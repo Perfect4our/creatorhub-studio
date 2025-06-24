@@ -27,23 +27,48 @@ module Tiktokstudio
     # Use Sidekiq as the Active Job queue adapter
     config.active_job.queue_adapter = :sidekiq
     
-    # Bulletproof credentials protection for production deployment
+    # COMPLETELY BYPASS RAILS CREDENTIALS SYSTEM IN PRODUCTION
     if Rails.env.production?
-      # Override the credentials method to prevent decryption errors
-      Rails.application.define_singleton_method(:credentials) do
-        @safe_credentials ||= begin
-          # Try to load real credentials first
-          ActiveSupport::EncryptedConfiguration.new(
-            config_path: Rails.root.join("config", "credentials.yml.enc"),
-            key_path: Rails.root.join("config", "master.key"),
-            env_key: "RAILS_MASTER_KEY",
-            raise_if_missing_key: false
-          )
-        rescue => e
-          # If credentials fail, return an empty configuration that won't break the app
-          puts "⚠️  Credentials failed (#{e.class}), using environment variables fallback"
-          ActiveSupport::OrderedOptions.new
+      puts "🔒 Production: Bypassing Rails credentials system entirely"
+      
+      # Override the entire credentials system to prevent ANY decryption attempts
+      define_method :credentials do
+        @bypass_credentials ||= begin
+          puts "📋 Using environment variables for all credentials"
+          # Create a simple object that just returns environment variables
+          credentials_obj = Object.new
+          
+          # Define all the methods we need
+          credentials_obj.define_singleton_method(:dig) { |*keys| nil }
+          
+          # YouTube credentials from ENV
+          credentials_obj.define_singleton_method(:youtube) do
+            youtube_obj = Object.new
+            youtube_obj.define_singleton_method(:api_key) { ENV['YOUTUBE_API_KEY'] }
+            youtube_obj.define_singleton_method(:client_id) { ENV['YOUTUBE_CLIENT_ID'] }
+            youtube_obj.define_singleton_method(:client_secret) { ENV['YOUTUBE_CLIENT_SECRET'] }
+            youtube_obj
+          end
+          
+          # TikTok credentials from ENV
+          credentials_obj.define_singleton_method(:tiktok) do
+            tiktok_obj = Object.new
+            tiktok_obj.define_singleton_method(:client_id) { ENV['TIKTOK_CLIENT_ID'] }
+            tiktok_obj.define_singleton_method(:client_secret) { ENV['TIKTOK_CLIENT_SECRET'] }
+            tiktok_obj
+          end
+          
+          # Catch any other method calls and return nil
+          credentials_obj.define_singleton_method(:method_missing) { |*args| nil }
+          credentials_obj.define_singleton_method(:respond_to_missing?) { |*args| true }
+          
+          credentials_obj
         end
+      end
+      
+      # Also override the class method
+      self.class.define_method(:credentials) do
+        Rails.application.credentials
       end
     end
   end
