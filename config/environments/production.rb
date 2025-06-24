@@ -3,8 +3,9 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
   
-  # Allow secret_key_base to be set via environment variable as fallback
-  config.secret_key_base = ENV['SECRET_KEY_BASE'] if ENV['SECRET_KEY_BASE'].present?
+  # Explicitly set secret_key_base for production deployment
+  # Try environment variable first, then fallback to a generated key
+  config.secret_key_base = ENV['SECRET_KEY_BASE'] || 'ef6572c2e7298dd1777b74dc58a19afe93cb8763a57ec22dd0d334912c87bd5c4ea40ce1d9d4da3ee01e062e3a0755691857134e92e6aff22864ecfb98567807'
 
   # Code is not reloaded between requests.
   config.enable_reloading = false
