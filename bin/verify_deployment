@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+
+puts "🔍 Verifying deployment configuration..."
+
+# Check for Rails 8 compatibility
+puts "\n📋 Checking Rails 8 compatibility:"
+
+# Check Gemfile
+gemfile_content = File.read('Gemfile')
+if gemfile_content.include?('gem "solid_cache"') && !gemfile_content.include?('# gem "solid_cache"')
+  puts "❌ Solid gems are still active in Gemfile"
+  exit 1
+else
+  puts "✅ Solid gems properly commented out"
+end
+
+# Check production config
+prod_config = File.read('config/environments/production.rb')
+if prod_config.include?('config.action_cable.adapter = :redis')
+  puts "❌ Old ActionCable syntax found"
+  exit 1
+elsif prod_config.include?('config.action_cable.cable = {')
+  puts "✅ ActionCable configured for Rails 8"
+else
+  puts "⚠️  ActionCable configuration not found"
+end
+
+# Check cable.yml
+cable_config = File.read('config/cable.yml')
+if cable_config.include?('adapter: solid_cable')
+  puts "❌ Cable.yml still using solid_cable"
+  exit 1
+elsif cable_config.include?('adapter: redis')
+  puts "✅ Cable.yml configured for Redis"
+else
+  puts "⚠️  Redis configuration not found in cable.yml"
+end
+
+# Check for master key
+if File.exist?('config/master.key')
+  puts "✅ Master key found for credentials"
+else
+  puts "❌ Master key missing - credentials won't decrypt"
+  exit 1
+end
+
+puts "\n🎉 All checks passed! Ready for deployment."
+puts "\n📝 Remember to set these environment variables on Railway:"
+puts "   RAILS_MASTER_KEY=#{File.read('config/master.key').strip}"
+puts "   RAILS_ENV=production"
+puts "   RACK_ENV=production"
+puts "\n🚀 Your app should deploy successfully now!" 
