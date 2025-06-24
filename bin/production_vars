@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+
+puts "🚀 CreatorHub Studio - Production Environment Variables"
+puts "=" * 60
+
+puts "\n📋 COPY-PASTE THESE VARIABLES TO RAILWAY:"
+puts "=" * 40
+
+puts "\n🔑 CRITICAL DEPLOYMENT VARIABLES:"
+puts "RAILS_ENV=production"
+puts "RACK_ENV=production"
+puts "RAILS_MASTER_KEY=#{File.read('config/master.key').strip}"
+puts "SECRET_KEY_BASE=ef6572c2e7298dd1777b74dc58a19afe93cb8763a57ec22dd0d334912c87bd5c4ea40ce1d9d4da3ee01e062e3a0755691857134e92e6aff22864ecfb98567807"
+
+puts "\n📺 YOUTUBE API KEYS (REQUIRED):"
+puts "YOUTUBE_API_KEY=***REMOVED***"
+puts "YOUTUBE_CLIENT_ID=***REMOVED***"
+puts "YOUTUBE_CLIENT_SECRET=***REMOVED***"
+
+puts "\n📧 EMAIL CONFIGURATION (OPTIONAL):"
+puts "# SMTP_ADDRESS=smtp.sendgrid.net"
+puts "# SMTP_USERNAME=apikey"  
+puts "# SMTP_PASSWORD=your_sendgrid_api_key"
+puts "# FROM_EMAIL=noreply@creatorhub.studio"
+
+puts "\n🌐 DOMAIN CONFIGURATION (OPTIONAL):"
+puts "# RAILS_FORCE_SSL=true"
+
+puts "\n" + "=" * 60
+puts "📝 DEPLOYMENT INSTRUCTIONS:"
+puts "1. Go to Railway → Your Project → Service → Variables"
+puts "2. Click 'New Variable' for each variable above"
+puts "3. Copy Name and Value exactly (case sensitive!)"
+puts "4. Railway will auto-deploy after adding variables"
+puts "5. Watch deployment logs for success"
+
+puts "\n✅ TOTAL REQUIRED VARIABLES: 7"
+puts "   • 4 Rails configuration variables"
+puts "   • 3 YouTube API variables"
+
+puts "\n🎯 AFTER DEPLOYMENT:"
+puts "   • App will be available at: your-app.up.railway.app"
+puts "   • Add custom domain in Railway → Settings → Domains"
+puts "   • Point creatorhub.studio to Railway via DNS"
+
+puts "\n🔧 TROUBLESHOOTING:"
+puts "   • If deployment fails: check all variable names are exact"
+puts "   • If credentials error: environment variables provide fallback"
+puts "   • If 500 error: check Rails logs in Railway dashboard"
+
+puts "\n🎉 Once deployed, your CreatorHub Studio will be live!" 

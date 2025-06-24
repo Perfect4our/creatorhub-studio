@@ -1,8 +1,16 @@
 class TiktokService < BasePlatformService
   def initialize(subscription = nil)
     super(subscription)
-    @client_id = Rails.application.credentials.tiktok&.client_id || ENV['TIKTOK_CLIENT_ID']
-    @client_secret = Rails.application.credentials.tiktok&.client_secret || ENV['TIKTOK_CLIENT_SECRET']
+    @client_id = get_credential('tiktok', 'client_id') || ENV['TIKTOK_CLIENT_ID']
+    @client_secret = get_credential('tiktok', 'client_secret') || ENV['TIKTOK_CLIENT_SECRET']
+  end
+  
+  # Safe credential access that never crashes
+  def get_credential(service, key)
+    Rails.application.credentials.dig(service.to_sym, key.to_sym)
+  rescue => e
+    Rails.logger.debug "Credentials access failed for #{service}.#{key}: #{e.class}"
+    nil
   end
   
   def sync!

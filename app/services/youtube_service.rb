@@ -9,9 +9,20 @@ class YoutubeService < BasePlatformService
   
   def initialize(subscription = nil)
     super(subscription)
-    @api_key = Rails.application.credentials.youtube&.api_key || ENV['YOUTUBE_API_KEY']
-    @client_id = Rails.application.credentials.youtube&.client_id || ENV['YOUTUBE_CLIENT_ID']
-    @client_secret = Rails.application.credentials.youtube&.client_secret || ENV['YOUTUBE_CLIENT_SECRET']
+    # Bulletproof credential loading with environment variable fallbacks
+    @api_key = get_credential('youtube', 'api_key') || ENV['YOUTUBE_API_KEY']
+    @client_id = get_credential('youtube', 'client_id') || ENV['YOUTUBE_CLIENT_ID']
+    @client_secret = get_credential('youtube', 'client_secret') || ENV['YOUTUBE_CLIENT_SECRET']
+  end
+  
+  private
+  
+  # Safe credential access that never crashes
+  def get_credential(service, key)
+    Rails.application.credentials.dig(service.to_sym, key.to_sym)
+  rescue => e
+    Rails.logger.debug "Credentials access failed for #{service}.#{key}: #{e.class}"
+    nil
   end
   
   # Generate OAuth URL for YouTube with Analytics API scopes
