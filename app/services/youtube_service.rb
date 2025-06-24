@@ -15,16 +15,6 @@ class YoutubeService < BasePlatformService
     @client_secret = get_credential('youtube', 'client_secret') || ENV['YOUTUBE_CLIENT_SECRET']
   end
   
-  private
-  
-  # Safe credential access that never crashes
-  def get_credential(service, key)
-    Rails.application.credentials.dig(service.to_sym, key.to_sym)
-  rescue => e
-    Rails.logger.debug "Credentials access failed for #{service}.#{key}: #{e.class}"
-    nil
-  end
-  
   # Generate OAuth URL for YouTube with Analytics API scopes
   def oauth_url(redirect_uri, analytics_enabled = false)
     # Base scope for reading channel data
@@ -115,11 +105,12 @@ class YoutubeService < BasePlatformService
           thumbnail_url: channel['snippet']['thumbnails']['default']['url']
         }
       else
-        raise "No channel found"
+        Rails.logger.error "No YouTube channel found for authenticated user"
+        mock_channel_info
       end
     else
-      Rails.logger.error "YouTube API error: #{response.body}"
-      raise "Failed to fetch channel info"
+      Rails.logger.error "YouTube channel API error: #{response.body}"
+      mock_channel_info
     end
   end
   
@@ -267,6 +258,16 @@ class YoutubeService < BasePlatformService
     end
   end
   
+  private
+  
+  # Safe credential access that never crashes
+  def get_credential(service, key)
+    Rails.application.credentials.dig(service.to_sym, key.to_sym)
+  rescue => e
+    Rails.logger.debug "Credentials access failed for #{service}.#{key}: #{e.class}"
+    nil
+  end
+
   # Get analytics data from YouTube Analytics API
   def get_analytics_data(start_date = 30.days.ago, end_date = Date.current)
     return mock_analytics_data(start_date, end_date) unless analytics_api_available?
