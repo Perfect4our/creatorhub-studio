@@ -47,6 +47,7 @@ end
 puts "\n🎉 All checks passed! Ready for deployment."
 puts "\n📝 Remember to set these environment variables on Railway:"
 puts "   RAILS_MASTER_KEY=#{File.read('config/master.key').strip}"
+puts "   SECRET_KEY_BASE=ef6572c2e7298dd1777b74dc58a19afe93cb8763a57ec22dd0d334912c87bd5c4ea40ce1d9d4da3ee01e062e3a0755691857134e92e6aff22864ecfb98567807"
 puts "   RAILS_ENV=production"
 puts "   RACK_ENV=production"
 puts "\n🚀 Your app should deploy successfully now!" 

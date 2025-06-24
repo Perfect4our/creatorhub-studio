@@ -213,6 +213,9 @@ In your hosting platform dashboard, set these environment variables:
 # Rails Master Key (REQUIRED for decrypting credentials)
 RAILS_MASTER_KEY=ad5ab364558fc7e7ad801d64cbbe3aed
 
+# Secret Key Base (REQUIRED fallback for Rails encryption)
+SECRET_KEY_BASE=ef6572c2e7298dd1777b74dc58a19afe93cb8763a57ec22dd0d334912c87bd5c4ea40ce1d9d4da3ee01e062e3a0755691857134e92e6aff22864ecfb98567807
+
 # Rails Environment
 RAILS_ENV=production
 RACK_ENV=production
