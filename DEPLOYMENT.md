@@ -221,6 +221,24 @@ RAILS_ENV=production
 RACK_ENV=production
 ```
 
+### **API Keys (Alternative to credentials - set these if credentials fail)**
+```bash
+# YouTube API (get values from: rails credentials:show)
+YOUTUBE_API_KEY=your_youtube_api_key_here
+YOUTUBE_CLIENT_ID=your_youtube_client_id_here
+YOUTUBE_CLIENT_SECRET=your_youtube_client_secret_here
+
+# TikTok API (set when you get TikTok developer access)
+# TIKTOK_CLIENT_ID=your_tiktok_client_id
+# TIKTOK_CLIENT_SECRET=your_tiktok_client_secret
+
+# Email Configuration
+# SMTP_ADDRESS=smtp.sendgrid.net
+# SMTP_USERNAME=apikey
+# SMTP_PASSWORD=your_sendgrid_api_key
+# FROM_EMAIL=noreply@creatorhub.studio
+```
+
 ### **Database & Redis** (Auto-configured on Railway)
 ```bash
 # These are usually auto-set by Railway, but verify:
