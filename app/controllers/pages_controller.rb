@@ -1,5 +1,5 @@
 class PagesController < ApplicationController
-  before_action :authenticate_user!, except: :home
+  before_action :authenticate_user!, except: [:home, :privacy, :terms]
   
   def home
     redirect_to dashboard_path if user_signed_in?
@@ -14,11 +14,11 @@ class PagesController < ApplicationController
   end
 
   def privacy
-    # Privacy policy page
+    # Privacy policy page - publicly accessible
   end
 
   def terms
-    # Terms of service page
+    # Terms of service page - publicly accessible
   end
 
   private
