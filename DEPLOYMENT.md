@@ -202,4 +202,31 @@ Once deployed, your CreatorHub.Studio will be available at:
 - Primary: `https://creatorhub.studio`
 - WWW: `https://www.creatorhub.studio`
 
-Users can register, connect their social media accounts, and start tracking their content performance across platforms! 
+Users can register, connect their social media accounts, and start tracking their content performance across platforms!
+
+## 4. Set Environment Variables
+
+In your hosting platform dashboard, set these environment variables:
+
+### **Critical Security Variables**
+```bash
+# Rails Master Key (REQUIRED for decrypting credentials)
+RAILS_MASTER_KEY=ad5ab364558fc7e7ad801d64cbbe3aed
+
+# Rails Environment
+RAILS_ENV=production
+RACK_ENV=production
+```
+
+### **Database & Redis** (Auto-configured on Railway)
+```bash
+# These are usually auto-set by Railway, but verify:
+DATABASE_URL=postgresql://...
+REDIS_URL=redis://...
+```
+
+### **Domain Configuration**
+```bash
+# Your custom domain
+RAILS_FORCE_SSL=true
+``` 
