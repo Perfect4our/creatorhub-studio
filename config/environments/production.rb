@@ -32,7 +32,7 @@ Rails.application.configure do
   config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  config.force_ssl = ENV.fetch('RAILS_FORCE_SSL', 'true') == 'true'
 
   # Skip http-to-https redirect for the default health check endpoint.
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
@@ -52,7 +52,7 @@ Rails.application.configure do
 
   # Use Redis for caching in production
   config.cache_store = :redis_cache_store, {
-    url: ENV['REDIS_URL'] || 'redis://localhost:6379/1'
+    url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/1')
   }
 
   # Use Sidekiq for background jobs in production
@@ -63,16 +63,24 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "example.com" }
+  config.action_mailer.default_url_options = { 
+    host: ENV.fetch('HEROKU_APP_NAME', 'creatorhub-studio') + '.herokuapp.com',
+    protocol: 'https'
+  }
 
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via rails credentials:edit.
-  # config.action_mailer.smtp_settings = {
-  #   user_name: Rails.application.credentials.dig(:smtp, :user_name),
-  #   password: Rails.application.credentials.dig(:smtp, :password),
-  #   address: "smtp.example.com",
-  #   port: 587,
-  #   authentication: :plain
-  # }
+  if ENV['SMTP_ADDRESS'].present?
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      address: ENV['SMTP_ADDRESS'],
+      port: 587,
+      domain: ENV.fetch('HEROKU_APP_NAME', 'creatorhub-studio') + '.herokuapp.com',
+      user_name: ENV['SMTP_USERNAME'],
+      password: ENV['SMTP_PASSWORD'],
+      authentication: 'plain',
+      enable_starttls_auto: true
+    }
+  end
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
@@ -85,49 +93,26 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "example.com",     # Allow requests from example.com
-  #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
-  # ]
-  #
-  # Skip DNS rebinding protection for the default health check endpoint.
-  # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
-
-  # Add these configurations for production deployment
-
-  # Allow creatorhub.studio domain
-  config.hosts << "creatorhub.studio"
-  config.hosts << "www.creatorhub.studio"
+  # Allow Heroku domain
+  config.hosts << /.*\.herokuapp\.com/
+  config.hosts << "creatorhub.studio" if ENV['CUSTOM_DOMAIN']
+  config.hosts << "www.creatorhub.studio" if ENV['CUSTOM_DOMAIN']
 
   # Asset pipeline configuration
   config.assets.compile = false
   config.assets.digest = true
+  config.public_file_server.enabled = true
 
   # Action Cable configuration for production
   config.action_cable.allowed_request_origins = [
+    /https:\/\/.*\.herokuapp\.com/,
     'https://creatorhub.studio',
     'https://www.creatorhub.studio'
   ]
 
-  # Configure ActionMailer for production
-  config.action_mailer.default_url_options = { host: 'creatorhub.studio', protocol: 'https' }
-  config.action_mailer.perform_deliveries = true
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    address: ENV['SMTP_ADDRESS'],
-    port: 587,
-    domain: 'creatorhub.studio',
-    user_name: ENV['SMTP_USERNAME'],
-    password: ENV['SMTP_PASSWORD'],
-    authentication: 'plain',
-    enable_starttls_auto: true
-  }
-
-
-
   # Action Cable configuration for Rails 8
   config.action_cable.cable = {
     adapter: "redis",
-    url: ENV['REDIS_URL'] || 'redis://localhost:6379/1'
+    url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/1')
   }
 end

@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -e
+
+echo "🚀 Deploying CreatorHub Studio to Heroku..."
+
+# Check if Heroku CLI is installed
+if ! command -v heroku &> /dev/null; then
+    echo "❌ Heroku CLI is not installed. Please install it first:"
+    echo "   brew tap heroku/brew && brew install heroku"
+    exit 1
+fi
+
+# Check if user is logged in to Heroku
+if ! heroku auth:whoami &> /dev/null; then
+    echo "❌ Please login to Heroku first:"
+    echo "   heroku login"
+    exit 1
+fi
+
+# Check if git is clean
+if [[ -n $(git status --porcelain) ]]; then
+    echo "⚠️  Warning: You have uncommitted changes. Committing them now..."
+    git add .
+    git commit -m "Deploy to Heroku"
+fi
+
+# Check if Heroku app exists
+APP_NAME=${1:-creatorhub-studio}
+if ! heroku apps:info $APP_NAME &> /dev/null; then
+    echo "📱 Creating Heroku app '$APP_NAME'..."
+    heroku create $APP_NAME
+    
+    echo "🗄️  Adding PostgreSQL addon..."
+    heroku addons:create heroku-postgresql:essential-0 --app $APP_NAME
+    
+    echo "🔴 Adding Redis addon..."
+    heroku addons:create heroku-redis:essential-0 --app $APP_NAME
+    
+    echo "⚙️  Setting environment variables..."
+    heroku config:set \
+        RAILS_ENV=production \
+        RACK_ENV=production \
+        RAILS_MASTER_KEY=ad5ab364558fc7e7ad801d64cbbe3aed \
+        SECRET_KEY_BASE=ef6572c2e7298dd1777b74dc58a19afe93cb8763a57ec22dd0d334912c87bd5c4ea40ce1d9d4da3ee01e062e3a0755691857134e92e6aff22864ecfb98567807 \
+        YOUTUBE_API_KEY=***REMOVED*** \
+        YOUTUBE_CLIENT_ID=***REMOVED*** \
+        YOUTUBE_CLIENT_SECRET=***REMOVED*** \
+        HEROKU_APP_NAME=$APP_NAME \
+        --app $APP_NAME
+else
+    echo "📱 Using existing Heroku app '$APP_NAME'"
+fi
+
+echo "🚀 Deploying to Heroku..."
+git push heroku main
+
+echo "🗄️  Running database migrations..."
+heroku run rails db:migrate --app $APP_NAME
+
+echo "🌱 Seeding database..."
+heroku run rails db:seed --app $APP_NAME
+
+echo "✅ Deployment complete!"
+echo "🌐 Your app is available at: https://$APP_NAME.herokuapp.com"
+
+# Open the app
+if command -v open &> /dev/null; then
+    open "https://$APP_NAME.herokuapp.com"
+fi 
