@@ -6,6 +6,24 @@ class PagesController < ApplicationController
   end
 
   def dashboard
+    if user_signed_in?
+      load_dashboard_data
+    else
+      redirect_to new_user_session_path, alert: 'Please sign in to access your dashboard.'
+    end
+  end
+
+  def privacy
+    # Privacy policy page
+  end
+
+  def terms
+    # Terms of service page
+  end
+
+  private
+  
+  def load_dashboard_data
     @subscriptions = current_user.subscriptions.active
     @selected_platform = params[:platform] # Add platform filtering
     @selected_time_window = params[:time_window] || '28'

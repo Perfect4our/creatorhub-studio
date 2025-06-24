@@ -58,4 +58,8 @@ Rails.application.routes.draw do
   authenticate :user, lambda { |u| u.admin? } do
     mount Sidekiq::Web => '/sidekiq'
   end
+
+  # Pages
+  get 'privacy', to: 'pages#privacy'
+  get 'terms', to: 'pages#terms'
 end

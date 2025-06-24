@@ -1,55 +1,458 @@
-<%= render "shared/navbar" %>
+<%# Homepage for CreatorHub Studio %>
+<% content_for :title, "CreatorHub Studio - Multi-Platform Creator Analytics" %>
 
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8 text-center">
-      <h1 class="display-4 mb-4">Welcome to CreatorHub Studio</h1>
-      <p class="lead mb-5">Connect your social media accounts and track performance across all platforms in one unified dashboard.</p>
-      
-      <% if user_signed_in? %>
-        <% if current_user.subscriptions.any? %>
-          <%= link_to dashboard_path, class: "btn btn-primary btn-lg" do %>
-            <i class="fas fa-chart-line me-2"></i>Go to Dashboard
+<!-- Hero Section -->
+<section class="hero-section bg-gradient-to-br from-blue-600 to-purple-700 text-white py-20">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <h1 class="display-4 fw-bold mb-4">
+          Your Creator Dashboard<br>
+          <span class="text-warning">All Platforms, One View</span>
+        </h1>
+        <p class="lead mb-4">
+          Track, analyze, and grow your content across YouTube, TikTok, Instagram, Twitter, LinkedIn, and Twitch with real-time analytics and powerful insights.
+        </p>
+        <div class="hero-buttons">
+          <% if user_signed_in? %>
+            <%= link_to dashboard_path, class: "btn btn-warning btn-lg me-3" do %>
+              <i class="fas fa-chart-line me-2"></i>
+              Go to Dashboard
+            <% end %>
+          <% else %>
+            <%= link_to new_user_registration_path, class: "btn btn-warning btn-lg me-3" do %>
+              <i class="fas fa-rocket me-2"></i>
+              Get Started Free
+            <% end %>
+            <%= link_to new_user_session_path, class: "btn btn-outline-light btn-lg" do %>
+              <i class="fas fa-sign-in-alt me-2"></i>
+              Sign In
+            <% end %>
+          <% end %>
+        </div>
+        <p class="mt-3 text-white-50">
+          <small><i class="fas fa-check me-1"></i> Free forever plan available</small>
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-image text-center">
+          <div class="dashboard-preview bg-white rounded-lg shadow-lg p-4">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="metric-card bg-danger text-white rounded p-3">
+                  <i class="fab fa-youtube fa-2x mb-2"></i>
+                  <h4>1.2M</h4>
+                  <small>YouTube Views</small>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="metric-card bg-dark text-white rounded p-3">
+                  <i class="fab fa-tiktok fa-2x mb-2"></i>
+                  <h4>850K</h4>
+                  <small>TikTok Views</small>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="metric-card bg-primary text-white rounded p-3">
+                  <i class="fab fa-twitter fa-2x mb-2"></i>
+                  <h4>45.3K</h4>
+                  <small>Twitter Followers</small>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="metric-card bg-info text-white rounded p-3">
+                  <i class="fab fa-linkedin fa-2x mb-2"></i>
+                  <h4>12.8K</h4>
+                  <small>LinkedIn Connections</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Platform Integrations -->
+<section class="platforms-section py-16 bg-light">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center mb-12">
+        <h2 class="display-5 fw-bold mb-4">Supported Platforms</h2>
+        <p class="lead text-muted">Connect all your social media accounts and get unified analytics</p>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="platform-grid row g-4">
+          <div class="col-md-4 col-sm-6">
+            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
+              <i class="fab fa-youtube fa-3x text-danger mb-3"></i>
+              <h5>YouTube</h5>
+              <p class="text-muted">Advanced YouTube Analytics API integration with real-time subscriber counts, video performance, and revenue tracking.</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6">
+            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
+              <i class="fab fa-tiktok fa-3x text-dark mb-3"></i>
+              <h5>TikTok</h5>
+              <p class="text-muted">Track viral videos, engagement rates, and follower growth with TikTok's creator tools integration.</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6">
+            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
+              <i class="fab fa-instagram fa-3x text-info mb-3"></i>
+              <h5>Instagram</h5>
+              <p class="text-muted">Monitor posts, stories, and reels performance with detailed audience insights and engagement metrics.</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6">
+            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
+              <i class="fab fa-twitter fa-3x text-primary mb-3"></i>
+              <h5>Twitter</h5>
+              <p class="text-muted">Analyze tweet performance, follower growth, and engagement trends across your Twitter presence.</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6">
+            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
+              <i class="fab fa-linkedin fa-3x text-primary mb-3"></i>
+              <h5>LinkedIn</h5>
+              <p class="text-muted">Professional network insights including post reach, connection growth, and industry engagement.</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6">
+            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
+              <i class="fab fa-twitch fa-3x text-purple mb-3"></i>
+              <h5>Twitch</h5>
+              <p class="text-muted">Stream analytics, viewer engagement, subscriber tracking, and chat analysis for live content.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section py-16">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center mb-12">
+        <h2 class="display-5 fw-bold mb-4">Powerful Features</h2>
+        <p class="lead text-muted">Everything you need to understand and grow your audience</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="feature-card p-4 h-100">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-chart-line fa-3x text-primary"></i>
+          </div>
+          <h4>Real-Time Analytics</h4>
+          <p class="text-muted">Get instant updates on your content performance with live data from all connected platforms.</p>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="feature-card p-4 h-100">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-lightbulb fa-3x text-warning"></i>
+          </div>
+          <h4>Smart Insights</h4>
+          <p class="text-muted">AI-powered recommendations to help you optimize your content strategy and grow your audience.</p>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="feature-card p-4 h-100">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-history fa-3x text-success"></i>
+          </div>
+          <h4>Historical Tracking</h4>
+          <p class="text-muted">Track your growth over time with detailed historical data and trend analysis.</p>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="feature-card p-4 h-100">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-users fa-3x text-info"></i>
+          </div>
+          <h4>Audience Demographics</h4>
+          <p class="text-muted">Understand your audience with detailed demographic insights and engagement patterns.</p>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="feature-card p-4 h-100">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-download fa-3x text-secondary"></i>
+          </div>
+          <h4>Export & Reports</h4>
+          <p class="text-muted">Generate custom reports and export your data for deeper analysis and client presentations.</p>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="feature-card p-4 h-100">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-mobile-alt fa-3x text-purple"></i>
+          </div>
+          <h4>Mobile Optimized</h4>
+          <p class="text-muted">Access your dashboard anywhere with our fully responsive design optimized for all devices.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Security & Trust Section -->
+<section class="security-section py-16 bg-light">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <h2 class="display-5 fw-bold mb-4">Secure & Trustworthy</h2>
+        <p class="lead mb-4">Your data security and privacy are our top priorities</p>
+        <div class="security-features">
+          <div class="security-item d-flex mb-3">
+            <i class="fas fa-shield-alt fa-2x text-success me-3"></i>
+            <div>
+              <h5>Bank-Level Security</h5>
+              <p class="text-muted mb-0">All data encrypted in transit and at rest using industry-standard protocols.</p>
+            </div>
+          </div>
+          <div class="security-item d-flex mb-3">
+            <i class="fas fa-user-shield fa-2x text-success me-3"></i>
+            <div>
+              <h5>Privacy First</h5>
+              <p class="text-muted mb-0">We never sell your data. Your information is used solely to provide our service.</p>
+            </div>
+          </div>
+          <div class="security-item d-flex mb-3">
+            <i class="fas fa-certificate fa-2x text-success me-3"></i>
+            <div>
+              <h5>Certified APIs</h5>
+              <p class="text-muted mb-0">Official API integrations with all major platforms ensure reliable and secure access.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="compliance-badges text-center">
+          <div class="badge-item mb-4">
+            <i class="fab fa-google fa-4x text-primary mb-2"></i>
+            <h6>Google Verified</h6>
+            <p class="text-muted small">Official YouTube API integration with verified app status</p>
+          </div>
+          <div class="row">
+            <div class="col-6">
+              <div class="compliance-item p-3 bg-white rounded shadow-sm">
+                <i class="fas fa-lock fa-2x text-warning mb-2"></i>
+                <h6>HTTPS Secure</h6>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="compliance-item p-3 bg-white rounded shadow-sm">
+                <i class="fas fa-database fa-2x text-info mb-2"></i>
+                <h6>Data Encrypted</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section py-16 bg-gradient-to-br from-purple-600 to-blue-700 text-white">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h2 class="display-5 fw-bold mb-4">Ready to Grow Your Audience?</h2>
+        <p class="lead mb-5">Join thousands of creators who trust CreatorHub Studio for their analytics needs</p>
+        <% if user_signed_in? %>
+          <%= link_to dashboard_path, class: "btn btn-warning btn-lg" do %>
+            <i class="fas fa-chart-line me-2"></i>
+            Go to Dashboard
           <% end %>
         <% else %>
-          <%= link_to subscriptions_path, class: "btn btn-primary btn-lg" do %>
-            <i class="fas fa-link me-2"></i>Connect Your Accounts
+          <%= link_to new_user_registration_path, class: "btn btn-warning btn-lg" do %>
+            <i class="fas fa-rocket me-2"></i>
+            Start Free Today
           <% end %>
         <% end %>
-      <% else %>
-        <%= link_to new_user_registration_path, class: "btn btn-primary btn-lg me-2" do %>
-          <i class="fas fa-user-plus me-2"></i>Sign Up
-        <% end %>
-        <%= link_to new_user_session_path, class: "btn btn-outline-primary btn-lg" do %>
-          <i class="fas fa-sign-in-alt me-2"></i>Sign In
-        <% end %>
-      <% end %>
+        <p class="mt-3 text-white-75">
+          <small>No credit card required • Free forever plan available</small>
+        </p>
+      </div>
     </div>
   </div>
-  
-  <div class="row mt-5 pt-5">
-    <div class="col-md-4">
-      <div class="text-center mb-4">
-        <i class="fas fa-chart-line fa-3x text-primary"></i>
-      </div>
-      <h3 class="text-center">Multi-Platform Analytics</h3>
-      <p class="text-center">Monitor views, followers, and engagement across YouTube, TikTok, Instagram, and more platforms.</p>
-    </div>
-    <div class="col-md-4">
-      <div class="text-center mb-4">
-        <i class="fas fa-history fa-3x text-primary"></i>
-      </div>
-      <h3 class="text-center">Historical Data</h3>
-      <p class="text-center">Access up to 365 days of historical performance data with detailed analytics across all platforms.</p>
-    </div>
-    <div class="col-md-4">
-      <div class="text-center mb-4">
-        <i class="fas fa-dollar-sign fa-3x text-primary"></i>
-      </div>
-      <h3 class="text-center">Revenue Insights</h3>
-      <p class="text-center">Get estimated revenue projections and real monetization data from connected platforms.</p>
-    </div>
-  </div>
-</div>
+</section>
 
-<%= render "shared/footer" %>
+<!-- Footer with required links -->
+<footer class="footer-section py-12 bg-dark text-white">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-4 mb-4">
+        <h5 class="fw-bold mb-3">CreatorHub Studio</h5>
+        <p class="text-white-75 mb-3">
+          The ultimate multi-platform analytics dashboard for content creators. Track, analyze, and grow your audience across all major social media platforms.
+        </p>
+        <div class="social-links">
+          <a href="#" class="text-white me-3"><i class="fab fa-twitter fa-lg"></i></a>
+          <a href="#" class="text-white me-3"><i class="fab fa-linkedin fa-lg"></i></a>
+          <a href="#" class="text-white me-3"><i class="fab fa-github fa-lg"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-2 mb-4">
+        <h6 class="fw-bold mb-3">Product</h6>
+        <ul class="list-unstyled">
+          <li><a href="#features" class="text-white-75 text-decoration-none">Features</a></li>
+          <li><a href="#platforms" class="text-white-75 text-decoration-none">Platforms</a></li>
+          <li><a href="#pricing" class="text-white-75 text-decoration-none">Pricing</a></li>
+          <li><a href="#analytics" class="text-white-75 text-decoration-none">Analytics</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 mb-4">
+        <h6 class="fw-bold mb-3">Company</h6>
+        <ul class="list-unstyled">
+          <li><a href="#about" class="text-white-75 text-decoration-none">About</a></li>
+          <li><a href="#blog" class="text-white-75 text-decoration-none">Blog</a></li>
+          <li><a href="#careers" class="text-white-75 text-decoration-none">Careers</a></li>
+          <li><a href="mailto:support@creatorhubstudio.com" class="text-white-75 text-decoration-none">Contact</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 mb-4">
+        <h6 class="fw-bold mb-3">Support</h6>
+        <ul class="list-unstyled">
+          <li><a href="#help" class="text-white-75 text-decoration-none">Help Center</a></li>
+          <li><a href="#docs" class="text-white-75 text-decoration-none">Documentation</a></li>
+          <li><a href="#api" class="text-white-75 text-decoration-none">API</a></li>
+          <li><a href="mailto:support@creatorhubstudio.com" class="text-white-75 text-decoration-none">Support</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 mb-4">
+        <h6 class="fw-bold mb-3">Legal</h6>
+        <ul class="list-unstyled">
+          <%= content_tag :li do %>
+            <%= link_to "Privacy Policy", privacy_path, class: "text-white-75 text-decoration-none" %>
+          <% end %>
+          <%= content_tag :li do %>
+            <%= link_to "Terms of Service", terms_path, class: "text-white-75 text-decoration-none" %>
+          <% end %>
+          <li><a href="#security" class="text-white-75 text-decoration-none">Security</a></li>
+          <li><a href="#compliance" class="text-white-75 text-decoration-none">Compliance</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="my-4 border-white-25">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <p class="text-white-50 mb-0">
+          &copy; <%= Date.current.year %> CreatorHub Studio. All rights reserved.
+        </p>
+      </div>
+      <div class="col-lg-6 text-lg-end">
+        <p class="text-white-50 mb-0">
+          Made with <i class="fas fa-heart text-danger"></i> for creators worldwide
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+.hero-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-preview {
+  transform: perspective(1000px) rotateY(-5deg);
+  transition: transform 0.3s ease;
+}
+
+.dashboard-preview:hover {
+  transform: perspective(1000px) rotateY(0deg);
+}
+
+.metric-card {
+  transition: transform 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+}
+
+.platform-card {
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.platform-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+}
+
+.feature-card {
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-3px);
+}
+
+.text-purple {
+  color: #764ba2 !important;
+}
+
+.text-white-75 {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.text-white-50 {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.border-white-25 {
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.py-16 {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.py-20 {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.mb-12 {
+  margin-bottom: 3rem;
+}
+
+.rounded-lg {
+  border-radius: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 60vh;
+    text-align: center;
+  }
+  
+  .display-4 {
+    font-size: 2.5rem;
+  }
+  
+  .dashboard-preview {
+    transform: none;
+    margin-top: 2rem;
+  }
+}
+</style>
