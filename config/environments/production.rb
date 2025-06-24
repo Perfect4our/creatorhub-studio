@@ -64,7 +64,7 @@ Rails.application.configure do
 
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { 
-    host: ENV.fetch('HEROKU_APP_NAME', 'creatorhub-studio') + '.herokuapp.com',
+    host: ENV['CUSTOM_DOMAIN'] == 'true' ? 'creatorhubstudio.com' : ENV.fetch('HEROKU_APP_NAME', 'creatorhub-studio') + '.herokuapp.com',
     protocol: 'https'
   }
 
@@ -95,8 +95,8 @@ Rails.application.configure do
   # Enable DNS rebinding protection and other `Host` header attacks.
   # Allow Heroku domain
   config.hosts << /.*\.herokuapp\.com/
-  config.hosts << "creatorhub.studio" if ENV['CUSTOM_DOMAIN']
-  config.hosts << "www.creatorhub.studio" if ENV['CUSTOM_DOMAIN']
+  config.hosts << "creatorhubstudio.com" if ENV['CUSTOM_DOMAIN']
+  config.hosts << "www.creatorhubstudio.com" if ENV['CUSTOM_DOMAIN']
 
   # Asset pipeline configuration
   config.assets.compile = false
@@ -106,8 +106,8 @@ Rails.application.configure do
   # Action Cable configuration for production
   config.action_cable.allowed_request_origins = [
     /https:\/\/.*\.herokuapp\.com/,
-    'https://creatorhub.studio',
-    'https://www.creatorhub.studio'
+    'https://creatorhubstudio.com',
+    'https://www.creatorhubstudio.com'
   ]
 
   # Action Cable configuration for Rails 8
