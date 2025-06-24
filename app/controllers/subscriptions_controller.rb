@@ -39,35 +39,65 @@ class SubscriptionsController < ApplicationController
       when 'tiktok'
         tiktok_callback
       when 'youtube'
-        youtube_callback
+        youtube_oauth_start
       else
         redirect_to subscriptions_path, alert: "Unsupported platform: #{platform}"
       end
     end
   end
   
-  def youtube_callback
-    # Handle YouTube OAuth callback
+  def youtube_oauth_start
+    # Start YouTube OAuth flow - redirect to Google
     begin
       youtube_service = YoutubeService.new
       
       # Debug: Check if we have proper credentials
-      Rails.logger.info "YouTube OAuth Debug - Client ID present: #{ENV['YOUTUBE_CLIENT_ID'].present?}"
-      Rails.logger.info "YouTube OAuth Debug - Client Secret present: #{ENV['YOUTUBE_CLIENT_SECRET'].present?}"
-      Rails.logger.info "YouTube OAuth Debug - API Key present: #{ENV['YOUTUBE_API_KEY'].present?}"
-      Rails.logger.info "YouTube OAuth Debug - Code parameter: #{params[:code].present?}"
+      Rails.logger.info "YouTube OAuth Start - Client ID present: #{ENV['YOUTUBE_CLIENT_ID'].present?}"
+      
+      unless ENV['YOUTUBE_CLIENT_ID'].present?
+        Rails.logger.error "YouTube OAuth Error: Missing YOUTUBE_CLIENT_ID environment variable"
+        redirect_to subscriptions_path, alert: "YouTube integration is not properly configured. Please contact support."
+        return
+      end
+      
+      redirect_uri = request.base_url + auth_youtube_callback_path
+      Rails.logger.info "YouTube OAuth Start - Redirect URI: #{redirect_uri}"
+      
+      # Check if Analytics API is requested
+      analytics_enabled = params[:analytics] == 'true'
+      oauth_url = youtube_service.oauth_url(redirect_uri, analytics_enabled)
+      
+      Rails.logger.info "YouTube OAuth Start - Generated OAuth URL: #{oauth_url}"
+      redirect_to oauth_url, allow_other_host: true
+    rescue => e
+      Rails.logger.error "YouTube OAuth start error: #{e.message}"
+      Rails.logger.error "YouTube OAuth start backtrace: #{e.backtrace.first(5).join('\n')}"
+      redirect_to subscriptions_path, alert: "Failed to start YouTube authentication: #{e.message}. Please try again."
+    end
+  end
+  
+  def youtube_callback
+    # Handle YouTube OAuth callback (when user returns from Google)
+    begin
+      youtube_service = YoutubeService.new
+      
+      # Debug: Check if we have proper credentials
+      Rails.logger.info "YouTube OAuth Callback - Client ID present: #{ENV['YOUTUBE_CLIENT_ID'].present?}"
+      Rails.logger.info "YouTube OAuth Callback - Client Secret present: #{ENV['YOUTUBE_CLIENT_SECRET'].present?}"
+      Rails.logger.info "YouTube OAuth Callback - API Key present: #{ENV['YOUTUBE_API_KEY'].present?}"
+      Rails.logger.info "YouTube OAuth Callback - Code parameter: #{params[:code].present?}"
       
       if params[:code].present?
-        # Real OAuth flow - user authorized and Google sent back auth code
+        # User authorized and Google sent back auth code
         redirect_uri = request.base_url + auth_youtube_callback_path
-        Rails.logger.info "YouTube OAuth Debug - Redirect URI: #{redirect_uri}"
+        Rails.logger.info "YouTube OAuth Callback - Redirect URI: #{redirect_uri}"
         
         token_data = youtube_service.exchange_code_for_token(params[:code], redirect_uri)
-        Rails.logger.info "YouTube OAuth Debug - Token exchange successful"
+        Rails.logger.info "YouTube OAuth Callback - Token exchange successful"
         
         # Get channel information
         channel_info = youtube_service.get_channel_info(token_data['access_token'])
-        Rails.logger.info "YouTube OAuth Debug - Channel info: #{channel_info.inspect}"
+        Rails.logger.info "YouTube OAuth Callback - Channel info: #{channel_info.inspect}"
         
         # Check if we already have this YouTube account
         existing = current_user.subscriptions.find_by(platform: 'youtube', channel_id: channel_info[:channel_id])
@@ -118,22 +148,9 @@ class SubscriptionsController < ApplicationController
           redirect_to dashboard_path, notice: message
         end
       else
-        # No code parameter - redirect to YouTube OAuth
-        unless ENV['YOUTUBE_CLIENT_ID'].present?
-          Rails.logger.error "YouTube OAuth Error: Missing YOUTUBE_CLIENT_ID environment variable"
-          redirect_to subscriptions_path, alert: "YouTube integration is not properly configured. Please contact support."
-          return
-        end
-        
-        redirect_uri = request.base_url + auth_youtube_callback_path
-        Rails.logger.info "YouTube OAuth Debug - Starting OAuth flow with redirect URI: #{redirect_uri}"
-        
-        # Check if Analytics API is requested
-        analytics_enabled = params[:analytics] == 'true'
-        oauth_url = youtube_service.oauth_url(redirect_uri, analytics_enabled)
-        
-        Rails.logger.info "YouTube OAuth Debug - Generated OAuth URL: #{oauth_url}"
-        redirect_to oauth_url, allow_other_host: true
+        # No code parameter - this shouldn't happen in callback, but handle gracefully
+        Rails.logger.error "YouTube OAuth Callback - No authorization code received"
+        redirect_to subscriptions_path, alert: "YouTube authorization was not completed. Please try again."
       end
     rescue => e
       Rails.logger.error "YouTube callback error: #{e.message}"

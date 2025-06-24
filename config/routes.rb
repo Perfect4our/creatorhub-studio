@@ -21,12 +21,12 @@ Rails.application.routes.draw do
   # Custom dashboard route
   get "/dashboard", to: "pages#dashboard"
   
-  # OAuth start routes
-  get "/auth/youtube", to: "subscriptions#youtube_callback"
+  # OAuth start routes (redirect to provider)
+  get "/auth/youtube", to: "subscriptions#youtube_oauth_start", as: :auth_youtube
   
-  # OAuth callbacks
+  # OAuth callbacks (handle provider response)
   get "/auth/tiktok/callback", to: "subscriptions#tiktok_callback"
-  get "/auth/youtube/callback", to: "subscriptions#youtube_callback"
+  get "/auth/youtube/callback", to: "subscriptions#youtube_callback", as: :auth_youtube_callback
   
   # Generic OAuth callback that determines platform
   get "/auth/:platform/callback", to: "subscriptions#create"
