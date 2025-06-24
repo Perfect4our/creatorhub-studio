@@ -1,0 +1,52 @@
+/*
+ * This is a manifest file that'll be compiled into application.css.
+ *
+ * With Propshaft, CSS files are loaded individually via stylesheet_link_tag.
+ */
+
+/* Global styles */
+:root {
+  --primary-color: #ee1d52;
+  --secondary-color: #69c9d0;
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --card-bg: #ffffff;
+  --border-color: #e6e6e6;
+}
+
+/* Dark mode styles */
+[data-theme="dark"] {
+  --primary-color: #ff2c55;
+  --secondary-color: #7ad9df;
+  --background-color: #121212;
+  --text-color: #f5f5f5;
+  --card-bg: #1e1e1e;
+  --border-color: #2d2d2d;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.table {
+  color: var(--text-color);
+}
+
+/* Animation for stat updates */
+@keyframes highlight {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(238, 29, 82, 0.2); }
+  100% { background-color: transparent; }
+}
+
+.highlight-update {
+  animation: highlight 2s ease;
+}

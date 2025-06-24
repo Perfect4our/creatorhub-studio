@@ -1,0 +1,295 @@
+<div class="platform-tab-content" data-platform="<%= platform %>">
+  <div class="row mt-4">
+    <div class="col-md-4 mb-4 mb-md-0">
+      <div class="card stat-card">
+        <div class="card-body text-center">
+          <h5 class="card-title">Views</h5>
+          <h2 class="card-text counter-pulse" id="<%= platform %>-views"><%= number_with_delimiter(platform_data[:stats][:views]) %></h2>
+          <p class="text-muted"><%= platform.capitalize %> video views</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4 mb-md-0">
+      <div class="card stat-card">
+        <div class="card-body text-center">
+          <h5 class="card-title">Followers</h5>
+          <h2 class="card-text counter-pulse" id="<%= platform %>-followers"><%= number_with_delimiter(platform_data[:stats][:followers]) %></h2>
+          <p class="text-muted"><%= platform.capitalize %> followers</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4 mb-md-0">
+      <div class="card stat-card">
+        <div class="card-body text-center">
+          <h5 class="card-title">Revenue</h5>
+          <h2 class="card-text" id="<%= platform %>-revenue">$<%= number_with_delimiter(platform_data[:stats][:revenue]) %></h2>
+          <p class="text-muted"><%= platform.capitalize %> earnings</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+          <h5 class="mb-2 mb-sm-0"><%= platform.capitalize %> Performance</h5>
+          <div class="btn-group time-window-selector" role="group">
+            <button type="button" class="btn btn-sm btn-outline-secondary <%= time_window == '7' ? 'active' : '' %>" data-time-window="7">7 Days</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary <%= time_window == '30' ? 'active' : '' %>" data-time-window="30">30 Days</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary <%= time_window == '90' ? 'active' : '' %>" data-time-window="90">90 Days</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary <%= time_window == '365' ? 'active' : '' %>" data-time-window="365">365 Days</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas id="<%= platform %>Chart" height="300"></canvas>
+            <!-- Loading overlay will be added via JavaScript -->
+          </div>
+        </div>
+        <div class="card-footer bg-transparent">
+          <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <small class="text-muted">Last updated: <%= Time.now.strftime("%b %d, %Y at %I:%M %p") %></small>
+            <div class="d-flex align-items-center">
+              <div class="form-check form-switch me-3">
+                <input class="form-check-input" type="checkbox" id="<%= platform %>-legend-toggle" checked>
+                <label class="form-check-label" for="<%= platform %>-legend-toggle">Show Legend</label>
+              </div>
+              <div class="tooltip-wrapper">
+                <button class="btn btn-sm btn-outline-secondary" id="<%= platform %>-chart-refresh">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+                <span class="tooltip-content">Refresh data</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if platform_videos.any? %>
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+            <h5 class="mb-2 mb-sm-0">Top <%= platform.capitalize %> Videos</h5>
+            <div class="d-flex align-items-center">
+              <div class="tooltip-wrapper me-2">
+                <button class="btn btn-sm btn-outline-secondary">
+                  <i class="fas fa-filter"></i>
+                </button>
+                <span class="tooltip-content">Filter videos</span>
+              </div>
+              <a href="<%= videos_path(platform: platform) %>" class="btn btn-sm btn-outline-primary btn-ripple">View All Videos</a>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Thumbnail</th>
+                    <th>Title</th>
+                    <th>Views</th>
+                    <th>Likes</th>
+                    <th>Comments</th>
+                    <th>Engagement</th>
+                    <th>Posted</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% platform_videos.each do |video| %>
+                    <tr>
+                      <td>
+                        <a href="<%= video_path(video) %>" class="position-relative">
+                          <img src="<%= video.thumbnail_url %>" alt="Video thumbnail" width="80" class="img-thumbnail video-thumbnail">
+                          <span class="position-absolute top-0 end-0 badge bg-dark">
+                            <i class="fas fa-play"></i>
+                          </span>
+                        </a>
+                      </td>
+                      <td>
+                        <a href="<%= video_path(video) %>" class="text-decoration-none">
+                          <%= video.title %>
+                        </a>
+                      </td>
+                      <td><%= number_with_delimiter(video.view_count) %></td>
+                      <td><%= number_with_delimiter(video.like_count) %></td>
+                      <td><%= number_with_delimiter(video.comment_count) %></td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="progress flex-grow-1" style="height: 6px; width: 60px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: <%= [video.engagement_rate, 100].min %>%"></div>
+                          </div>
+                          <span class="ms-2"><%= video.engagement_rate %>%</span>
+                        </div>
+                      </td>
+                      <td><%= time_ago_in_words(video.created_at_tiktok) %> ago</td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body empty-state py-4">
+            <div class="empty-state-icon">
+              <i class="fas fa-video"></i>
+            </div>
+            <div class="empty-state-text">
+              <h4>No <%= platform.capitalize %> videos found</h4>
+              <p>We don't have any video data for this platform yet.</p>
+              <button class="btn btn-primary btn-ripple mt-3" id="<%= platform %>-refresh-videos">
+                <i class="fas fa-sync-alt me-2"></i> Refresh Video Data
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">365-Day History</h5>
+          <div class="tooltip-wrapper">
+            <button class="btn btn-sm btn-outline-secondary" id="<%= platform %>-yearly-chart-download">
+              <i class="fas fa-download"></i>
+            </button>
+            <span class="tooltip-content">Download chart</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas id="<%= platform %>YearlyChart" height="300"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Additional insights section -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="collapsible-section">
+        <div class="collapsible-header" aria-expanded="false" id="<%= platform %>-insights-header">
+          <h5>Performance Insights</h5>
+          <i class="fas fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="collapsible-content" id="<%= platform %>-insights-content">
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-header">
+                  <h6 class="mb-0">Growth Analysis</h6>
+                </div>
+                <div class="card-body">
+                  <p>Your <%= platform.capitalize %> account has grown by <strong><%= rand(5..20) %>%</strong> in the last <%= time_window %> days.</p>
+                  <p>This is <strong><%= rand(1..10) %>% <%= ['higher', 'lower'].sample %></strong> than the average growth rate in your niche.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-header">
+                  <h6 class="mb-0">Recommendations</h6>
+                </div>
+                <div class="card-body">
+                  <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Post more consistently</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Engage with trending topics</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Collaborate with other creators</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Toggle collapsible sections
+    const insightsHeader = document.getElementById('<%= platform %>-insights-header');
+    const insightsContent = document.getElementById('<%= platform %>-insights-content');
+    
+    if (insightsHeader && insightsContent) {
+      insightsHeader.addEventListener('click', function() {
+        const expanded = this.getAttribute('aria-expanded') === 'true';
+        this.setAttribute('aria-expanded', !expanded);
+        insightsContent.classList.toggle('show');
+      });
+    }
+    
+    // Chart legend toggle
+    const legendToggle = document.getElementById('<%= platform %>-legend-toggle');
+    if (legendToggle) {
+      legendToggle.addEventListener('change', function() {
+        const chart = Chart.getChart('<%= platform %>Chart');
+        if (chart) {
+          chart.options.plugins.legend.display = this.checked;
+          chart.update();
+        }
+      });
+    }
+    
+    // Refresh chart button
+    const refreshButton = document.getElementById('<%= platform %>-chart-refresh');
+    if (refreshButton) {
+      refreshButton.addEventListener('click', function() {
+        const chartContainer = document.getElementById('<%= platform %>Chart').closest('.chart-container');
+        const loadingOverlay = chartContainer.querySelector('.chart-loading-overlay');
+        
+        if (loadingOverlay) {
+          loadingOverlay.classList.add('show');
+          
+          // Simulate refresh (would be replaced with actual AJAX call)
+          setTimeout(function() {
+            loadingOverlay.classList.remove('show');
+          }, 1500);
+        }
+      });
+    }
+    
+    // Video refresh button
+    const videoRefreshBtn = document.getElementById('<%= platform %>-refresh-videos');
+    if (videoRefreshBtn) {
+      videoRefreshBtn.addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Refreshing...';
+        
+        // Simulate refresh (would be replaced with actual AJAX call)
+        setTimeout(function() {
+          videoRefreshBtn.disabled = false;
+          videoRefreshBtn.innerHTML = '<i class="fas fa-sync-alt me-2"></i> Refresh Video Data';
+        }, 2000);
+      });
+    }
+    
+    // Chart download button
+    const downloadBtn = document.getElementById('<%= platform %>-yearly-chart-download');
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', function() {
+        const chart = Chart.getChart('<%= platform %>YearlyChart');
+        if (chart) {
+          const link = document.createElement('a');
+          link.download = '<%= platform %>_yearly_chart.png';
+          link.href = chart.toBase64Image();
+          link.click();
+        }
+      });
+    }
+  });
+</script>

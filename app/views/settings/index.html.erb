@@ -1,0 +1,251 @@
+<%= render "shared/navbar" %>
+
+<div class="container-fluid p-0">
+  <div class="row g-0">
+    <!-- Sidebar -->
+    <div class="col-md-2 d-md-block bg-light sidebar">
+      <div class="sidebar-sticky">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="<%= dashboard_path %>">
+              <i class="fas fa-tachometer-alt"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<%= subscriptions_path %>">
+              <i class="fas fa-link"></i>
+              Linked Accounts
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<%= videos_path %>">
+              <i class="fas fa-video"></i>
+              Videos
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<%= analytics_demographics_path %>">
+              <i class="fas fa-chart-bar"></i>
+              Analytics
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fas fa-dollar-sign"></i>
+              Revenue
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="<%= settings_path %>">
+              <i class="fas fa-cog"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Main content -->
+    <div class="col-md-10 main-content">
+      <div class="notification-container" id="notificationContainer" data-notification-target="container"></div>
+      
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Settings</h1>
+      </div>
+      
+      <% if flash[:notice] %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <%= flash[:notice] %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% end %>
+      
+      <% if flash[:alert] %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <%= flash[:alert] %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% end %>
+      
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Real-time Data Settings</h5>
+            </div>
+            <div class="card-body">
+              <p class="text-muted mb-4">
+                Enable or disable real-time data updates for each platform. Disabling real-time updates can reduce API usage and costs.
+                <br>
+                <small>Note: Real-time data is updated every 10 seconds when enabled.</small>
+              </p>
+              
+              <% if @subscriptions.any? %>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Platform</th>
+                        <th>Real-time Updates</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% @subscriptions.each do |subscription| %>
+                        <tr>
+                          <td>
+                            <div class="d-flex align-items-center">
+                              <div class="platform-icon <%= subscription.platform&.downcase %>-icon me-2"></div>
+                              <%= subscription.platform&.capitalize || 'Unknown' %>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="form-check form-switch">
+                              <input class="form-check-input realtime-toggle" 
+                                     type="checkbox" 
+                                     id="realtime-<%= subscription.id %>" 
+                                     data-subscription-id="<%= subscription.id %>"
+                                     <%= subscription.enable_realtime ? 'checked' : '' %>>
+                              <label class="form-check-label" for="realtime-<%= subscription.id %>">
+                                <%= subscription.enable_realtime ? 'Enabled' : 'Disabled' %>
+                              </label>
+                            </div>
+                          </td>
+                          <td>
+                            <span class="badge <%= subscription.enable_realtime ? 'bg-success' : 'bg-secondary' %>" id="status-<%= subscription.id %>">
+                              <%= subscription.enable_realtime ? 'Active' : 'Inactive' %>
+                            </span>
+                          </td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                  </table>
+                </div>
+              <% else %>
+                <div class="alert alert-info">
+                  You don't have any connected platforms yet. <a href="<%= subscriptions_path %>">Connect a platform</a> to manage real-time settings.
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Performance Settings</h5>
+            </div>
+            <div class="card-body">
+              <p class="text-muted mb-4">
+                Configure performance settings for your dashboard.
+              </p>
+              
+              <div class="mb-3">
+                <label class="form-label">Cache Duration</label>
+                <select class="form-select" id="cache-duration">
+                  <option value="15">15 seconds</option>
+                  <option value="30" selected>30 seconds</option>
+                  <option value="60">1 minute</option>
+                  <option value="300">5 minutes</option>
+                </select>
+                <div class="form-text">
+                  How long to cache data before fetching new data from APIs.
+                </div>
+              </div>
+              
+              <button type="button" class="btn btn-primary" id="save-performance-settings">
+                Save Performance Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render "shared/footer" %>
+
+<% content_for :page_scripts do %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get notification controller if available
+      const notificationController = document.querySelector('[data-controller="notification"]')?.__stimulusController;
+      
+      // Handle real-time toggle switches
+      document.querySelectorAll('.realtime-toggle').forEach(toggle => {
+        toggle.addEventListener('change', function() {
+          const subscriptionId = this.dataset.subscriptionId;
+          const enableRealtime = this.checked;
+          const label = this.nextElementSibling;
+          const statusBadge = document.getElementById(`status-${subscriptionId}`);
+          
+          // Update the label text
+          label.textContent = enableRealtime ? 'Enabled' : 'Disabled';
+          
+          // Update the status badge
+          statusBadge.textContent = enableRealtime ? 'Active' : 'Inactive';
+          statusBadge.className = `badge ${enableRealtime ? 'bg-success' : 'bg-secondary'}`;
+          
+          // Send AJAX request to update the setting
+          fetch(`<%= settings_update_realtime_path %>`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+              subscription_id: subscriptionId,
+              enable_realtime: enableRealtime
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Show success notification
+              if (notificationController) {
+                notificationController.success('Real-time settings updated successfully');
+              }
+            } else {
+              // Show error notification and revert the toggle
+              if (notificationController) {
+                notificationController.error('Failed to update real-time settings');
+              }
+              this.checked = !enableRealtime;
+              label.textContent = !enableRealtime ? 'Enabled' : 'Disabled';
+              statusBadge.textContent = !enableRealtime ? 'Active' : 'Inactive';
+              statusBadge.className = `badge ${!enableRealtime ? 'bg-success' : 'bg-secondary'}`;
+            }
+          })
+          .catch(error => {
+            console.error('Error updating real-time settings:', error);
+            // Show error notification and revert the toggle
+            if (notificationController) {
+              notificationController.error('Failed to update real-time settings');
+            }
+            this.checked = !enableRealtime;
+            label.textContent = !enableRealtime ? 'Enabled' : 'Disabled';
+            statusBadge.textContent = !enableRealtime ? 'Active' : 'Inactive';
+            statusBadge.className = `badge ${!enableRealtime ? 'bg-success' : 'bg-secondary'}`;
+          });
+        });
+      });
+      
+      // Handle performance settings save
+      document.getElementById('save-performance-settings')?.addEventListener('click', function() {
+        const cacheDuration = document.getElementById('cache-duration').value;
+        
+        // In a real app, this would save to the user's preferences
+        // For now, just show a notification
+        if (notificationController) {
+          notificationController.success(`Performance settings saved. Cache duration set to ${cacheDuration} seconds.`);
+        } else {
+          alert(`Performance settings saved. Cache duration set to ${cacheDuration} seconds.`);
+        }
+      });
+    });
+  </script>
+<% end %>

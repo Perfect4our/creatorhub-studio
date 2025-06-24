@@ -1,0 +1,276 @@
+<%= render "shared/navbar" %>
+
+<div class="container-fluid p-0">
+  <div class="row g-0">
+    <!-- Sidebar -->
+    <div class="col-md-2 d-md-block bg-light sidebar">
+      <div class="sidebar-sticky">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="<%= dashboard_path %>">
+              <i class="fas fa-tachometer-alt"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<%= subscriptions_path %>">
+              <i class="fas fa-link"></i>
+              Linked Accounts
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#">
+              <i class="fas fa-video"></i>
+              Videos
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fas fa-chart-bar"></i>
+              Analytics
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fas fa-dollar-sign"></i>
+              Revenue
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fas fa-cog"></i>
+              Settings
+            </a>
+          </li>
+          
+          <!-- Platform Selector for Sidebar -->
+          <li class="nav-item mt-4">
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span>Platforms</span>
+            </h6>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#">
+              <i class="fab fa-tiktok"></i>
+              TikTok
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fab fa-youtube"></i>
+              YouTube
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fab fa-instagram"></i>
+              Instagram
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fab fa-facebook"></i>
+              Facebook
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fab fa-twitter"></i>
+              Twitter
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Main content -->
+    <div class="col-md-10 main-content" data-controller="video">
+      <div class="notification-container" id="notificationContainer"></div>
+      
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Video Details</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+              <i class="fas fa-share-alt me-1"></i> Share
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+              <i class="fas fa-download me-1"></i> Export
+            </button>
+          </div>
+          <div class="dropdown period-selector">
+            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" id="periodDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-calendar me-1"></i>
+              <span id="selectedPeriodText">Last 30 Days</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="periodDropdown">
+              <li><button class="dropdown-item active" data-period="30" type="button">Last 30 Days</button></li>
+              <li><button class="dropdown-item" data-period="90" type="button">Last 90 Days</button></li>
+              <li><button class="dropdown-item" data-period="180" type="button">Last 180 Days</button></li>
+              <li><button class="dropdown-item" data-period="365" type="button">Last 365 Days</button></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><button class="dropdown-item" data-period="custom" type="button">Custom Range</button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Video detail header -->
+      <div class="video-detail-header">
+        <div class="video-detail-thumbnail">
+          <img src="<%= @video.thumbnail_url %>" alt="Video thumbnail">
+        </div>
+        <div class="video-detail-info">
+          <div class="d-flex align-items-center mb-2">
+            <span class="platform-badge platform-badge-tiktok">
+              <i class="fab fa-tiktok"></i> TikTok
+            </span>
+            <span class="text-muted ms-2"><%= time_ago_in_words(@video.created_at_tiktok) %> ago</span>
+          </div>
+          <h2 class="video-detail-title"><%= @video.title %></h2>
+          <div class="video-detail-meta">
+            <div class="video-detail-meta-item">
+              <i class="fas fa-eye"></i>
+              <span data-video-target="viewsCount"><%= number_with_delimiter(@video.view_count) %></span> views
+            </div>
+            <div class="video-detail-meta-item">
+              <i class="fas fa-heart"></i>
+              <span data-video-target="likesCount"><%= number_with_delimiter(@video.like_count) %></span> likes
+            </div>
+            <div class="video-detail-meta-item">
+              <i class="fas fa-comment"></i>
+              <span data-video-target="commentsCount"><%= number_with_delimiter(@video.comment_count) %></span> comments
+            </div>
+            <div class="video-detail-meta-item">
+              <i class="fas fa-share"></i>
+              <span data-video-target="sharesCount"><%= number_with_delimiter(@video.share_count) %></span> shares
+            </div>
+          </div>
+          <div class="video-detail-description">
+            <%= @video.description || "No description available." %>
+          </div>
+          <div class="video-detail-tags">
+            <% (@video.tags || ["tiktok", "viral", "trending"]).each do |tag| %>
+              <span class="video-detail-tag">#<%= tag %></span>
+            <% end %>
+          </div>
+          <div class="mt-3">
+            <a href="https://tiktok.com/@username/video/<%= @video.video_id %>" target="_blank" class="btn btn-primary">
+              <i class="fas fa-external-link-alt me-1"></i> View on TikTok
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Performance metrics -->
+      <div class="row mt-4">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Performance Over Time</h5>
+            </div>
+            <div class="card-body">
+              <canvas data-video-target="performanceChart" height="300"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Engagement Breakdown</h5>
+            </div>
+            <div class="card-body">
+              <canvas data-video-target="engagementChart" height="300"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Audience insights -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Audience Insights</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <h6>Age Distribution</h6>
+                  <canvas data-video-target="audienceChart" height="250"></canvas>
+                </div>
+                <div class="col-md-6">
+                  <h6>Demographics</h6>
+                  <div class="demographics-grid">
+                    <div class="demographics-item">
+                      <div class="demographics-value">65%</div>
+                      <div class="demographics-label">Female</div>
+                    </div>
+                    <div class="demographics-item">
+                      <div class="demographics-value">35%</div>
+                      <div class="demographics-label">Male</div>
+                    </div>
+                    <div class="demographics-item">
+                      <div class="demographics-value">42%</div>
+                      <div class="demographics-label">US Viewers</div>
+                    </div>
+                    <div class="demographics-item">
+                      <div class="demographics-value">18%</div>
+                      <div class="demographics-label">Mobile</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Similar videos -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Similar Videos</h5>
+              <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <% @similar_videos.each do |video| %>
+                  <div class="col-md-3 mb-4">
+                    <div class="video-card">
+                      <div class="video-thumbnail-container">
+                        <img src="<%= video.thumbnail_url %>" class="video-thumbnail" alt="Video thumbnail">
+                        <span class="video-duration">0:<%= rand(30..59) %></span>
+                      </div>
+                      <div class="p-3">
+                        <h6 class="mb-2"><%= video.title %></h6>
+                        <div class="video-stats">
+                          <div class="video-stats-item">
+                            <i class="fas fa-eye"></i>
+                            <%= number_with_delimiter(video.view_count) %>
+                          </div>
+                          <div class="video-stats-item">
+                            <i class="fas fa-heart"></i>
+                            <%= number_with_delimiter(video.like_count) %>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Theme toggle button -->
+<button class="theme-toggle" data-controller="theme" data-action="click->theme#toggleTheme">
+  <i class="fas fa-moon" data-theme-target="themeIcon"></i>
+</button>
+
+<%= render "shared/footer" %>

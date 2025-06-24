@@ -1,0 +1,33 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+tiktok_yesterday:
+  subscription: one
+  date: <%= 1.day.ago.to_date %>
+  views: 5000
+  followers: 1000
+  revenue: 100.50
+  platform: tiktok
+
+tiktok_today:
+  subscription: one
+  date: <%= Date.current %>
+  views: 5500
+  followers: 1100
+  revenue: 110.75
+  platform: tiktok
+
+youtube_yesterday:
+  subscription: two
+  date: <%= 1.day.ago.to_date %>
+  views: 10000
+  followers: 2000
+  revenue: 200.25
+  platform: youtube
+
+youtube_today:
+  subscription: two
+  date: <%= Date.current %>
+  views: 11000
+  followers: 2100
+  revenue: 220.50
+  platform: youtube

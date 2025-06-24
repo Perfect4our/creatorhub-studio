@@ -1,0 +1,98 @@
+<%= render "shared/navbar" %>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0"><i class="fab fa-tiktok me-2"></i>Connect TikTok Account</h4>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Connect your TikTok account to TikTok Studio</h5>
+          <p class="card-text">
+            Connecting your TikTok account will allow TikTok Studio to access your analytics data and display it in your dashboard.
+            We'll need the following permissions:
+          </p>
+          
+          <ul class="list-group mb-4">
+            <li class="list-group-item d-flex align-items-center">
+              <i class="fas fa-user-circle text-primary me-3"></i>
+              <div>
+                <strong>Basic Profile Information</strong>
+                <div class="text-muted">Your TikTok username and profile picture</div>
+              </div>
+            </li>
+            <li class="list-group-item d-flex align-items-center">
+              <i class="fas fa-chart-line text-primary me-3"></i>
+              <div>
+                <strong>Analytics Data</strong>
+                <div class="text-muted">View counts, follower counts, and engagement metrics</div>
+              </div>
+            </li>
+            <li class="list-group-item d-flex align-items-center">
+              <i class="fas fa-video text-primary me-3"></i>
+              <div>
+                <strong>Video List</strong>
+                <div class="text-muted">List of your public videos and their metadata</div>
+              </div>
+            </li>
+          </ul>
+          
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Note:</strong> TikTok Studio will never post content on your behalf or access your private messages.
+          </div>
+          
+          <div class="text-center mt-4">
+            <%= link_to auth_tiktok_callback_path, class: "btn btn-lg btn-primary" do %>
+              <i class="fab fa-tiktok me-2"></i>Authorize with TikTok
+            <% end %>
+            <%= link_to dashboard_path, class: "btn btn-link" do %>
+              Cancel
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card mt-4">
+        <div class="card-header">
+          <h5 class="mb-0">For Development/Testing Only</h5>
+        </div>
+        <div class="card-body">
+          <p class="card-text text-muted">
+            This form is only for development/testing. In production, use the TikTok OAuth flow above.
+          </p>
+          
+          <%= form_with(model: @subscription, class: "mb-3") do |form| %>
+            <% if @subscription.errors.any? %>
+              <div class="alert alert-danger">
+                <h4><%= pluralize(@subscription.errors.count, "error") %> prohibited this subscription from being saved:</h4>
+                <ul>
+                  <% @subscription.errors.each do |error| %>
+                    <li><%= error.full_message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+            
+            <div class="mb-3">
+              <%= form.label :tiktok_uid, "TikTok User ID", class: "form-label" %>
+              <%= form.text_field :tiktok_uid, class: "form-control", placeholder: "Enter TikTok User ID" %>
+            </div>
+            
+            <div class="mb-3">
+              <%= form.label :auth_token, "Authentication Token", class: "form-label" %>
+              <%= form.text_field :auth_token, class: "form-control", placeholder: "Enter mock auth token" %>
+            </div>
+            
+            <div class="mt-4">
+              <%= form.submit "Connect Account (Mock)", class: "btn btn-secondary" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render "shared/footer" %>

@@ -1,0 +1,164 @@
+<% if defined?(realtime_disabled) && realtime_disabled %>
+  <div class="realtime-status-banner realtime-disabled" id="realtime-disabled-banner">
+    <div class="realtime-status-icon">
+      <i class="fas fa-exclamation-circle"></i>
+    </div>
+    <div class="realtime-status-message">
+      <strong>Real-time updates are disabled</strong>
+      <span><%= message || "Real-time updates are currently disabled for all platforms." %></span>
+    </div>
+    <div class="d-flex align-items-center">
+      <% if defined?(platform) && platform.present? %>
+        <a href="<%= settings_path(platform: platform) %>" class="realtime-status-action">
+          <i class="fas fa-toggle-on me-1"></i> Enable for <%= platform.capitalize %>
+        </a>
+      <% else %>
+        <a href="<%= settings_path %>" class="realtime-status-action">
+          <i class="fas fa-toggle-on me-1"></i> Enable All
+        </a>
+      <% end %>
+      <button class="btn btn-link text-muted ms-2 p-0" id="dismissDisabledBanner" aria-label="Dismiss">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+<% elsif defined?(rate_limited) && rate_limited %>
+  <div class="realtime-status-banner realtime-rate-limited" id="realtime-rate-limited-banner">
+    <div class="realtime-status-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <div class="realtime-status-message">
+      <strong>API rate limit reached</strong>
+      <span><%= message || "Real-time updates are temporarily paused due to API rate limits." %></span>
+      <small class="d-block mt-1">Will resume automatically in <span id="rate-limit-countdown">5:00</span></small>
+    </div>
+    <div class="d-flex align-items-center">
+      <div class="tooltip-wrapper">
+        <button class="realtime-status-action" id="refreshRateLimitStatus">
+          <i class="fas fa-sync-alt me-1"></i> Check Status
+        </button>
+        <span class="tooltip-content">Check if rate limit has expired</span>
+      </div>
+      <button class="btn btn-link text-muted ms-2 p-0" id="dismissRateLimitBanner" aria-label="Dismiss">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+<% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Dismiss buttons functionality
+    const dismissDisabledBtn = document.getElementById('dismissDisabledBanner');
+    const dismissRateLimitBtn = document.getElementById('dismissRateLimitBanner');
+    const disabledBanner = document.getElementById('realtime-disabled-banner');
+    const rateLimitedBanner = document.getElementById('realtime-rate-limited-banner');
+    
+    if (dismissDisabledBtn && disabledBanner) {
+      dismissDisabledBtn.addEventListener('click', function() {
+        disabledBanner.style.height = disabledBanner.offsetHeight + 'px';
+        setTimeout(() => {
+          disabledBanner.style.height = '0';
+          disabledBanner.style.opacity = '0';
+          disabledBanner.style.marginBottom = '0';
+          disabledBanner.style.padding = '0';
+        }, 10);
+        setTimeout(() => {
+          disabledBanner.style.display = 'none';
+        }, 300);
+      });
+    }
+    
+    if (dismissRateLimitBtn && rateLimitedBanner) {
+      dismissRateLimitBtn.addEventListener('click', function() {
+        rateLimitedBanner.style.height = rateLimitedBanner.offsetHeight + 'px';
+        setTimeout(() => {
+          rateLimitedBanner.style.height = '0';
+          rateLimitedBanner.style.opacity = '0';
+          rateLimitedBanner.style.marginBottom = '0';
+          rateLimitedBanner.style.padding = '0';
+        }, 10);
+        setTimeout(() => {
+          rateLimitedBanner.style.display = 'none';
+        }, 300);
+      });
+    }
+    
+    // Rate limit countdown timer
+    const countdownElement = document.getElementById('rate-limit-countdown');
+    if (countdownElement) {
+      let minutes = 5;
+      let seconds = 0;
+      
+      const updateCountdown = () => {
+        countdownElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        
+        if (minutes === 0 && seconds === 0) {
+          clearInterval(countdownInterval);
+          
+          // Add refresh button animation
+          const refreshBtn = document.getElementById('refreshRateLimitStatus');
+          if (refreshBtn) {
+            refreshBtn.classList.add('highlight-update');
+            refreshBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> Try Again';
+          }
+          
+          return;
+        }
+        
+        if (seconds === 0) {
+          minutes--;
+          seconds = 59;
+        } else {
+          seconds--;
+        }
+      };
+      
+      const countdownInterval = setInterval(updateCountdown, 1000);
+    }
+    
+    // Refresh rate limit status button
+    const refreshRateLimitBtn = document.getElementById('refreshRateLimitStatus');
+    if (refreshRateLimitBtn) {
+      refreshRateLimitBtn.addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Checking...';
+        
+        // Simulate API check (would be replaced with actual AJAX call)
+        setTimeout(() => {
+          this.disabled = false;
+          
+          // Randomly determine if rate limit is still active for demo purposes
+          const stillRateLimited = Math.random() > 0.5;
+          
+          if (stillRateLimited) {
+            this.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Check Status';
+            // Show notification that we're still rate limited
+            const notificationController = document.querySelector('[data-controller="notification"]')?.__stimulusController;
+            if (notificationController) {
+              notificationController.warning('Still rate limited. Please try again later.');
+            }
+          } else {
+            this.innerHTML = '<i class="fas fa-check-circle me-1"></i> Resolved!';
+            
+            // Hide banner after a short delay
+            setTimeout(() => {
+              if (rateLimitedBanner) {
+                rateLimitedBanner.style.height = rateLimitedBanner.offsetHeight + 'px';
+                setTimeout(() => {
+                  rateLimitedBanner.style.height = '0';
+                  rateLimitedBanner.style.opacity = '0';
+                  rateLimitedBanner.style.marginBottom = '0';
+                  rateLimitedBanner.style.padding = '0';
+                }, 10);
+                setTimeout(() => {
+                  rateLimitedBanner.style.display = 'none';
+                }, 300);
+              }
+            }, 1000);
+          }
+        }, 1500);
+      });
+    }
+  });
+</script>

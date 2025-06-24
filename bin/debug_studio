@@ -1,0 +1,165 @@
+#!/usr/bin/env ruby
+
+# TikTok Studio Debug Script
+# Usage: ./bin/debug_studio
+
+require 'fileutils'
+
+# Change to the Rails app directory
+APP_ROOT = File.expand_path('..', __dir__)
+FileUtils.chdir APP_ROOT
+
+puts "\n🎬 TikTok Studio Debug Tool"
+puts "=" * 50
+
+# Check if Rails is available
+begin
+  require 'bundler/setup'
+  require './config/environment'
+  puts "✅ Rails application loaded successfully"
+rescue => e
+  puts "❌ Failed to load Rails application: #{e.message}"
+  exit 1
+end
+
+# Check environment variables
+puts "\n📋 Environment Variables & Credentials:"
+youtube_vars = %w[YOUTUBE_API_KEY YOUTUBE_CLIENT_ID YOUTUBE_CLIENT_SECRET]
+
+puts "  Environment Variables:"
+youtube_vars.each do |var|
+  if ENV[var].present?
+    puts "    ✅ #{var}: #{ENV[var][0..10]}..." 
+  else
+    puts "    ❌ #{var}: Not set"
+  end
+end
+
+puts "  Encrypted Credentials:"
+begin
+  youtube_creds = Rails.application.credentials.youtube
+  if youtube_creds
+    puts "    ✅ YouTube credentials: #{youtube_creds.keys.join(', ')}"
+  else
+    puts "    ❌ YouTube credentials: Not configured"
+  end
+  
+  tiktok_creds = Rails.application.credentials.tiktok
+  if tiktok_creds
+    puts "    ✅ TikTok credentials: #{tiktok_creds.keys.join(', ')}"
+  else
+    puts "    ❌ TikTok credentials: Not configured"
+  end
+rescue => e
+  puts "    ⚠️  Error reading credentials: #{e.message}"
+end
+
+# Check database connection
+puts "\n🗄️  Database:"
+begin
+  ActiveRecord::Base.connection.execute("SELECT 1")
+  puts "  ✅ Database connection successful"
+  
+  # Check for users
+  user_count = User.count
+  puts "  ℹ️  Users: #{user_count}"
+  
+  # Check for subscriptions
+  subscription_count = Subscription.count
+  puts "  ℹ️  Subscriptions: #{subscription_count}"
+  
+  # Check for subscriptions without platform
+  no_platform = Subscription.where(platform: [nil, '']).count
+  if no_platform > 0
+    puts "  ⚠️  Subscriptions without platform: #{no_platform}"
+  end
+  
+rescue => e
+  puts "  ❌ Database error: #{e.message}"
+end
+
+# Check if server is running
+puts "\n🌐 Server Status:"
+begin
+  require 'net/http'
+  uri = URI('http://localhost:3000')
+  response = Net::HTTP.get_response(uri)
+  if response.code == '200'
+    puts "  ✅ Server is running on localhost:3000"
+  else
+    puts "  ⚠️  Server responded with code: #{response.code}"
+  end
+rescue => e
+  puts "  ❌ Server not accessible: #{e.message}"
+  puts "  💡 Try running: rails server"
+end
+
+# Check important files
+puts "\n📁 Important Files:"
+important_files = [
+  'app/controllers/subscriptions_controller.rb',
+  'app/services/youtube_service.rb',
+  'app/views/subscriptions/index.html.erb',
+  'config/routes.rb'
+]
+
+important_files.each do |file|
+  if File.exist?(file)
+    puts "  ✅ #{file}"
+  else
+    puts "  ❌ #{file} missing"
+  end
+end
+
+puts "\n📊 Data Flow Check:"
+begin
+  user = User.find(3)
+  active_subs = user.subscriptions.active
+  puts "  ✅ User found: #{user.email}"
+  puts "  ℹ️  Active subscriptions: #{active_subs.count}"
+  
+  active_subs.each do |sub|
+    puts "    - #{sub.platform.capitalize}: Channel #{sub.channel_id}"
+    puts "      Auth Token: #{sub.auth_token.present? ? '✅' : '❌'}"
+    puts "      Daily Trackings: #{sub.daily_view_trackings.count}"
+    
+    if sub.daily_view_trackings.any?
+      latest = sub.daily_view_trackings.order(:tracked_date).last
+      puts "      Latest Data: #{latest.total_views} views, #{latest.total_subscribers} subs"
+    end
+    
+    if sub.platform == 'youtube' && sub.auth_token.present?
+      puts "      Testing API..."
+      begin
+        service = YoutubeService.new(sub)
+        stats = service.get_public_stats
+        puts "      API Response: #{stats[:total_views]} views, #{stats[:total_subscribers]} subs"
+      rescue => e
+        puts "      API Error: #{e.message}"
+      end
+    end
+  end
+rescue => e
+  puts "  ❌ Error checking data: #{e.message}"
+end
+
+puts "\n🎯 Next Steps:"
+youtube_configured = Rails.application.credentials.youtube&.api_key.present? || ENV['YOUTUBE_API_KEY'].present?
+
+if !youtube_configured
+  puts "  1. Set up YouTube API credentials:"
+  puts "     - Environment: export YOUTUBE_API_KEY='...' etc."
+  puts "     - OR Encrypted: rails credentials:edit"
+  puts "  2. Restart the Rails server"
+  puts "  3. Visit http://localhost:3000/subscriptions"
+  puts "  4. Click 'Connect YouTube' to test OAuth flow"
+else
+  puts "  1. Visit http://localhost:3000/dashboard"
+  puts "  2. Check that real data shows up properly"
+  puts "  3. If data is missing, run: rails runner 'FetchRealYoutubeStatsJob.new.perform'"
+end
+
+puts "\n" + "=" * 50
+puts "Debug complete! 🎬"
+
+exit 0 

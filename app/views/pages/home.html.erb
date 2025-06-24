@@ -1,0 +1,55 @@
+<%= render "shared/navbar" %>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+      <h1 class="display-4 mb-4">Welcome to CreatorHub Studio</h1>
+      <p class="lead mb-5">Connect your social media accounts and track performance across all platforms in one unified dashboard.</p>
+      
+      <% if user_signed_in? %>
+        <% if current_user.subscriptions.any? %>
+          <%= link_to dashboard_path, class: "btn btn-primary btn-lg" do %>
+            <i class="fas fa-chart-line me-2"></i>Go to Dashboard
+          <% end %>
+        <% else %>
+          <%= link_to subscriptions_path, class: "btn btn-primary btn-lg" do %>
+            <i class="fas fa-link me-2"></i>Connect Your Accounts
+          <% end %>
+        <% end %>
+      <% else %>
+        <%= link_to new_user_registration_path, class: "btn btn-primary btn-lg me-2" do %>
+          <i class="fas fa-user-plus me-2"></i>Sign Up
+        <% end %>
+        <%= link_to new_user_session_path, class: "btn btn-outline-primary btn-lg" do %>
+          <i class="fas fa-sign-in-alt me-2"></i>Sign In
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+  
+  <div class="row mt-5 pt-5">
+    <div class="col-md-4">
+      <div class="text-center mb-4">
+        <i class="fas fa-chart-line fa-3x text-primary"></i>
+      </div>
+      <h3 class="text-center">Multi-Platform Analytics</h3>
+      <p class="text-center">Monitor views, followers, and engagement across YouTube, TikTok, Instagram, and more platforms.</p>
+    </div>
+    <div class="col-md-4">
+      <div class="text-center mb-4">
+        <i class="fas fa-history fa-3x text-primary"></i>
+      </div>
+      <h3 class="text-center">Historical Data</h3>
+      <p class="text-center">Access up to 365 days of historical performance data with detailed analytics across all platforms.</p>
+    </div>
+    <div class="col-md-4">
+      <div class="text-center mb-4">
+        <i class="fas fa-dollar-sign fa-3x text-primary"></i>
+      </div>
+      <h3 class="text-center">Revenue Insights</h3>
+      <p class="text-center">Get estimated revenue projections and real monetization data from connected platforms.</p>
+    </div>
+  </div>
+</div>
+
+<%= render "shared/footer" %>

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# CreatorHub.Studio Deployment Script
+
+set -e  # Exit on any error
+
+echo "🚀 Deploying CreatorHub.Studio to Production..."
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Check if we're in the right directory
+if [ ! -f "Gemfile" ]; then
+  echo -e "${RED}❌ Error: Not in Rails app directory${NC}"
+  exit 1
+fi
+
+# Check if production environment file exists
+if [ ! -f ".env.production" ]; then
+  echo -e "${YELLOW}⚠️  Warning: .env.production not found${NC}"
+  echo "Copy .env.production.example to .env.production and configure it"
+  exit 1
+fi
+
+echo -e "${BLUE}📦 Installing production dependencies...${NC}"
+bundle install --without development test
+
+echo -e "${BLUE}🔨 Precompiling assets...${NC}"
+RAILS_ENV=production bundle exec rails assets:precompile
+
+echo -e "${BLUE}🗄️  Running database migrations...${NC}"
+RAILS_ENV=production bundle exec rails db:migrate
+
+echo -e "${BLUE}🌱 Seeding database (if needed)...${NC}"
+RAILS_ENV=production bundle exec rails db:seed
+
+echo -e "${GREEN}✅ Deployment preparation complete!${NC}"
+echo -e "${YELLOW}Next steps:${NC}"
+echo "1. Push to your git repository"
+echo "2. Deploy to your hosting platform (Heroku, Railway, etc.)"
+echo "3. Set up your domain DNS to point to your hosting platform"
+echo "4. Configure SSL certificate"
+
+echo -e "${GREEN}🎉 CreatorHub.Studio is ready for production!${NC}" 

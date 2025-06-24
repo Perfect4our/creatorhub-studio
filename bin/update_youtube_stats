@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+
+require_relative '../config/environment'
+
+puts "🎯 TikTok Studio - YouTube Stats Updater"
+puts "=" * 50
+
+# Find all active YouTube subscriptions
+youtube_subscriptions = Subscription.active.where(platform: 'youtube')
+
+if youtube_subscriptions.empty?
+  puts "❌ No active YouTube subscriptions found"
+  exit 1
+end
+
+puts "📊 Found #{youtube_subscriptions.count} active YouTube subscription(s)"
+
+youtube_subscriptions.each do |subscription|
+  puts "\n🔄 Processing subscription ID: #{subscription.id}"
+  puts "   Channel ID: #{subscription.channel_id}"
+  
+  begin
+    # Track daily views using public API
+    puts "   📈 Tracking daily views..."
+    subscription.track_daily_views!
+    
+    # Sync stats using authenticated API
+    puts "   🔄 Syncing detailed stats..."
+    youtube_service = YoutubeService.new(subscription)
+    if youtube_service.sync!
+      puts "   ✅ Successfully updated stats"
+    else
+      puts "   ⚠️  Stats sync failed (but daily tracking succeeded)"
+    end
+    
+  rescue => e
+    puts "   ❌ Error: #{e.message}"
+  end
+end
+
+puts "\n📊 Final Statistics:"
+youtube_subscriptions.each do |subscription|
+  latest_stat = subscription.daily_stats.recent.first
+  latest_tracking = subscription.daily_view_trackings.recent.first
+  
+  puts "   Subscription #{subscription.id}:"
+  if latest_stat
+    puts "     📊 Latest Daily Stat: #{latest_stat.views} views, #{latest_stat.followers} subscribers (#{latest_stat.date})"
+  end
+  if latest_tracking
+    puts "     📈 Latest Tracking: #{latest_tracking.total_views} views, #{latest_tracking.daily_view_gain} daily gain (#{latest_tracking.tracked_date})"
+  end
+  puts "     📚 Total Daily Stats: #{subscription.daily_stats.count}"
+  puts "     📊 Total Trackings: #{subscription.daily_view_trackings.count}"
+end
+
+puts "\n🎉 YouTube stats update completed!"
+puts "💡 Tip: This script runs automatically every day at 2am via TrackDailyViewsJob" 

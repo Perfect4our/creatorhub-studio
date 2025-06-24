@@ -1,0 +1,362 @@
+<%= render "shared/navbar" %>
+
+<div class="container-fluid p-0">
+  <div class="row g-0">
+    <!-- Sidebar -->
+    <div class="col-md-2 d-md-block bg-light sidebar">
+      <div class="sidebar-sticky">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="<%= dashboard_path %>">
+              <i class="fas fa-tachometer-alt"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<%= subscriptions_path %>">
+              <i class="fas fa-link"></i>
+              Linked Accounts
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#">
+              <i class="fas fa-video"></i>
+              Videos
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fas fa-chart-bar"></i>
+              Analytics
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fas fa-dollar-sign"></i>
+              Revenue
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fas fa-cog"></i>
+              Settings
+            </a>
+          </li>
+          
+          <!-- Platform Selector for Sidebar -->
+          <li class="nav-item mt-4">
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span>Platforms</span>
+            </h6>
+          </li>
+          
+          <!-- All Platforms option -->
+          <li class="nav-item">
+            <a class="nav-link <%= @selected_platform == 'all' ? 'active' : '' %>" href="<%= videos_path(platform: 'all') %>">
+              <i class="fas fa-layer-group"></i>
+              All Platforms
+            </a>
+          </li>
+          
+          <!-- Individual Platform Links -->
+          <% @available_platforms.each do |platform| %>
+            <li class="nav-item">
+              <a class="nav-link <%= @selected_platform == platform ? 'active' : '' %>" href="<%= videos_path(platform: platform) %>">
+                <% case platform %>
+                <% when 'tiktok' %>
+                  <i class="fab fa-tiktok"></i>
+                <% when 'youtube' %>
+                  <i class="fab fa-youtube"></i>
+                <% when 'instagram' %>
+                  <i class="fab fa-instagram"></i>
+                <% when 'facebook' %>
+                  <i class="fab fa-facebook"></i>
+                <% when 'twitter' %>
+                  <i class="fab fa-twitter"></i>
+                <% when 'linkedin' %>
+                  <i class="fab fa-linkedin"></i>
+                <% when 'twitch' %>
+                  <i class="fab fa-twitch"></i>
+                <% else %>
+                  <i class="fas fa-video"></i>
+                <% end %>
+                <%= platform&.capitalize || 'Unknown' %>
+              </a>
+            </li>
+          <% end %>
+          
+          <!-- Show placeholder platforms if no subscriptions -->
+          <% if @available_platforms.empty? %>
+            <li class="nav-item">
+              <a class="nav-link disabled text-muted" href="#">
+                <i class="fab fa-tiktok"></i>
+                TikTok
+                <small class="d-block">Not connected</small>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled text-muted" href="#">
+                <i class="fab fa-youtube"></i>
+                YouTube
+                <small class="d-block">Not connected</small>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled text-muted" href="#">
+                <i class="fab fa-instagram"></i>
+                Instagram
+                <small class="d-block">Not connected</small>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled text-muted" href="#">
+                <i class="fab fa-facebook"></i>
+                Facebook
+                <small class="d-block">Not connected</small>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled text-muted" href="#">
+                <i class="fab fa-twitter"></i>
+                Twitter
+                <small class="d-block">Not connected</small>
+              </a>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Main content -->
+    <div class="col-md-10 main-content">
+      <div class="notification-container" id="notificationContainer"></div>
+      
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Videos</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <form method="get" class="input-group me-2" style="width: 300px;">
+            <input type="hidden" name="platform" value="<%= @selected_platform %>">
+            <input type="hidden" name="sort_by" value="<%= @sort_by %>">
+            <input type="text" class="form-control form-control-sm" name="search" placeholder="Search videos..." value="<%= @search_query %>" id="videoSearchInput">
+            <button class="btn btn-sm btn-outline-secondary" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+            <% if @search_query.present? %>
+              <a href="<%= videos_path(platform: @selected_platform, sort_by: @sort_by) %>" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-times"></i>
+              </a>
+            <% end %>
+          </form>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-sort me-1"></i> 
+              <% case @sort_by %>
+              <% when 'newest' %>
+                Date (newest)
+              <% when 'oldest' %>
+                Date (oldest)
+              <% when 'most_viewed' %>
+                Views (high to low)
+              <% when 'least_viewed' %>
+                Views (low to high)
+              <% when 'engagement' %>
+                Engagement rate
+              <% else %>
+                Sort by
+              <% end %>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortDropdown">
+              <li><a class="dropdown-item <%= @sort_by == 'newest' ? 'active' : '' %>" href="<%= videos_path(platform: @selected_platform, sort_by: 'newest', search: @search_query) %>">Date (newest)</a></li>
+              <li><a class="dropdown-item <%= @sort_by == 'oldest' ? 'active' : '' %>" href="<%= videos_path(platform: @selected_platform, sort_by: 'oldest', search: @search_query) %>">Date (oldest)</a></li>
+              <li><a class="dropdown-item <%= @sort_by == 'most_viewed' ? 'active' : '' %>" href="<%= videos_path(platform: @selected_platform, sort_by: 'most_viewed', search: @search_query) %>">Views (high to low)</a></li>
+              <li><a class="dropdown-item <%= @sort_by == 'least_viewed' ? 'active' : '' %>" href="<%= videos_path(platform: @selected_platform, sort_by: 'least_viewed', search: @search_query) %>">Views (low to high)</a></li>
+              <li><a class="dropdown-item <%= @sort_by == 'engagement' ? 'active' : '' %>" href="<%= videos_path(platform: @selected_platform, sort_by: 'engagement', search: @search_query) %>">Engagement rate</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Platform selector -->
+      <div class="platform-selector mb-4">
+        <ul class="nav" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link <%= @selected_platform == 'all' ? 'active' : '' %>" href="<%= videos_path(platform: 'all', search: @search_query, sort_by: @sort_by) %>" role="tab">
+              <i class="fas fa-layer-group"></i>
+              <span class="platform-name">All Platforms</span>
+            </a>
+          </li>
+          <% @available_platforms.each do |platform| %>
+            <li class="nav-item platform-<%= platform %>">
+              <a class="nav-link <%= @selected_platform == platform ? 'active' : '' %>" href="<%= videos_path(platform: platform, search: @search_query, sort_by: @sort_by) %>" role="tab">
+                <i class="fab fa-<%= platform %>"></i>
+                <span class="platform-name"><%= platform.capitalize %></span>
+              </a>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+      
+      <!-- Video content -->
+      <div class="videos-content">
+        <% if @videos.any? %>
+          <div class="row">
+            <% @videos.each do |video| %>
+              <div class="col-md-3 mb-4">
+                <div class="video-card">
+                  <% 
+                    # Determine the correct link based on video source
+                    if video[:id].present?
+                      # Database video - use Rails route
+                      video_link = video_path(video[:id])
+                      link_target = "_self"
+                    elsif video[:video_id].present?
+                      # API video - link to platform
+                      case video[:platform]
+                      when 'youtube'
+                        video_link = "https://www.youtube.com/watch?v=#{video[:video_id]}"
+                      when 'tiktok'
+                        video_link = "https://www.tiktok.com/@username/video/#{video[:video_id]}"
+                      else
+                        video_link = "#"
+                      end
+                      link_target = "_blank"
+                    else
+                      video_link = "#"
+                      link_target = "_self"
+                    end
+                  %>
+                  <a href="<%= video_link %>" target="<%= link_target %>" class="text-decoration-none">
+                    <div class="video-thumbnail-container">
+                      <img src="<%= video[:thumbnail_url] || '/icon.png' %>" class="video-thumbnail" alt="Video thumbnail">
+                      <span class="video-duration">0:<%= rand(30..59) %></span>
+                      <div class="platform-badge">
+                        <i class="fab fa-<%= video[:platform] %>"></i>
+                      </div>
+                    </div>
+                    <div class="p-3">
+                      <h6 class="mb-2 text-dark video-title"><%= truncate(video[:title] || 'Untitled Video', length: 50) %></h6>
+                      <div class="video-stats">
+                        <div class="video-stats-item">
+                          <i class="fas fa-eye"></i>
+                          <%= format_large_number(video[:view_count] || 0) %>
+                        </div>
+                        <div class="video-stats-item">
+                          <i class="fas fa-heart"></i>
+                          <%= format_large_number(video[:like_count] || 0) %>
+                        </div>
+                        <div class="video-stats-item">
+                          <i class="fas fa-calendar-alt"></i>
+                          <%= video[:created_at_tiktok] ? time_ago_in_words(video[:created_at_tiktok]) : 'Unknown' %>
+                        </div>
+                      </div>
+                      <div class="mt-2">
+                        <div class="progress" style="height: 6px;">
+                          <div class="progress-bar bg-success" role="progressbar" style="width: <%= [video[:engagement_rate] || 0, 100].min %>%;" aria-valuenow="<%= video[:engagement_rate] || 0 %>" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                          <small class="text-muted">Engagement rate</small>
+                          <small class="text-muted"><%= video[:engagement_rate] || 0 %>%</small>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <!-- No videos found -->
+          <div class="text-center py-5">
+            <% if @search_query.present? %>
+              <i class="fas fa-search text-muted mb-3" style="font-size: 3rem;"></i>
+              <h4 class="text-muted">No videos found</h4>
+              <p class="text-muted">No videos match your search "<%= @search_query %>"</p>
+              <a href="<%= videos_path(platform: @selected_platform, sort_by: @sort_by) %>" class="btn btn-outline-primary">Clear Search</a>
+            <% elsif @selected_platform != 'all' %>
+              <i class="fab fa-<%= @selected_platform %> text-muted mb-3" style="font-size: 3rem;"></i>
+              <h4 class="text-muted">No <%= @selected_platform.capitalize %> videos</h4>
+              <p class="text-muted">Connect your <%= @selected_platform.capitalize %> account to see videos.</p>
+              <a href="<%= subscriptions_path %>" class="btn btn-primary">Connect Account</a>
+            <% else %>
+              <i class="fas fa-video text-muted mb-3" style="font-size: 3rem;"></i>
+              <h4 class="text-muted">No videos available</h4>
+              <p class="text-muted">Connect your social media accounts to see your videos here.</p>
+              <a href="<%= subscriptions_path %>" class="btn btn-primary">Connect Accounts</a>
+            <% end %>
+          </div>
+        <% end %>
+          
+        <!-- Pagination -->
+        <% if @total_pages > 1 %>
+          <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+              <li class="page-item <%= @page <= 1 ? 'disabled' : '' %>">
+                <a class="page-link" href="<%= videos_path(page: @page - 1, platform: @selected_platform, search: @search_query, sort_by: @sort_by) %>" tabindex="-1" <%= @page <= 1 ? 'aria-disabled="true"' : '' %>>Previous</a>
+                </li>
+                
+                <% (1..@total_pages).each do |page_num| %>
+                  <% if page_num == @page %>
+                    <li class="page-item active">
+                      <span class="page-link"><%= page_num %></span>
+                    </li>
+                  <% else %>
+                    <li class="page-item">
+                      <a class="page-link" href="<%= videos_path(page: page_num, platform: params[:platform]) %>"><%= page_num %></a>
+                    </li>
+                  <% end %>
+                <% end %>
+                
+                <li class="page-item <%= @page >= @total_pages ? 'disabled' : '' %>">
+                  <a class="page-link" href="<%= videos_path(page: @page + 1, platform: params[:platform]) %>" <%= @page >= @total_pages ? 'aria-disabled="true"' : '' %>>Next</a>
+                </li>
+              </ul>
+            </nav>
+          <% end %>
+        </div>
+        
+        <!-- YouTube Videos -->
+        <div class="tab-pane fade" data-platform="youtube" data-platform-target="platformContent">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Connect your YouTube account to see your videos.
+            <a href="#" class="btn btn-sm btn-outline-primary ms-2">Connect YouTube</a>
+          </div>
+        </div>
+        
+        <!-- Instagram Videos -->
+        <div class="tab-pane fade" data-platform="instagram" data-platform-target="platformContent">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Connect your Instagram account to see your videos.
+            <a href="#" class="btn btn-sm btn-outline-primary ms-2">Connect Instagram</a>
+          </div>
+        </div>
+        
+        <!-- Facebook Videos -->
+        <div class="tab-pane fade" data-platform="facebook" data-platform-target="platformContent">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Connect your Facebook account to see your videos.
+            <a href="#" class="btn btn-sm btn-outline-primary ms-2">Connect Facebook</a>
+          </div>
+        </div>
+        
+        <!-- Twitter Videos -->
+        <div class="tab-pane fade" data-platform="twitter" data-platform-target="platformContent">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Connect your Twitter account to see your videos.
+            <a href="#" class="btn btn-sm btn-outline-primary ms-2">Connect Twitter</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Theme toggle button -->
+<button class="theme-toggle" data-controller="theme" data-action="click->theme#toggleTheme">
+  <i class="fas fa-moon" data-theme-target="themeIcon"></i>
+</button>
+
+<%= render "shared/footer" %>

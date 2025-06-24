@@ -1,0 +1,371 @@
+<%# Set default values if not provided %>
+<% stats ||= { views: 0, followers: 0, revenue: 0 } %>
+<% @platform_stats ||= {} %>
+<% @chart_data ||= {} %>
+<% @chart_labels ||= [] %>
+
+<div class="realtime-stats">
+  <!-- Live Subscriber Count -->
+  <div class="card mb-3">
+    <div class="card-header">
+      <h6 class="mb-0 d-flex align-items-center">
+        <span class="live-indicator me-2"></span>
+        Live Subscribers
+      </h6>
+    </div>
+    <div class="card-body text-center">
+      <h3 class="mb-0 counter-pulse" id="liveSubscriberCount">
+        <%= format_large_number(stats[:followers] || 0) %>
+      </h3>
+      <small class="text-muted">Total across all platforms</small>
+    </div>
+  </div>
+  
+  <!-- 48-Hour Views Chart -->
+  <div class="card mb-3">
+    <div class="card-header">
+      <h6 class="mb-0">Views (Last 48 Hours)</h6>
+    </div>
+    <div class="card-body">
+      <% has_advanced = defined?(@subscriptions) && @subscriptions&.any? { |s| has_advanced_analytics?(s) } %>
+      <% if has_advanced %>
+        <div class="text-center py-3">
+          <i class="fas fa-chart-line text-muted mb-2" style="font-size: 2rem;"></i>
+          <p class="text-muted mb-0 small">48-Hour View Tracking</p>
+          <p class="text-muted mb-0 small">Coming Soon</p>
+        </div>
+      <% else %>
+        <div class="text-center py-3">
+          <i class="fas fa-chart-line text-muted mb-2" style="font-size: 2rem;"></i>
+          <p class="text-muted mb-0 small">Analytics Coming Soon</p>
+          <p class="text-muted mb-0 small">Connect accounts to start tracking</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  
+  <% if defined?(@platform_stats) && @platform_stats.any? %>
+    <!-- Platform Breakdown -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <h5 class="mb-0">Platform Breakdown</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Platform</th>
+                <th>Views</th>
+                <th>Followers</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @platform_stats.each do |platform, data| %>
+                <tr class="platform-row" data-platform="<%= platform %>">
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="platform-icon <%= platform&.downcase %>-icon me-2"></div>
+                      <%= platform&.capitalize || 'Unknown' %>
+                    </div>
+                  </td>
+                  <td><%= format_large_number(data[:views] || 0) %></td>
+                  <td><%= format_large_number(data[:followers] || 0) %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  
+  <!-- Top Performing Videos -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <%
+        # Get the time window for display
+        selected_window = (@selected_time_window || '28').to_s
+        
+        time_window_display = case selected_window
+        when '7'
+          '7 days'
+        when '28' 
+          '28 days'
+        when '90'
+          '90 days'
+        when '365'
+          '365 days'
+        when '2025'
+          '2025'
+        when '2024'
+          '2024'
+        when 'custom'
+          if defined?(@start_date) && defined?(@end_date) && @start_date && @end_date
+            begin
+              if @start_date == @end_date
+                @start_date.strftime('%b %d')
+              elsif @start_date.year == @end_date.year
+                if @start_date.month == @end_date.month
+                  "#{@start_date.strftime('%b %d')}-#{@end_date.strftime('%d')}"
+                else
+                  "#{@start_date.strftime('%b %d')} - #{@end_date.strftime('%b %d')}"
+                end
+              else
+                "#{@start_date.strftime('%b %Y')} - #{@end_date.strftime('%b %Y')}"
+              end
+            rescue
+              'custom range'
+            end
+          else
+            'custom range'
+          end
+        else
+          # Handle any numeric value or fallback
+          if selected_window =~ /^\d+$/
+            "#{selected_window} days"
+          else
+            '28 days' # Ultimate fallback
+          end
+        end
+      %>
+      <h6 class="mb-0">Top Videos (<%= time_window_display %>)</h6>
+      <% if defined?(@analytics_data) && @analytics_data.any? %>
+        <% @analytics_data.each do |platform, data| %>
+          <% if data[:has_analytics_api] %>
+            <span class="badge bg-success" title="Enhanced with Analytics API">
+              <i class="fas fa-chart-line"></i>
+            </span>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+    <div class="card-body">
+      <% 
+        # Collect all videos from all platforms for the time frame
+        all_videos = []
+        
+        # Get videos from Analytics API (YouTube with enhanced data)
+        if defined?(@analytics_data) && @analytics_data.any?
+          @analytics_data.each do |platform, data|
+            if data[:has_analytics_api] && data[:top_videos]&.any?
+              data[:top_videos].each do |video|
+                all_videos << {
+                  platform: platform,
+                  title: video[:title] || video[:video_id] || 'Untitled Video',
+                  video_id: video[:video_id],
+                  views: video[:views] || 0,
+                  likes: video[:likes] || 0,
+                  comments: video[:comments] || 0,
+                  thumbnail_url: video[:thumbnail_url] || nil,
+                  source: 'analytics_api',
+                  link: platform == 'youtube' ? "https://www.youtube.com/watch?v=#{video[:video_id]}" : "#"
+                }
+              end
+            end
+          end
+        end
+        
+        # Get videos from platform_videos (database videos and API videos)
+        if defined?(@platform_videos) && @platform_videos.any?
+          @platform_videos.each do |platform, videos|
+            next unless videos&.any?
+            
+            videos.each do |video|
+              # Handle both database videos and API video objects
+              video_data = {
+                platform: platform,
+                title: (video.respond_to?(:title) ? video.title : video[:title]) || 'Untitled Video',
+                video_id: video.respond_to?(:video_id) ? video.video_id : video[:video_id],
+                views: (video.respond_to?(:view_count) ? video.view_count : video[:view_count]) || 0,
+                likes: (video.respond_to?(:like_count) ? video.like_count : video[:like_count]) || 0,
+                comments: (video.respond_to?(:comment_count) ? video.comment_count : video[:comment_count]) || 0,
+                thumbnail_url: (video.respond_to?(:thumbnail_url) ? video.thumbnail_url : video[:thumbnail_url]) || nil,
+                source: 'platform_data'
+              }
+              
+              # Generate appropriate link
+              if video.respond_to?(:id) && video.id.present?
+                video_data[:link] = video_path(video)
+                video_data[:link_target] = '_self'
+              elsif video_data[:video_id].present?
+                case platform.downcase
+                when 'youtube'
+                  video_data[:link] = "https://www.youtube.com/watch?v=#{video_data[:video_id]}"
+                when 'tiktok'
+                  video_data[:link] = "https://www.tiktok.com/@username/video/#{video_data[:video_id]}"
+                else
+                  video_data[:link] = "#"
+                end
+                video_data[:link_target] = '_blank'
+              else
+                video_data[:link] = "#"
+                video_data[:link_target] = '_self'
+              end
+              
+              all_videos << video_data
+            end
+          end
+        end
+        
+        # Sort by views and get top 5
+        top_videos = all_videos.sort_by { |v| -(v[:views] || 0) }.first(5)
+      %>
+      
+      <% if top_videos.any? %>
+        <% top_videos.each_with_index do |video, index| %>
+          <div class="top-video-item mb-3 <%= 'border-bottom pb-3' if index < top_videos.length - 1 %>">
+            <div class="d-flex">
+              <div class="video-thumbnail-small me-3 position-relative">
+                <% if video[:thumbnail_url].present? %>
+                  <img src="<%= video[:thumbnail_url] %>" alt="Video thumbnail" class="img-fluid rounded" style="width: 60px; height: 45px; object-fit: cover;">
+                <% else %>
+                  <div class="d-flex align-items-center justify-content-center bg-light rounded" style="width: 60px; height: 45px;">
+                    <i class="fab fa-<%= video[:platform] %> text-<%= video[:platform] == 'youtube' ? 'danger' : 'dark' %>"></i>
+                  </div>
+                <% end %>
+                <!-- Ranking badge -->
+                <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-primary" style="font-size: 0.7rem;">
+                  <%= index + 1 %>
+                </span>
+              </div>
+              <div class="video-info flex-grow-1">
+                <% if video[:link] != "#" %>
+                  <a href="<%= video[:link] %>" target="<%= video[:link_target] || '_blank' %>" class="text-decoration-none">
+                    <h6 class="video-title-small mb-1 text-dark"><%= truncate(video[:title], length: 45) %></h6>
+                  </a>
+                <% else %>
+                  <h6 class="video-title-small mb-1"><%= truncate(video[:title], length: 45) %></h6>
+                <% end %>
+                <div class="video-stats-small">
+                  <small class="text-muted d-flex flex-wrap gap-2">
+                    <span><i class="fas fa-eye"></i> <%= number_with_delimiter(video[:views]) %></span>
+                    <% if video[:likes] > 0 %>
+                      <span><i class="fas fa-thumbs-up"></i> <%= number_with_delimiter(video[:likes]) %></span>
+                    <% end %>
+                    <% if video[:comments] > 0 %>
+                      <span><i class="fas fa-comment"></i> <%= number_with_delimiter(video[:comments]) %></span>
+                    <% end %>
+                  </small>
+                  <small class="text-muted d-block mt-1">
+                    <i class="fab fa-<%= video[:platform] %>"></i> 
+                    <%= video[:platform].capitalize %>
+                    <% if video[:source] == 'analytics_api' %>
+                      <span class="badge bg-success ms-1" style="font-size: 0.6rem;">Enhanced</span>
+                    <% end %>
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+        
+        <!-- View All Videos Link -->
+        <div class="text-center mt-3">
+          <% 
+            # Determine the correct videos link based on context
+            if defined?(@selected_platform) && @selected_platform.present?
+              # User is viewing a specific platform dashboard
+              videos_link = videos_path(platform: @selected_platform)
+              link_text = "View All #{@selected_platform.capitalize} Videos"
+            else
+              # User is viewing all platforms dashboard
+              videos_link = videos_path
+              link_text = "View All Videos"
+            end
+          %>
+          <a href="<%= videos_link %>" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-video me-1"></i>
+            <%= link_text %>
+          </a>
+        </div>
+      <% else %>
+        <div class="text-center py-3">
+          <i class="fas fa-video text-muted mb-2" style="font-size: 2rem;"></i>
+          <p class="text-muted mb-1">No videos found</p>
+          <small class="text-muted">Videos will appear here once your accounts are synced</small>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<% content_for :page_scripts do %>
+  <script>
+    // Use a unique namespace to avoid conflicts
+    window.TikTokStudio = window.TikTokStudio || {};
+    
+    function initializeRealtimeStats() {
+      // Realtime Views Chart (48-hour bar chart)
+      const realtimeCanvas = document.getElementById('realtimeViewsChart');
+      if (realtimeCanvas && typeof Chart !== 'undefined') {
+        // Destroy any existing chart instance
+        if (window.TikTokStudio.realtimeChart) {
+          window.TikTokStudio.realtimeChart.destroy();
+          window.TikTokStudio.realtimeChart = null;
+        }
+        
+        // Also check Chart.js registry for existing charts
+        const existingChart = Chart.getChart(realtimeCanvas);
+        if (existingChart) {
+          existingChart.destroy();
+        }
+        
+        try {
+          const realtimeCtx = realtimeCanvas.getContext('2d');
+          if (realtimeCtx) {
+            window.TikTokStudio.realtimeChart = new Chart(realtimeCtx, {
+              type: 'bar',
+              data: {
+                labels: Array.from({length: 48}, (_, i) => `${i}h`),
+                datasets: [{
+                  label: 'Views',
+                  data: Array.from({length: 48}, () => Math.floor(Math.random() * 1000)),
+                  backgroundColor: '#007bff',
+                  borderRadius: 2
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: false
+                  }
+                },
+                scales: {
+                  x: {
+                    display: false
+                  },
+                  y: {
+                    display: false
+                  }
+                }
+              }
+            });
+          }
+        } catch (error) {
+          console.warn('Could not initialize realtime chart:', error);
+        }
+      }
+      
+      // Platform row click
+      document.querySelectorAll('.platform-row').forEach(row => {
+        row.addEventListener('click', function() {
+          const platform = this.getAttribute('data-platform');
+          console.log('Selected platform:', platform);
+        });
+      });
+    }
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeRealtimeStats);
+    } else {
+      initializeRealtimeStats();
+    }
+    
+    // Also initialize on Turbo page loads (for Rails with Turbo)
+    document.addEventListener('turbo:load', initializeRealtimeStats);
+  </script>
+<% end %>

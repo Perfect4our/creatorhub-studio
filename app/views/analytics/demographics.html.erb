@@ -1,0 +1,403 @@
+<%= render "shared/navbar" %>
+
+<div class="container-fluid p-0">
+  <div class="row g-0">
+    <!-- Sidebar -->
+    <div class="col-md-2 d-md-block bg-light sidebar">
+      <div class="sidebar-sticky">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="<%= dashboard_path %>">
+              <i class="fas fa-tachometer-alt"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<%= subscriptions_path %>">
+              <i class="fas fa-link"></i>
+              Linked Accounts
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<%= videos_path %>">
+              <i class="fas fa-video"></i>
+              Videos
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#">
+              <i class="fas fa-chart-bar"></i>
+              Analytics
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fas fa-dollar-sign"></i>
+              Revenue
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fas fa-cog"></i>
+              Settings
+            </a>
+          </li>
+          
+          <!-- Platform Selector for Sidebar -->
+          <li class="nav-item mt-4">
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span>Platforms</span>
+            </h6>
+          </li>
+          
+          <!-- All Platforms option -->
+          <li class="nav-item">
+            <a class="nav-link <%= @selected_platform == 'all' ? 'active' : '' %>" href="<%= analytics_demographics_path(platform: 'all') %>">
+              <i class="fas fa-layer-group"></i>
+              All Platforms
+            </a>
+          </li>
+          
+          <!-- Individual Platform Links -->
+          <% @available_platforms.each do |platform| %>
+            <li class="nav-item">
+              <a class="nav-link <%= @selected_platform == platform ? 'active' : '' %>" href="<%= analytics_demographics_path(platform: platform) %>">
+                <% case platform %>
+                <% when 'tiktok' %>
+                  <i class="fab fa-tiktok"></i>
+                <% when 'youtube' %>
+                  <i class="fab fa-youtube"></i>
+                <% when 'instagram' %>
+                  <i class="fab fa-instagram"></i>
+                <% when 'facebook' %>
+                  <i class="fab fa-facebook"></i>
+                <% when 'twitter' %>
+                  <i class="fab fa-twitter"></i>
+                <% when 'linkedin' %>
+                  <i class="fab fa-linkedin"></i>
+                <% when 'twitch' %>
+                  <i class="fab fa-twitch"></i>
+                <% else %>
+                  <i class="fas fa-video"></i>
+                <% end %>
+                <%= platform&.capitalize || 'Unknown' %>
+              </a>
+            </li>
+          <% end %>
+          
+          <!-- Show placeholder platforms if no subscriptions -->
+          <% if @available_platforms.empty? %>
+            <li class="nav-item">
+              <a class="nav-link disabled text-muted" href="#">
+                <i class="fab fa-tiktok"></i>
+                TikTok
+                <small class="d-block">Not connected</small>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled text-muted" href="#">
+                <i class="fab fa-youtube"></i>
+                YouTube
+                <small class="d-block">Not connected</small>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled text-muted" href="#">
+                <i class="fab fa-instagram"></i>
+                Instagram
+                <small class="d-block">Not connected</small>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled text-muted" href="#">
+                <i class="fab fa-facebook"></i>
+                Facebook
+                <small class="d-block">Not connected</small>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled text-muted" href="#">
+                <i class="fab fa-twitter"></i>
+                Twitter
+                <small class="d-block">Not connected</small>
+              </a>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Main content -->
+    <div class="col-md-10 main-content" data-controller="demographics">
+      <div class="notification-container" id="notificationContainer"></div>
+      
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Audience Demographics</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+              <i class="fas fa-share-alt me-1"></i> Share
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+              <i class="fas fa-download me-1"></i> Export
+            </button>
+          </div>
+          <div class="dropdown period-selector">
+            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" id="periodDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-calendar me-1"></i>
+              <span id="selectedPeriodText">Last 30 Days</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="periodDropdown">
+              <li><button class="dropdown-item active" data-period="30" type="button">Last 30 Days</button></li>
+              <li><button class="dropdown-item" data-period="90" type="button">Last 90 Days</button></li>
+              <li><button class="dropdown-item" data-period="180" type="button">Last 180 Days</button></li>
+              <li><button class="dropdown-item" data-period="365" type="button">Last 365 Days</button></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><button class="dropdown-item" data-period="custom" type="button">Custom Range</button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Platform selector -->
+      <div class="platform-selector mb-4" data-controller="platform">
+        <ul class="nav" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link <%= 'active' if @selected_platform == 'all' %>" 
+               href="<%= analytics_demographics_path(platform: 'all') %>" role="tab">
+              <i class="fas fa-layer-group"></i>
+              <span class="platform-name">All Platforms</span>
+            </a>
+          </li>
+          <% @available_platforms.each do |platform| %>
+            <li class="nav-item platform-<%= platform %>">
+              <a class="nav-link <%= 'active' if @selected_platform == platform %>" 
+                 href="<%= analytics_demographics_path(platform: platform) %>" role="tab">
+                <i class="fab fa-<%= platform %>"></i>
+                <span class="platform-name"><%= platform.capitalize %></span>
+              </a>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+      
+      <!-- Platform content -->
+      <div class="tab-content">
+        <% if @platform_analytics.any? %>
+          <% if @selected_platform == 'all' %>
+            <!-- All Platforms View -->
+            <div class="row">
+              <% @platform_analytics.each do |platform, data| %>
+                <div class="col-12 mb-4">
+                  <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                      <h5 class="mb-0">
+                        <i class="fab fa-<%= platform %> me-2"></i>
+                        <%= platform.capitalize %> Analytics
+                      </h5>
+                      <% if data[:has_real_data] %>
+                        <span class="badge bg-success">Live Data</span>
+                      <% else %>
+                        <span class="badge bg-warning">Coming Soon</span>
+                      <% end %>
+                    </div>
+                    <div class="card-body">
+                      <% if data[:has_real_data] %>
+                        <p class="text-success">
+                          <i class="fas fa-check-circle me-1"></i>
+                          Real analytics data available
+                        </p>
+                      <% else %>
+                        <div class="text-center py-4">
+                          <i class="fas fa-chart-line text-muted mb-3" style="font-size: 2rem;"></i>
+                          <h6 class="text-muted">Advanced Analytics</h6>
+                          <p class="text-muted small mb-0"><%= data[:error] %></p>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <!-- Single Platform View -->
+            <% platform_data = @platform_analytics[@selected_platform] %>
+            <% if platform_data %>
+              <% if platform_data[:has_real_data] %>
+                <!-- Real data charts would go here -->
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="card mb-4">
+                      <div class="card-header">
+                        <h5 class="mb-0">Age Distribution</h5>
+                        <span class="badge bg-success">Live Data</span>
+                      </div>
+                      <div class="card-body">
+                        <canvas data-demographics-target="ageChart" height="300"></canvas>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card mb-4">
+                      <div class="card-header">
+                        <h5 class="mb-0">Gender Distribution</h5>
+                        <span class="badge bg-success">Live Data</span>
+                      </div>
+                      <div class="card-body">
+                        <canvas data-demographics-target="genderChart" height="300"></canvas>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% else %>
+                <!-- Placeholder content -->
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="card mb-4">
+                      <div class="card-header">
+                        <h5 class="mb-0">Age Distribution</h5>
+                        <span class="badge bg-warning">Coming Soon</span>
+                      </div>
+                      <div class="card-body">
+                        <div class="text-center py-5">
+                          <i class="fas fa-chart-bar text-muted mb-3" style="font-size: 3rem;"></i>
+                          <h6 class="text-muted">Advanced Analytics</h6>
+                          <p class="text-muted small"><%= platform_data[:error] %></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card mb-4">
+                      <div class="card-header">
+                        <h5 class="mb-0">Gender Distribution</h5>
+                        <span class="badge bg-warning">Coming Soon</span>
+                      </div>
+                      <div class="card-body">
+                        <div class="text-center py-5">
+                          <i class="fas fa-chart-pie text-muted mb-3" style="font-size: 3rem;"></i>
+                          <h6 class="text-muted">Advanced Analytics</h6>
+                          <p class="text-muted small"><%= platform_data[:error] %></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% else %>
+          <!-- No platforms connected -->
+          <div class="text-center py-5">
+            <i class="fas fa-chart-line text-muted mb-3" style="font-size: 4rem;"></i>
+            <h4 class="text-muted">No Analytics Available</h4>
+            <p class="text-muted">Connect your social media accounts to see analytics data.</p>
+            <a href="<%= subscriptions_path %>" class="btn btn-primary">Connect Accounts</a>
+          </div>
+        <% end %>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h5 class="mb-0">Geographic Distribution</h5>
+                </div>
+                <div class="card-body">
+                  <canvas data-demographics-target="locationChart" height="300"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h5 class="mb-0">Device Usage</h5>
+                </div>
+                <div class="card-body">
+                  <div class="demographics-grid">
+                    <div class="demographics-item">
+                      <div class="demographics-value">85%</div>
+                      <div class="demographics-label">Mobile</div>
+                    </div>
+                    <div class="demographics-item">
+                      <div class="demographics-value">12%</div>
+                      <div class="demographics-label">Tablet</div>
+                    </div>
+                    <div class="demographics-item">
+                      <div class="demographics-value">3%</div>
+                      <div class="demographics-label">Desktop</div>
+                    </div>
+                    <div class="demographics-item">
+                      <div class="demographics-value">78%</div>
+                      <div class="demographics-label">Android</div>
+                    </div>
+                    <div class="demographics-item">
+                      <div class="demographics-value">22%</div>
+                      <div class="demographics-label">iOS</div>
+                    </div>
+                    <div class="demographics-item">
+                      <div class="demographics-value">92%</div>
+                      <div class="demographics-label">App</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-12">
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h5 class="mb-0">Best Posting Times (Engagement Rate)</h5>
+                </div>
+                <div class="card-body">
+                  <div data-demographics-target="heatmap" class="posting-times-heatmap"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Other platforms -->
+        <div class="tab-pane fade" data-platform="youtube" data-platform-target="platformContent">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Connect your YouTube account to see your audience demographics.
+            <a href="#" class="btn btn-sm btn-outline-primary ms-2">Connect YouTube</a>
+          </div>
+        </div>
+        
+        <div class="tab-pane fade" data-platform="instagram" data-platform-target="platformContent">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Connect your Instagram account to see your audience demographics.
+            <a href="#" class="btn btn-sm btn-outline-primary ms-2">Connect Instagram</a>
+          </div>
+        </div>
+        
+        <div class="tab-pane fade" data-platform="facebook" data-platform-target="platformContent">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Connect your Facebook account to see your audience demographics.
+            <a href="#" class="btn btn-sm btn-outline-primary ms-2">Connect Facebook</a>
+          </div>
+        </div>
+        
+        <div class="tab-pane fade" data-platform="twitter" data-platform-target="platformContent">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Connect your Twitter account to see your audience demographics.
+            <a href="#" class="btn btn-sm btn-outline-primary ms-2">Connect Twitter</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Theme toggle button -->
+<button class="theme-toggle" data-controller="theme" data-action="click->theme#toggleTheme">
+  <i class="fas fa-moon" data-theme-target="themeIcon"></i>
+</button>
+
+<%= render "shared/footer" %>

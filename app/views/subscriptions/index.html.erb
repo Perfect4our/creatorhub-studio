@@ -1,0 +1,256 @@
+<%= render "shared/navbar" %>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-2 d-md-block bg-light sidebar">
+      <div class="sidebar-sticky">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="<%= dashboard_path %>">
+              <i class="fas fa-tachometer-alt"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="<%= subscriptions_path %>">
+              <i class="fas fa-link"></i>
+              Linked Accounts
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<%= videos_path %>">
+              <i class="fas fa-video"></i>
+              Videos
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<%= analytics_demographics_path %>">
+              <i class="fas fa-chart-bar"></i>
+              Analytics
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="fas fa-dollar-sign"></i>
+              Revenue
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<%= settings_path %>">
+              <i class="fas fa-cog"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Main content -->
+    <div class="col-md-10 main-content">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Linked Accounts</h1>
+        <div class="btn-group">
+          <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fab fa-youtube me-2"></i>Connect YouTube
+            </button>
+            <ul class="dropdown-menu">
+              <li>
+                <%= link_to "/auth/youtube", class: "dropdown-item" do %>
+                  <i class="fas fa-play me-2"></i>
+                  <div>
+                    <strong>Basic Connection</strong>
+                    <br><small class="text-muted">Channel info, videos, basic stats</small>
+                  </div>
+                <% end %>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <%= link_to "/auth/youtube?analytics=true", class: "dropdown-item" do %>
+                  <i class="fas fa-chart-line me-2"></i>
+                  <div>
+                    <strong>Analytics API (Advanced)</strong>
+                    <br><small class="text-muted">Real-time data, revenue, demographics</small>
+                    <br><small class="text-warning"><i class="fas fa-exclamation-triangle"></i> Requires Google approval</small>
+                  </div>
+                <% end %>
+              </li>
+            </ul>
+          </div>
+          <%= link_to auth_tiktok_callback_path, class: "btn btn-outline-primary" do %>
+            <i class="fab fa-tiktok me-2"></i>Connect TikTok
+          <% end %>
+        </div>
+      </div>
+      
+      <!-- Subscription Status -->
+      <% if current_user.has_permanent_subscription? %>
+        <div class="alert alert-success mb-4">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-crown me-2"></i>
+            <div>
+              <h5 class="alert-heading mb-1">Premium Access Granted</h5>
+              <p class="mb-0">You have permanent subscription access to all features.</p>
+            </div>
+          </div>
+        </div>
+      <% elsif current_user.subscriptions.where(active: true).exists? %>
+        <div class="alert alert-info mb-4">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle me-2"></i>
+            <div>
+              <h5 class="alert-heading mb-1">Active Subscription</h5>
+              <p class="mb-0">You have <%= pluralize(current_user.subscriptions.where(active: true).count, 'active account') %> connected.</p>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <div class="alert alert-warning mb-4">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <div>
+              <h5 class="alert-heading mb-1">No Active Subscriptions</h5>
+              <p class="mb-0">Connect your social media accounts to access your analytics dashboard.</p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      
+      <% if @subscriptions.any? %>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+          <% @subscriptions.each do |subscription| %>
+            <div class="col">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                      <% case subscription.platform %>
+                      <% when 'youtube' %>
+                        <i class="fab fa-youtube fa-2x text-danger"></i>
+                      <% when 'tiktok' %>
+                        <i class="fab fa-tiktok fa-2x text-dark"></i>
+                      <% when 'instagram' %>
+                        <i class="fab fa-instagram fa-2x text-primary"></i>
+                      <% when 'twitter' %>
+                        <i class="fab fa-twitter fa-2x text-info"></i>
+                      <% when 'facebook' %>
+                        <i class="fab fa-facebook fa-2x text-primary"></i>
+                      <% when 'linkedin' %>
+                        <i class="fab fa-linkedin fa-2x text-primary"></i>
+                      <% when 'twitch' %>
+                        <i class="fab fa-twitch fa-2x text-purple"></i>
+                      <% else %>
+                        <i class="fas fa-video fa-2x text-secondary"></i>
+                      <% end %>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                      <h5 class="card-title mb-0"><%= subscription.display_name %></h5>
+                      <p class="card-text text-muted small">
+                        <%= subscription.platform&.capitalize || 'Unknown' %>
+                        <% if subscription.account_username.present? %>
+                          • <%= subscription.account_username %>
+                        <% end %>
+                      </p>
+                    </div>
+                  </div>
+                  <p class="card-text">
+                    <small class="text-muted">Connected on: <%= subscription.created_at.strftime("%B %d, %Y") %></small>
+                  </p>
+                  <p class="card-text">
+                    <% if subscription.expires_at %>
+                      <small class="text-<%= subscription.token_expired? ? 'danger' : 'success' %>">
+                        Token <%= subscription.token_expired? ? 'expired' : 'expires' %> 
+                        <%= subscription.token_expired? ? 'on' : 'in' %> 
+                        <%= time_ago_in_words(subscription.expires_at) %>
+                        <%= subscription.token_expired? ? 'ago' : 'from now' %>
+                      </small>
+                    <% end %>
+                  </p>
+                  <% if subscription.platform == 'youtube' %>
+                    <p class="card-text">
+                      <% if subscription.scope&.include?('yt-analytics.readonly') %>
+                        <span class="badge bg-success">
+                          <i class="fas fa-chart-line me-1"></i>Analytics API Enabled
+                        </span>
+                      <% else %>
+                        <span class="badge bg-secondary">
+                          <i class="fas fa-play me-1"></i>Basic Connection
+                        </span>
+                      <% end %>
+                    </p>
+                  <% end %>
+                </div>
+                <div class="card-footer bg-transparent d-flex justify-content-between">
+                  <%= link_to dashboard_path(subscription_id: subscription.id), class: "btn btn-sm btn-outline-primary" do %>
+                    <i class="fas fa-chart-line me-1"></i>View Analytics
+                  <% end %>
+                  <%= button_to subscription_path(subscription), method: :delete, 
+                      data: { turbo_confirm: "Are you sure you want to disconnect this #{subscription.platform&.capitalize} account?" },
+                      class: "btn btn-sm btn-outline-danger" do %>
+                    <i class="fas fa-unlink me-1"></i>Disconnect
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center py-5">
+          <div class="mb-4">
+            <i class="fas fa-plug fa-4x text-muted mb-3"></i>
+            <h4>No Accounts Connected</h4>
+            <p class="text-muted">Connect your social media accounts to see your analytics dashboard.</p>
+          </div>
+          
+          <!-- Platform Connection Options -->
+          <div class="row justify-content-center">
+            <div class="col-md-8">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="dropdown w-100">
+                    <button class="btn btn-outline-danger btn-lg w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fab fa-youtube fa-2x d-block mb-2"></i>
+                      Connect YouTube
+                    </button>
+                    <ul class="dropdown-menu w-100">
+                      <li>
+                        <%= link_to "/auth/youtube", class: "dropdown-item text-center py-3" do %>
+                          <i class="fas fa-play me-2"></i>
+                          <div>
+                            <strong>Basic Connection</strong>
+                            <br><small class="text-muted">Channel info, videos, basic stats</small>
+                          </div>
+                        <% end %>
+                      </li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li>
+                        <%= link_to "/auth/youtube?analytics=true", class: "dropdown-item text-center py-3" do %>
+                          <i class="fas fa-chart-line me-2"></i>
+                          <div>
+                            <strong>Analytics API (Advanced)</strong>
+                            <br><small class="text-muted">Real-time data, revenue, demographics</small>
+                            <br><small class="text-warning"><i class="fas fa-exclamation-triangle"></i> Requires Google approval</small>
+                          </div>
+                        <% end %>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <%= link_to auth_tiktok_callback_path, class: "btn btn-outline-dark btn-lg w-100" do %>
+                    <i class="fab fa-tiktok fa-2x d-block mb-2"></i>
+                    Connect TikTok
+                  <% end %>
+                </div>
+              </div>
+              <p class="text-muted mt-3 small">More platforms coming soon: Instagram, Twitter, Facebook, LinkedIn, Twitch</p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%= render "shared/footer" %>

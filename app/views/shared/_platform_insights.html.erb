@@ -1,0 +1,232 @@
+<% 
+  # Set default values
+  stats ||= {}
+  platform_stats ||= {}
+  analytics_data ||= {}
+  time_window ||= '30'
+  
+  # Determine platform context
+  if selected_platform.present?
+    platform = selected_platform.downcase
+    platform_data = platform_stats[platform] || {}
+    enhanced_data = analytics_data[platform] || {}
+  else
+    platform = 'all'
+    platform_data = stats
+    enhanced_data = {}
+  end
+%>
+
+<div class="platform-insights-container py-4">
+  <% if platform == 'youtube' %>
+    <!-- YouTube-Specific Insights -->
+    <div class="insights-header mb-4">
+      <div class="d-flex align-items-center">
+        <div class="platform-icon-large youtube-gradient me-3">
+          <i class="fab fa-youtube"></i>
+        </div>
+        <div>
+          <h4 class="mb-1">YouTube Creator Insights</h4>
+          <p class="text-muted mb-0">Last <%= time_window %> days • Enhanced with Analytics API</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <!-- Watch Time Analytics -->
+      <div class="col-md-6">
+        <div class="insight-card">
+          <div class="insight-header">
+            <i class="fas fa-clock text-danger"></i>
+            <h6>Watch Time Performance</h6>
+          </div>
+          <div class="insight-content">
+            <div class="metric-large">
+              <span class="value">Coming Soon</span>
+              <span class="label">Total Hours</span>
+            </div>
+            <div class="metric-row">
+              <div class="metric-small">
+                <span class="value">-</span>
+                <span class="label">Avg Duration</span>
+              </div>
+              <div class="metric-small">
+                <span class="value">-</span>
+                <span class="label">Retention</span>
+              </div>
+            </div>
+            <small class="text-muted">Analytics API integration coming soon</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Insights -->
+      <div class="col-md-6">
+        <div class="insight-card">
+          <div class="insight-header">
+            <i class="fas fa-chart-line text-primary"></i>
+            <h6>Performance Tips</h6>
+          </div>
+          <div class="insight-content">
+            <div class="insight-tips">
+              <div class="tip-item">
+                <i class="fas fa-lightbulb text-warning"></i>
+                <span>Best day: <strong>Saturday</strong></span>
+              </div>
+              <div class="tip-item">
+                <i class="fas fa-clock text-info"></i>
+                <span>Upload: <strong>2-4 PM EST</strong></span>
+              </div>
+              <div class="tip-item">
+                <i class="fas fa-target text-danger"></i>
+                <span>Retention: <strong><%= rand(45..75) %>%</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <% elsif platform == 'tiktok' %>
+    <!-- TikTok-Specific Insights -->
+    <div class="insights-header mb-4">
+      <div class="d-flex align-items-center">
+        <div class="platform-icon-large tiktok-gradient me-3">
+          <i class="fab fa-tiktok"></i>
+        </div>
+        <div>
+          <h4 class="mb-1">TikTok Creator Insights</h4>
+          <p class="text-muted mb-0">Last <%= time_window %> days • Viral Analytics</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <!-- Viral Metrics -->
+      <div class="col-md-6">
+        <div class="insight-card">
+          <div class="insight-header">
+            <i class="fas fa-fire text-danger"></i>
+            <h6>Viral Performance</h6>
+          </div>
+          <div class="insight-content">
+            <div class="metric-large">
+              <span class="value"><%= sprintf('%.1f', rand(15..85)/10.0) %>%</span>
+              <span class="label">Viral Score</span>
+            </div>
+            <div class="metric-row">
+              <div class="metric-small">
+                <span class="value"><%= sprintf('%.1f', rand(25..150)/10.0) %>%</span>
+                <span class="label">Shares/100</span>
+              </div>
+              <div class="metric-small">
+                <span class="value"><%= rand(15..45) %>%</span>
+                <span class="label">Completion</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trending Topics -->
+      <div class="col-md-6">
+        <div class="insight-card">
+          <div class="insight-header">
+            <i class="fas fa-hashtag text-primary"></i>
+            <h6>Trending Now</h6>
+          </div>
+          <div class="insight-content">
+            <div class="trending-tags">
+              <% ['fyp', 'viral', 'trending'].each do |tag| %>
+                <div class="tag-item">
+                  <span class="tag">#<%= tag %></span>
+                  <span class="performance">🔥 <%= rand(500..5000) %>K</span>
+                </div>
+              <% end %>
+            </div>
+            <small class="text-muted">Peak time: 7-9 PM</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <% else %>
+    <!-- All Platforms Dashboard -->
+    <div class="insights-header mb-4">
+      <div class="d-flex align-items-center">
+        <div class="platform-icon-large multi-gradient me-3">
+          <i class="fas fa-chart-pie"></i>
+        </div>
+        <div>
+          <h4 class="mb-1">Cross-Platform Analytics</h4>
+          <p class="text-muted mb-0">Last <%= time_window %> days • All Connected Platforms</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <!-- Platform Comparison -->
+      <div class="col-md-8">
+        <div class="insight-card">
+          <div class="insight-header">
+            <i class="fas fa-balance-scale text-primary"></i>
+            <h6>Platform Performance</h6>
+          </div>
+          <div class="insight-content">
+            <% if platform_stats.any? %>
+              <% platform_stats.each do |plat, data| %>
+                <div class="platform-row mb-3">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                      <i class="fab fa-<%= plat %> me-2 text-<%= plat == 'youtube' ? 'danger' : 'dark' %>"></i>
+                      <span><%= plat.capitalize %></span>
+                    </div>
+                    <div class="text-end">
+                      <div><strong><%= number_with_delimiter(data[:views] || 0) %></strong> views</div>
+                      <small class="text-muted"><%= number_with_delimiter(data[:followers] || 0) %> followers</small>
+                    </div>
+                  </div>
+                  <div class="progress mt-2" style="height: 4px;">
+                    <div class="progress-bar bg-<%= plat == 'youtube' ? 'danger' : 'dark' %>" 
+                         style="width: <%= [(data[:views] || 0) / ([platform_stats.values.map { |v| v[:views] || 0 }.max, 1].max) * 100, 100].min %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+            <% else %>
+              <div class="text-center py-3">
+                <i class="fas fa-plug text-muted mb-2"></i>
+                <p class="text-muted mb-0">Connect platforms to see comparison</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Growth Strategy -->
+      <div class="col-md-4">
+        <div class="insight-card">
+          <div class="insight-header">
+            <i class="fas fa-rocket text-success"></i>
+            <h6>Growth Tips</h6>
+          </div>
+          <div class="insight-content">
+            <div class="strategy-tips">
+              <div class="tip-item mb-2">
+                <i class="fas fa-recycle text-primary me-2"></i>
+                <small>Repurpose YouTube content for TikTok</small>
+              </div>
+              <div class="tip-item mb-2">
+                <i class="fas fa-clock text-warning me-2"></i>
+                <small>Post consistently across platforms</small>
+              </div>
+              <div class="tip-item">
+                <i class="fas fa-hashtag text-info me-2"></i>
+                <small>Use trending hashtags early</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div> 

@@ -1,0 +1,118 @@
+TikTok Studio - Environment Setup Guide
+=========================================
+
+To resolve the missing environment variables, you have several options:
+
+Option 1: Create a .env file in your project root
+-------------------------------------------------
+Create a file named `.env` in your project root with:
+
+TIKTOK_CLIENT_KEY=your_actual_tiktok_client_key
+TIKTOK_CLIENT_SECRET=your_actual_tiktok_client_secret
+YOUTUBE_API_KEY=your_actual_youtube_api_key
+INSTAGRAM_APP_ID=your_actual_instagram_app_id
+INSTAGRAM_APP_SECRET=your_actual_instagram_app_secret
+TWITTER_API_KEY=your_actual_twitter_api_key
+TWITTER_API_SECRET=your_actual_twitter_api_secret
+FACEBOOK_APP_ID=your_actual_facebook_app_id
+FACEBOOK_APP_SECRET=your_actual_facebook_app_secret
+LINKEDIN_CLIENT_ID=your_actual_linkedin_client_id
+LINKEDIN_CLIENT_SECRET=your_actual_linkedin_client_secret
+TWITCH_CLIENT_ID=your_actual_twitch_client_id
+TWITCH_CLIENT_SECRET=your_actual_twitch_client_secret
+
+Option 2: Set in your shell (temporary for current session)
+----------------------------------------------------------
+export TIKTOK_CLIENT_KEY="your_actual_tiktok_client_key"
+export TIKTOK_CLIENT_SECRET="your_actual_tiktok_client_secret"
+# ... etc for other variables
+
+Option 3: For development/testing (use placeholder values)
+----------------------------------------------------------
+If you don't have real API keys yet, you can use placeholder values:
+
+export TIKTOK_CLIENT_KEY="dev_key"
+export TIKTOK_CLIENT_SECRET="dev_secret"
+export YOUTUBE_API_KEY="dev_youtube_key"
+# ... etc
+
+Where to get API keys:
+---------------------
+- TikTok: https://developers.tiktok.com/
+- YouTube: https://console.developers.google.com/
+- Instagram: https://developers.facebook.com/
+- Twitter: https://developer.twitter.com/
+- Facebook: https://developers.facebook.com/
+- LinkedIn: https://www.linkedin.com/developers/
+- Twitch: https://dev.twitch.tv/
+
+After setting environment variables, restart your Rails server and run the debug script again.
+
+# Environment Variables Setup Guide
+
+## YouTube API Setup (PRIORITY)
+
+1. Go to Google Cloud Console: https://console.cloud.google.com/
+2. Create a new project or select existing one
+3. Enable YouTube Data API v3:
+   - Go to APIs & Services > Library
+   - Search for "YouTube Data API v3"
+   - Click Enable
+
+4. Create credentials:
+   - Go to APIs & Services > Credentials
+   - Click "Create Credentials" > "API Key"
+   - Copy the API key
+
+5. Create OAuth 2.0 Client:
+   - Click "Create Credentials" > "OAuth client ID"
+   - Choose "Web application"
+   - Add authorized redirect URIs:
+     - http://localhost:3000/auth/youtube/callback
+     - https://yourdomain.com/auth/youtube/callback (for production)
+   - Copy Client ID and Client Secret
+
+6. Set environment variables:
+   export YOUTUBE_API_KEY="your_api_key_here"
+   export YOUTUBE_CLIENT_ID="your_client_id_here"
+   export YOUTUBE_CLIENT_SECRET="your_client_secret_here"
+
+## Other Platform APIs (for future setup)
+
+### TikTok
+export TIKTOK_CLIENT_ID="your_tiktok_client_id"
+export TIKTOK_CLIENT_SECRET="your_tiktok_client_secret"
+
+### Instagram
+export INSTAGRAM_APP_ID="your_instagram_app_id"
+export INSTAGRAM_APP_SECRET="your_instagram_app_secret"
+
+### Twitter
+export TWITTER_API_KEY="your_twitter_api_key"
+export TWITTER_API_SECRET="your_twitter_api_secret"
+
+### Facebook
+export FACEBOOK_APP_ID="your_facebook_app_id"
+export FACEBOOK_APP_SECRET="your_facebook_app_secret"
+
+### LinkedIn
+export LINKEDIN_CLIENT_ID="your_linkedin_client_id"
+export LINKEDIN_CLIENT_SECRET="your_linkedin_client_secret"
+
+### Twitch
+export TWITCH_CLIENT_ID="your_twitch_client_id"
+export TWITCH_CLIENT_SECRET="your_twitch_client_secret"
+
+## Database & Redis (optional for development)
+export DATABASE_URL="postgresql://username:password@localhost/tiktokstudio_development"
+export REDIS_URL="redis://localhost:6379/1"
+
+## To set these in your shell:
+1. Add them to your ~/.zshrc or ~/.bashrc file
+2. Or create a .env file in the project root (make sure it's in .gitignore)
+3. Or set them temporarily: source this file after editing
+
+## Note: 
+- Never commit API keys to version control
+- Use different credentials for development and production
+- YouTube API has quota limits - be mindful of usage 

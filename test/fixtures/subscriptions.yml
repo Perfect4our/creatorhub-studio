@@ -1,0 +1,33 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  tiktok_uid: tiktok_uid_1
+  auth_token: auth_token_1
+  platform: tiktok
+  active: true
+  expires_at: <%= 30.days.from_now %>
+
+two:
+  user: two
+  tiktok_uid: youtube_uid_1
+  auth_token: auth_token_2
+  platform: youtube
+  active: true
+  expires_at: <%= 30.days.from_now %>
+
+three:
+  user: one
+  tiktok_uid: instagram_uid_1
+  auth_token: auth_token_3
+  platform: instagram
+  active: true
+  expires_at: <%= 30.days.from_now %>
+
+inactive:
+  user: two
+  tiktok_uid: inactive_uid_1
+  auth_token: auth_token_4
+  platform: twitter
+  active: false
+  expires_at: <%= 30.days.from_now %>

@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  subscription: one
+  follower_count: 1
+  total_views: 1
+  total_likes: 1
+  revenue_cents: 1
+  snapshot_date: 2025-06-19
+
+two:
+  subscription: two
+  follower_count: 1
+  total_views: 1
+  total_likes: 1
+  revenue_cents: 1
+  snapshot_date: 2025-06-19

@@ -1,0 +1,260 @@
+<div class="row mt-4">
+  <div class="col-md-4">
+    <div class="card stat-card">
+      <div class="card-body text-center">
+        <h5 class="card-title">Views</h5>
+        <h2 class="card-text" id="total-views"><%= number_with_delimiter(stats[:views]) %></h2>
+        <p class="text-muted">Total video views</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card">
+      <div class="card-body text-center">
+        <h5 class="card-title">Followers</h5>
+        <h2 class="card-text" id="total-followers"><%= number_with_delimiter(stats[:followers]) %></h2>
+        <p class="text-muted">Total followers</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card">
+      <div class="card-body text-center">
+        <h5 class="card-title">Revenue</h5>
+        <h2 class="card-text" id="total-revenue">$<%= number_with_delimiter(stats[:revenue]) %></h2>
+        <p class="text-muted">Total earnings</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if defined?(@platform_stats) && @platform_stats.any? %>
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Platform Breakdown</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Platform</th>
+                  <th>Views</th>
+                  <th>Followers</th>
+                  <th>Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @platform_stats.each do |platform, data| %>
+                  <tr class="platform-row" data-platform="<%= platform %>">
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="platform-icon <%= platform&.downcase %>-icon me-2"></div>
+                        <%= platform&.capitalize || 'Unknown' %>
+                      </div>
+                    </td>
+                    <td><%= number_with_delimiter(data[:views]) %></td>
+                    <td><%= number_with_delimiter(data[:followers]) %></td>
+                    <td>$<%= number_with_delimiter(data[:revenue]) %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Performance Over Time</h5>
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-sm btn-outline-secondary active" data-period="48">48 Hours</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-period="7">7 Days</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-period="30">30 Days</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="performanceChart" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if defined?(@videos) && @videos.any? %>
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Recent Videos</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Thumbnail</th>
+                  <th>Title</th>
+                  <th>Views</th>
+                  <th>Likes</th>
+                  <th>Comments</th>
+                  <th>Engagement</th>
+                  <th>Posted</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @videos.each do |video| %>
+                  <tr>
+                    <td>
+                      <img src="<%= video.thumbnail_url %>" alt="Video thumbnail" width="80" class="img-thumbnail video-thumbnail">
+                    </td>
+                    <td><%= video.title %></td>
+                    <td><%= number_with_delimiter(video.view_count) %></td>
+                    <td><%= number_with_delimiter(video.like_count) %></td>
+                    <td><%= number_with_delimiter(video.comment_count) %></td>
+                    <td><%= video.engagement_rate %>%</td>
+                    <td><%= time_ago_in_words(video.created_at_tiktok) %> ago</td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% content_for :page_scripts do %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Performance chart
+      try {
+        const ctx = document.getElementById('performanceChart')?.getContext('2d');
+        if (!ctx) {
+          console.warn('Performance chart canvas not found');
+          return;
+        }
+      
+      // Prepare datasets from all platforms
+      const datasets = [];
+      const colors = {
+        tiktok: { border: 'rgba(238, 29, 82, 1)', background: 'rgba(238, 29, 82, 0.2)' },
+        youtube: { border: 'rgba(255, 0, 0, 1)', background: 'rgba(255, 0, 0, 0.2)' },
+        instagram: { border: 'rgba(131, 58, 180, 1)', background: 'rgba(131, 58, 180, 0.2)' },
+        twitter: { border: 'rgba(29, 161, 242, 1)', background: 'rgba(29, 161, 242, 0.2)' },
+        facebook: { border: 'rgba(66, 103, 178, 1)', background: 'rgba(66, 103, 178, 0.2)' },
+        linkedin: { border: 'rgba(0, 119, 181, 1)', background: 'rgba(0, 119, 181, 0.2)' },
+        twitch: { border: 'rgba(100, 65, 165, 1)', background: 'rgba(100, 65, 165, 0.2)' }
+      };
+      
+      <% if defined?(@chart_data) && @chart_data.any? %>
+        // Combine all dates from all platforms
+        const allDates = [];
+        <% @chart_data.each do |platform, data| %>
+          <% if data[:dates].present? %>
+            allDates.push(...<%= raw data[:dates].to_json %>);
+          <% end %>
+        <% end %>
+        
+        // Get unique dates and sort them
+        const uniqueDates = [...new Set(allDates)].sort();
+        
+        // Create view datasets for each platform
+        <% @chart_data.each do |platform, data| %>
+          <% if data[:views].present? && data[:dates].present? %>
+            // Map data to the unique dates array (fill gaps with null)
+            const viewData = uniqueDates.map(date => {
+              const index = <%= raw data[:dates].to_json %>.indexOf(date);
+              return index !== -1 ? <%= raw data[:views].to_json %>[index] : null;
+            });
+            
+            datasets.push({
+              label: '<%= platform.capitalize %> Views',
+              data: viewData,
+              borderColor: colors['<%= platform %>']?.border || 'rgba(75, 192, 192, 1)',
+              backgroundColor: colors['<%= platform %>']?.background || 'rgba(75, 192, 192, 0.2)',
+              tension: 0.4,
+              fill: true
+            });
+          <% end %>
+        <% end %>
+        
+        const chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: uniqueDates,
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            interaction: {
+              mode: 'index',
+              intersect: false,
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Views'
+                }
+              }
+            }
+          }
+        });
+      <% else %>
+        // No data available
+        const chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: []
+          },
+          options: {
+            responsive: true
+          }
+        });
+      <% end %>
+      
+      } catch (error) {
+        console.error('Error initializing performance chart:', error);
+        // Display a fallback message
+        const chartContainer = document.querySelector('.chart-container');
+        if (chartContainer) {
+          chartContainer.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-chart-line fa-2x mb-2"></i><br>Chart temporarily unavailable</div>';
+        }
+      }
+      
+      // Period buttons
+      document.querySelectorAll('[data-period]').forEach(button => {
+        button.addEventListener('click', function() {
+          document.querySelectorAll('[data-period]').forEach(btn => btn.classList.remove('active'));
+          this.classList.add('active');
+          
+          const period = this.getAttribute('data-period');
+          // In a real app, this would fetch data for the selected period
+          // For now, we'll just log it
+          console.log('Selected period:', period);
+        });
+      });
+      
+      // Platform row click
+      document.querySelectorAll('.platform-row').forEach(row => {
+        row.addEventListener('click', function() {
+          const platform = this.getAttribute('data-platform');
+          // In a real app, this would navigate to platform-specific details
+          console.log('Selected platform:', platform);
+        });
+      });
+    });
+  </script>
+<% end %> 
