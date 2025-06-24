@@ -1,38 +1,58 @@
 # Load the Rails application.
 require_relative "application"
 
-# Bulletproof credential protection for production deployment
-# This prevents MessageEncryptor errors during Rails boot
-if Rails.env.production?
-  begin
-    # Override Rails.application.credentials before it's accessed
-    Rails.application.define_singleton_method(:credentials) do
-      @safe_credentials ||= begin
-        # Try normal credentials first
-        ActiveSupport::EncryptedConfiguration.new(
-          config_path: Rails.root.join("config", "credentials.yml.enc"),
-          key_path: Rails.root.join("config", "master.key"),
-          env_key: "RAILS_MASTER_KEY",
-          raise_if_missing_key: false
-        )
-      rescue ActiveSupport::MessageEncryptor::InvalidMessage, 
-             Errno::ENOENT,
-             ActiveSupport::EncryptedFile::MissingKeyError => e
-        puts "🔧 Credentials failed during boot: #{e.class}"
-        puts "✅ Using environment variables instead"
-        
-        # Return empty credentials object that responds to all methods
-        ActiveSupport::OrderedOptions.new.tap do |safe_creds|
-          # Make it respond to dig and any other credential access
-          safe_creds.define_singleton_method(:dig) { |*keys| nil }
-          safe_creds.define_singleton_method(:youtube) { ActiveSupport::OrderedOptions.new }
-          safe_creds.define_singleton_method(:tiktok) { ActiveSupport::OrderedOptions.new }
-          safe_creds.define_singleton_method(:method_missing) { |*args| nil }
+# NUCLEAR OPTION: Completely disable Rails encrypted credentials in production
+if ENV['RAILS_ENV'] == 'production' || ENV['RACK_ENV'] == 'production'
+  puts "🚫 PRODUCTION: Disabling Rails encrypted credentials entirely"
+  
+  # Override ActiveSupport::EncryptedConfiguration to never decrypt
+  ActiveSupport::EncryptedConfiguration.class_eval do
+    def read
+      puts "📝 Intercepted credentials read - returning empty config"
+      "{}"
+    end
+    
+    def config
+      @config ||= ActiveSupport::OrderedOptions.new
+    end
+  end
+  
+  # Override Rails.application.credentials at the class level
+  Rails.singleton_class.class_eval do
+    def application
+      @application ||= super.tap do |app|
+        app.define_singleton_method(:credentials) do
+          @production_safe_credentials ||= begin
+            puts "🔑 Using production environment variable credentials"
+            safe_creds = Object.new
+            
+            # YouTube credentials
+            safe_creds.define_singleton_method(:youtube) do
+              yt = Object.new
+              yt.define_singleton_method(:api_key) { ENV['YOUTUBE_API_KEY'] }
+              yt.define_singleton_method(:client_id) { ENV['YOUTUBE_CLIENT_ID'] }
+              yt.define_singleton_method(:client_secret) { ENV['YOUTUBE_CLIENT_SECRET'] }
+              yt
+            end
+            
+            # TikTok credentials
+            safe_creds.define_singleton_method(:tiktok) do
+              tt = Object.new
+              tt.define_singleton_method(:client_id) { ENV['TIKTOK_CLIENT_ID'] }
+              tt.define_singleton_method(:client_secret) { ENV['TIKTOK_CLIENT_SECRET'] }
+              tt
+            end
+            
+            # Safe methods
+            safe_creds.define_singleton_method(:dig) { |*args| nil }
+            safe_creds.define_singleton_method(:method_missing) { |*args| nil }
+            safe_creds.define_singleton_method(:respond_to_missing?) { |*args| true }
+            
+            safe_creds
+          end
         end
       end
     end
-  rescue => e
-    puts "⚠️  Environment credential setup error: #{e.message}"
   end
 end
 
