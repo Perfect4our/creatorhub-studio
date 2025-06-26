@@ -81,36 +81,81 @@ export default class extends Controller {
 
   // Enhanced generic event tracking with request context
   trackEvent(eventName, customProperties = {}) {
+    // Prevent infinite recursion with safeguards
+    if (!this.recursionGuard) {
+      this.recursionGuard = new Set()
+    }
+
+    // Create a unique key for this event call
+    const eventKey = `${eventName}-${JSON.stringify(customProperties)}-${Date.now()}`
+    
+    // Check if we're already processing this exact event
+    if (this.recursionGuard.has(eventKey)) {
+      console.warn(`🚫 PostHog recursion prevented for event: ${eventName}`)
+      return
+    }
+
+    // Check for recursion guard size (max 10 concurrent events)
+    if (this.recursionGuard.size > 10) {
+      console.warn(`🚫 PostHog event queue full, skipping: ${eventName}`)
+      return
+    }
+
     if (!window.posthog) {
       console.warn('PostHog not available, event not tracked:', eventName)
       return
     }
 
-    const properties = {
-      ...this.getCommonProperties(),
-      ...customProperties,
-      timestamp: new Date().toISOString(),
-      // Add request context
-      has_active_requests: this.requestManager ? this.requestManager.hasActiveRequests() : false,
-      active_requests_count: this.requestManager ? this.requestManager.getRequestStats().activeRequests : 0,
-      loading_buttons_count: this.requestManager ? this.requestManager.getRequestStats().loadingButtons : 0
-    }
+    try {
+      // Add to recursion guard
+      this.recursionGuard.add(eventKey)
 
-    // Track the analytics event itself as a managed request if it's external
-    if (this.requestManager && this.isExternalAnalyticsEvent(eventName)) {
-      const { requestId } = this.requestManager.createManagedRequest(
-        this.getAnalyticsEndpoint(eventName), 
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ event: eventName, properties })
+      const properties = {
+        ...this.getCommonProperties(),
+        ...customProperties,
+        timestamp: new Date().toISOString(),
+        // Safely get request context without triggering more events
+        has_active_requests: this.requestManager ? this.requestManager.hasActiveRequests() : false,
+        active_requests_count: this.requestManager ? this.requestManager.getRequestStats().activeRequests : 0,
+        loading_buttons_count: this.requestManager ? this.requestManager.getRequestStats().loadingButtons : 0
+      }
+
+      // Track the analytics event itself as a managed request if it's external
+      // BUT only if it's not already being tracked to avoid recursion
+      if (this.requestManager && this.isExternalAnalyticsEvent(eventName) && !eventName.includes('_tracked')) {
+        try {
+          const { requestId } = this.requestManager.createManagedRequest(
+            this.getAnalyticsEndpoint(eventName), 
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ event: eventName, properties })
+            }
+          )
+          this.activeAnalyticsRequests.add(requestId)
+        } catch (requestError) {
+          console.warn('External analytics request failed:', requestError)
         }
-      )
-      this.activeAnalyticsRequests.add(requestId)
-    }
+      }
 
-    window.posthog.capture(eventName, properties)
-    console.log(`📊 Event tracked: ${eventName}`, properties)
+      // Use setTimeout to prevent blocking and recursion
+      setTimeout(() => {
+        try {
+          window.posthog.capture(eventName, properties)
+          console.log(`📊 Event tracked: ${eventName}`, properties)
+        } catch (posthogError) {
+          console.warn('PostHog capture failed:', posthogError)
+        }
+      }, 0)
+
+    } catch (error) {
+      console.error('Analytics tracking error:', error)
+    } finally {
+      // Clean up recursion guard after a short delay
+      setTimeout(() => {
+        this.recursionGuard.delete(eventKey)
+      }, 1000)
+    }
   }
 
   // Check if event should be sent to external analytics

@@ -382,13 +382,44 @@ export default class extends Controller {
 
   resetAllButtonStates() {
     console.log("🔄 Resetting all button states")
-    this.buttonStates.forEach((state, elementId) => {
-      const element = document.getElementById(elementId) || document.querySelector(`[data-id="${elementId}"]`)
-      if (element) {
-        this.setButtonLoading(element, false)
-      }
-    })
-    this.buttonStates.clear()
+    
+    // Prevent infinite recursion
+    if (this.resettingStates) {
+      console.warn("🚫 Button state reset already in progress")
+      return
+    }
+    
+    this.resettingStates = true
+    
+    try {
+      // Create a copy of button states to iterate over
+      const statesToReset = new Map(this.buttonStates)
+      
+      statesToReset.forEach((state, elementId) => {
+        try {
+          const element = document.getElementById(elementId) || document.querySelector(`[data-id="${elementId}"]`)
+          if (element) {
+            // Directly reset without calling setButtonLoading to avoid recursion
+            element.disabled = state.originalDisabled || false
+            element.style.pointerEvents = ''
+            element.classList.remove('loading', 'disabled')
+            if (state.originalText) {
+              element.textContent = state.originalText
+            }
+          }
+        } catch (error) {
+          console.warn(`Error resetting button ${elementId}:`, error)
+        }
+      })
+      
+      this.buttonStates.clear()
+      console.log("✅ All button states reset")
+      
+    } catch (error) {
+      console.error("Error in resetAllButtonStates:", error)
+    } finally {
+      this.resettingStates = false
+    }
   }
 
   // === UTILITY METHODS ===

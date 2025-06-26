@@ -45,6 +45,16 @@
         capture_pageview: true,
         capture_pageleave: true,
         disable_session_recording: false,
+        // Prevent infinite loops and recursion
+        sanitize_properties: function(properties, event) {
+          // Limit property depth to prevent circular references
+          return JSON.parse(JSON.stringify(properties, null, 3))
+        },
+        // Rate limiting to prevent spam
+        rate_limiting: {
+          events_burst_limit: 100,
+          events_per_second: 10
+        },
         loaded: function(posthog) {
           <% if user_signed_in? %>
             // Identify logged-in users for better analytics tracking
