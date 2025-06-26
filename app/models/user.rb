@@ -26,6 +26,9 @@ class User < ApplicationRecord
   
   # Stripe subscription methods
   def stripe_subscribed?
+    # Check if the fields exist in the database first
+    return false unless respond_to?(:subscription_status) && respond_to?(:current_period_end)
+    
     subscription_status.present? && subscription_status == 'active' && current_period_end&.future?
   end
   
