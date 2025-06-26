@@ -8,32 +8,58 @@ Rails.application.configure do
   config.content_security_policy do |policy|
     policy.default_src :self, :https
     policy.font_src    :self, :https, :data
-    policy.img_src     :self, :https, :data
+    policy.img_src     :self, :https, :data, :blob
     policy.object_src  :none
-    policy.script_src  :self, :https, :unsafe_inline, :unsafe_eval, 
-                      "https://cdn.jsdelivr.net", 
+    
+    # Production-ready script sources with specific PostHog domains
+    policy.script_src  :self, :https, 
+                      "'unsafe-inline'", 
+                      "'unsafe-eval'",
+                      "https://cdn.jsdelivr.net",
                       "https://d3js.org", 
                       "https://cdnjs.cloudflare.com",
                       "https://us-assets.i.posthog.com",
                       "https://app-static.eu.posthog.com",
-                      "*.posthog.com"
-    policy.style_src   :self, :https, :unsafe_inline,
+                      "https://eu-assets.i.posthog.com"
+    
+    # Style sources for external CSS libraries
+    policy.style_src   :self, :https, 
+                      "'unsafe-inline'",
                       "https://cdn.jsdelivr.net",
                       "https://cdnjs.cloudflare.com"
+    
+    # Connection sources for API calls and analytics
     policy.connect_src :self, :https,
                       "https://us.i.posthog.com",
+                      "https://eu.i.posthog.com", 
                       "https://app.posthog.com",
-                      "*.posthog.com"
+                      "wss://localhost:*",
+                      "ws://localhost:*"
     
-    # Specify URI for violation reports
-    # policy.report_uri "/csp-violation-report-endpoint"
+    # Frame sources for embedded content
+    policy.frame_src   :self, :https
+    
+    # Media sources for video/audio
+    policy.media_src   :self, :https, :data, :blob
+    
+    # Worker sources for service workers
+    policy.worker_src  :self, :blob
+    
+    # Manifest source for PWA
+    policy.manifest_src :self
+    
+    # Specify URI for violation reports in production
+    if Rails.env.production?
+      policy.report_uri "/csp-violation-report-endpoint"
+    end
   end
 
-  # Generate session nonces for permitted importmap, inline scripts, and inline styles.
-  config.content_security_policy_nonce_generator = ->(request) { request.session.id.to_s }
+  # Use nonces for inline scripts in production for better security
+  config.content_security_policy_nonce_generator = ->(request) { 
+    SecureRandom.base64(32) 
+  }
   config.content_security_policy_nonce_directives = %w(script-src style-src)
 
-  # Report violations without enforcing the policy.
-  # In development, we can be more permissive to avoid CORS issues
+  # Only report violations in development, enforce in production
   config.content_security_policy_report_only = Rails.env.development?
 end

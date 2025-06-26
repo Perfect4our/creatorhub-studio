@@ -44,6 +44,9 @@ Rails.application.routes.draw do
   # Stripe webhooks
   post "/webhooks/stripe", to: "stripe_webhooks#create"
   
+  # CSP violation reporting for production security monitoring
+  post "/csp-violation-report-endpoint", to: "application#csp_violation_report"
+  
   # OAuth start routes (redirect to provider)
   get "/auth/youtube", to: "subscriptions#youtube_oauth_start", as: :auth_youtube
   
