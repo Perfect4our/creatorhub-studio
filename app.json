@@ -17,15 +17,15 @@
     },
     "YOUTUBE_API_KEY": {
       "description": "YouTube Data API key",
-      "value": "***REMOVED***"
+      "value": "YOUR_YOUTUBE_API_KEY_HERE"
     },
     "YOUTUBE_CLIENT_ID": {
       "description": "YouTube OAuth client ID",
-      "value": "***REMOVED***"
+      "value": "YOUR_YOUTUBE_CLIENT_ID_HERE"
     },
     "YOUTUBE_CLIENT_SECRET": {
       "description": "YouTube OAuth client secret",
-      "value": "***REMOVED***"
+      "value": "YOUR_YOUTUBE_CLIENT_SECRET_HERE"
     },
     "RAILS_FORCE_SSL": "true"
   },
