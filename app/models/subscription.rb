@@ -13,7 +13,6 @@ class Subscription < ApplicationRecord
   scope :active, -> { where(active: true) }
   scope :by_platform, ->(platform) { where(platform: platform) }
   
-  before_validation :set_default_platform
   before_validation :set_channel_id_if_missing
   
   def display_name
@@ -159,9 +158,7 @@ class Subscription < ApplicationRecord
     views * rand(0.001..0.005)
   end
   
-  def set_default_platform
-    self.platform ||= 'unknown'
-  end
+
   
   def set_channel_id_if_missing
     if channel_id.blank?

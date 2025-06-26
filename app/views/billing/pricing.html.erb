@@ -1,0 +1,634 @@
+<div class="pricing-page">
+  <div class="container py-5">
+    <div class="text-center mb-5">
+      <h1 class="display-4 fw-bold gradient-text">Choose Your Plan</h1>
+      <p class="lead text-muted">Unlock the full power of CreatorHub Studio</p>
+    </div>
+    
+    <% if @stripe_publishable_key&.include?('placeholder') %>
+      <div class="alert alert-warning mb-4">
+        <h6 class="alert-heading">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Stripe Setup Required
+        </h6>
+        <p class="mb-2">Stripe is not fully configured yet. To enable billing:</p>
+        <ol class="mb-2">
+          <li>Set up your Stripe account</li>
+          <li>Add your API keys to environment variables or Rails credentials</li>
+          <li>Create products and pricing in your Stripe dashboard</li>
+        </ol>
+        <p class="mb-0">
+          <small>See <code>STRIPE_SETUP_GUIDE.md</code> for detailed instructions.</small>
+        </p>
+      </div>
+    <% end %>
+    
+    <!-- Development Bypass Section -->
+    <% if Rails.env.development? %>
+      <div class="card mb-4" style="border: 2px dashed #17a2b8; background: #f1f9ff;">
+        <div class="card-body text-center">
+          <h6 class="text-info mb-3">
+            <i class="fas fa-code me-2"></i>
+            Development Bypass
+          </h6>
+          <p class="text-muted mb-3">For testing purposes, enter the bypass code to simulate a subscription:</p>
+          
+          <div class="row justify-content-center">
+            <div class="col-md-6">
+              <div class="input-group">
+                <input type="text" 
+                       class="form-control" 
+                       id="bypassCode" 
+                       placeholder="Enter bypass code..."
+                       style="border-radius: 8px 0 0 8px;">
+                <button class="btn btn-info" 
+                        type="button" 
+                        id="applyBypass"
+                        style="border-radius: 0 8px 8px 0;">
+                  <i class="fas fa-unlock me-1"></i>
+                  Apply
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    
+    <div class="row justify-content-center">
+      <!-- Monthly Plan -->
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="pricing-card h-100">
+          <div class="card-header text-center">
+            <h3 class="plan-name">Monthly Pro</h3>
+            <div class="price">
+              <span class="currency">$</span>
+              <span class="amount">9.99</span>
+              <span class="period">/month</span>
+            </div>
+            <p class="text-muted">Perfect for growing creators</p>
+          </div>
+          
+          <div class="card-body">
+            <ul class="features-list">
+              <li><i class="fas fa-check"></i> Multi-platform analytics</li>
+              <li><i class="fas fa-check"></i> Real-time stats tracking</li>
+              <li><i class="fas fa-check"></i> Advanced demographics</li>
+              <li><i class="fas fa-check"></i> Revenue insights</li>
+              <li><i class="fas fa-check"></i> Export data & reports</li>
+              <li><i class="fas fa-check"></i> Priority support</li>
+              <li><i class="fas fa-check"></i> API access</li>
+            </ul>
+          </div>
+          
+          <div class="card-footer">
+            <% if user_signed_in? %>
+              <%= form_with url: create_checkout_session_path, method: :post, local: true, class: "w-100", data: { turbo: false } do |form| %>
+                <%= form.hidden_field :plan, value: "monthly", id: "monthly_plan" %>
+                <%= form.submit "Start Monthly Plan", 
+                                class: "btn btn-primary btn-lg w-100",
+                                disabled: @stripe_publishable_key&.include?('placeholder') %>
+              <% end %>
+            <% else %>
+              <%= link_to "Start Monthly Plan", new_user_session_path, 
+                          class: "btn btn-primary btn-lg w-100" %>
+              <small class="text-muted d-block mt-2">Sign in to continue</small>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Yearly Plan (Popular) -->
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="pricing-card h-100 popular">
+          <div class="popular-badge">
+            <span>Most Popular</span>
+          </div>
+          
+          <div class="card-header text-center">
+            <h3 class="plan-name">Yearly Pro</h3>
+            <div class="price">
+              <span class="currency">$</span>
+              <span class="amount">100</span>
+              <span class="period">/year</span>
+            </div>
+            <p class="text-success mb-2">
+              <strong>Save $20/year!</strong>
+            </p>
+            <p class="text-muted">Best value for serious creators</p>
+          </div>
+          
+          <div class="card-body">
+            <ul class="features-list">
+              <li><i class="fas fa-check"></i> Everything in Monthly Pro</li>
+              <li><i class="fas fa-check"></i> <strong>1 week FREE trial</strong></li>
+              <li><i class="fas fa-check"></i> Advanced AI insights</li>
+              <li><i class="fas fa-check"></i> Custom branding</li>
+              <li><i class="fas fa-check"></i> White-label reports</li>
+              <li><i class="fas fa-check"></i> Dedicated account manager</li>
+              <li><i class="fas fa-check"></i> Early access to new features</li>
+            </ul>
+          </div>
+          
+          <div class="card-footer">
+            <% if user_signed_in? %>
+              <%= form_with url: create_checkout_session_path, method: :post, local: true, class: "w-100", data: { turbo: false } do |form| %>
+                <%= form.hidden_field :plan, value: "yearly", id: "yearly_plan" %>
+                <%= form.submit "Start Yearly Plan", 
+                                class: "btn btn-success btn-lg w-100",
+                                disabled: @stripe_publishable_key&.include?('placeholder') %>
+              <% end %>
+            <% else %>
+              <%= link_to "Start Yearly Plan", new_user_session_path, 
+                          class: "btn btn-success btn-lg w-100" %>
+              <small class="text-muted d-block mt-2">Sign in to continue</small>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- FAQ Section -->
+    <div class="row mt-5">
+      <div class="col-lg-8 mx-auto">
+        <h3 class="text-center mb-4">Frequently Asked Questions</h3>
+        
+        <div class="accordion" id="pricingFAQ">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                Can I cancel anytime?
+              </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#pricingFAQ">
+              <div class="accordion-body">
+                Yes! You can cancel your subscription at any time. You'll continue to have access until the end of your current billing period.
+              </div>
+            </div>
+          </div>
+          
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                Do you offer refunds?
+              </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
+              <div class="accordion-body">
+                We offer a 7-day money-back guarantee. If you're not satisfied within the first 7 days, contact support for a full refund.
+              </div>
+            </div>
+          </div>
+          
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                Which platforms do you support?
+              </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
+              <div class="accordion-body">
+                We support TikTok, YouTube, Instagram, Twitter, Twitch, LinkedIn, and Facebook. More platforms are added regularly.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Security & Trust -->
+    <div class="row mt-5">
+      <div class="col-lg-8 mx-auto text-center">
+        <div class="security-badges">
+          <h4 class="mb-3">Secure Payment Processing</h4>
+          <div class="d-flex justify-content-center align-items-center gap-4">
+            <div class="security-badge">
+              <i class="fab fa-stripe fa-2x"></i>
+              <small>Powered by Stripe</small>
+            </div>
+            <div class="security-badge">
+              <i class="fas fa-lock fa-2x"></i>
+              <small>SSL Encrypted</small>
+            </div>
+            <div class="security-badge">
+              <i class="fas fa-shield-alt fa-2x"></i>
+              <small>PCI Compliant</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Performance optimizations */
+* {
+  box-sizing: border-box;
+}
+
+.pricing-page * {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.pricing-page {
+  background: #f8f9fa;
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pricing-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.pricing-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.pricing-card.popular {
+  border: 2px solid #28a745;
+  transform: scale(1.03);
+  box-shadow: 0 6px 25px rgba(40, 167, 69, 0.15);
+}
+
+.pricing-card.popular:hover {
+  transform: scale(1.03) translateY(-8px);
+  box-shadow: 0 10px 35px rgba(40, 167, 69, 0.2);
+}
+
+.popular-badge {
+  position: absolute;
+  top: 25px;
+  right: -40px;
+  background: #28a745;
+  color: white;
+  padding: 10px 50px;
+  font-size: 13px;
+  font-weight: 700;
+  transform: rotate(45deg);
+  z-index: 2;
+}
+
+.card-header {
+  background: none;
+  border: none;
+  padding: 2.5rem 2rem 1.5rem;
+  text-align: center;
+}
+
+.plan-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+}
+
+.price {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.price .currency {
+  font-size: 1.5rem;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.price .amount {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.price .period {
+  font-size: 1.1rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.card-body {
+  padding: 1.5rem 2rem;
+  flex-grow: 1;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.features-list li {
+  padding: 1rem 0;
+  border-bottom: 1px solid #f1f3f5;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  color: #495057;
+  line-height: 1.5;
+}
+
+.features-list li:last-child {
+  border-bottom: none;
+}
+
+.features-list i {
+  color: #28a745;
+  margin-right: 1rem;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.card-footer {
+  background: none;
+  border: none;
+  padding: 1.5rem 2rem 2.5rem;
+  margin-top: auto;
+}
+
+.card-footer .btn {
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  will-change: transform;
+}
+
+.card-footer .btn-primary {
+  background: #007bff;
+  border: none;
+  box-shadow: 0 3px 10px rgba(0, 123, 255, 0.2);
+}
+
+.card-footer .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  background: #0056b3;
+}
+
+.card-footer .btn-success {
+  background: #28a745;
+  border: none;
+  box-shadow: 0 3px 10px rgba(40, 167, 69, 0.2);
+}
+
+.card-footer .btn-success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  background: #20c997;
+}
+
+.security-badges {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.security-badge {
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.security-badge i {
+  color: #6c757d;
+  margin-bottom: 0.75rem;
+}
+
+.security-badge small {
+  display: block;
+  color: #6c757d;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.accordion-item {
+  border: none;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.accordion-button {
+  background: white;
+  border: none;
+  font-weight: 600;
+  padding: 1.25rem 1.5rem;
+  font-size: 1.05rem;
+  transition: background-color 0.15s ease;
+}
+
+.accordion-button:not(.collapsed) {
+  background: #f8f9fa;
+  color: #2c3e50;
+  box-shadow: none;
+}
+
+.accordion-body {
+  background: white;
+  padding: 1.25rem 1.5rem;
+  color: #495057;
+  line-height: 1.6;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .pricing-card.popular {
+    transform: none;
+    margin-bottom: 2rem;
+  }
+  
+  .pricing-card.popular:hover {
+    transform: translateY(-8px);
+  }
+  
+  .card-header {
+    padding: 2rem 1.5rem 1rem;
+  }
+  
+  .card-body {
+    padding: 1rem 1.5rem;
+  }
+  
+  .card-footer {
+    padding: 1rem 1.5rem 2rem;
+  }
+  
+  .price .amount {
+    font-size: 3rem;
+  }
+  }
+  </style>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const bypassInput = document.getElementById('bypassCode');
+      const applyBtn = document.getElementById('applyBypass');
+      
+      if (bypassInput && applyBtn) {
+        // Handle Enter key in input
+        bypassInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            applyBypass();
+          }
+        });
+        
+        // Handle button click
+        applyBtn.addEventListener('click', applyBypass);
+        
+        function applyBypass() {
+          const code = bypassInput.value.trim();
+          
+          if (code === 'dev2025') {
+            // Show loading state
+            applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Applying...';
+            applyBtn.disabled = true;
+            
+            // Send request to bypass endpoint
+            fetch('/billing/dev_bypass', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+              },
+              body: JSON.stringify({ code: code })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Show success and redirect
+                applyBtn.innerHTML = '<i class="fas fa-check me-1"></i>Success!';
+                applyBtn.className = 'btn btn-success';
+                
+                setTimeout(() => {
+                  window.location.href = '/dashboard';
+                }, 1500);
+              } else {
+                throw new Error(data.message || 'Invalid code');
+              }
+            })
+            .catch(error => {
+              // Show error
+              applyBtn.innerHTML = '<i class="fas fa-times me-1"></i>Error';
+              applyBtn.className = 'btn btn-danger';
+              
+              setTimeout(() => {
+                applyBtn.innerHTML = '<i class="fas fa-unlock me-1"></i>Apply';
+                applyBtn.className = 'btn btn-info';
+                applyBtn.disabled = false;
+              }, 2000);
+            });
+          } else {
+            // Invalid code
+            bypassInput.style.borderColor = '#dc3545';
+            bypassInput.focus();
+            
+            setTimeout(() => {
+              bypassInput.style.borderColor = '';
+            }, 2000);
+          }
+        }
+      }
+    });
+    
+    // PostHog Analytics - Track pricing page interaction
+    if (window.posthog) {
+      // Track pricing page view
+      posthog.capture('pricing_page_viewed', {
+        <% if user_signed_in? %>
+        user_authenticated: true,
+        user_id: "<%= current_user.id %>",
+        has_existing_subscription: <%= current_user.stripe_subscribed? %>,
+        <% else %>
+        user_authenticated: false,
+        <% end %>
+        page_location: 'pricing',
+        stripe_configured: <%= !@stripe_publishable_key&.include?('placeholder') %>
+      });
+      
+      // Track plan button clicks
+      document.querySelectorAll('form[action*="create_checkout_session"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+          const planInput = this.querySelector('input[name="plan"]');
+          const planType = planInput ? planInput.value : 'unknown';
+          
+          posthog.capture('subscription_plan_selected', {
+            plan_type: planType,
+            <% if user_signed_in? %>
+            user_id: "<%= current_user.id %>",
+            user_email: "<%= current_user.email %>",
+            <% end %>
+            page_location: 'pricing',
+            conversion_step: 'checkout_initiated'
+          });
+        });
+      });
+      
+      // Track sign-in link clicks for unauthenticated users
+      document.querySelectorAll('a[href*="sign_in"]').forEach(link => {
+        link.addEventListener('click', function() {
+          posthog.capture('pricing_signin_clicked', {
+            page_location: 'pricing',
+            conversion_step: 'authentication_required'
+          });
+        });
+      });
+      
+      // Track FAQ interactions
+      document.querySelectorAll('.accordion-button').forEach(button => {
+        button.addEventListener('click', function() {
+          const faqTitle = this.textContent.trim();
+          posthog.capture('pricing_faq_opened', {
+            faq_question: faqTitle,
+            page_location: 'pricing'
+          });
+        });
+      });
+      
+      <% if Rails.env.development? %>
+      // Track development bypass usage
+      const bypassBtn = document.getElementById('applyBypass');
+      if (bypassBtn) {
+        bypassBtn.addEventListener('click', function() {
+          posthog.capture('dev_bypass_attempted', {
+            page_location: 'pricing',
+            environment: 'development'
+          });
+        });
+      }
+      <% end %>
+    }
+  </script> 

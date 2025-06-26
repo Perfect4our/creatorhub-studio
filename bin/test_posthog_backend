@@ -1,0 +1,91 @@
+#!/usr/bin/env ruby
+
+# Test script for PostHog backend service
+require_relative '../config/environment'
+
+puts "🧪 Testing PostHog Backend Service"
+puts "=" * 50
+
+# Check if PostHog is configured
+puts "\n1. Checking PostHog Configuration:"
+api_key = Rails.application.credentials.dig(:posthog, :public_key) || 
+          Rails.application.credentials.dig(:posthog, :api_key) || 
+          Rails.application.credentials.posthog_api_key ||
+          ENV['POSTHOG_API_KEY']
+
+if api_key.present?
+  puts "✅ PostHog API key found: #{api_key[0..10]}..."
+else
+  puts "❌ PostHog API key not configured"
+  puts "   Add to Rails credentials: posthog: { api_key: 'your_key' }"
+  puts "   Or set ENV variable: POSTHOG_API_KEY=your_key"
+end
+
+# Test PostHog service methods
+puts "\n2. Testing PostHog Service Methods:"
+
+if api_key.present?
+  # Test basic event tracking
+  puts "\n   Testing basic event tracking..."
+  result = PosthogService.track_event(
+    user_id: 'test_user_123',
+    event: 'backend_test_event',
+    properties: {
+      test: true,
+      timestamp: Time.current.iso8601,
+      environment: Rails.env
+    }
+  )
+  puts result ? "✅ Basic event tracking works" : "❌ Basic event tracking failed"
+  
+  # Test user identification
+  puts "\n   Testing user identification..."
+  result = PosthogService.identify_user(
+    user_id: 'test_user_123',
+    properties: {
+      email: 'test@creatorhub.studio',
+      test_user: true,
+      environment: Rails.env
+    }
+  )
+  puts result ? "✅ User identification works" : "❌ User identification failed"
+  
+  # Test with a real user if available
+  if User.exists?
+    user = User.first
+    puts "\n   Testing with real user (#{user.email})..."
+    result = PosthogService.track_signup(
+      user: user,
+      source: 'backend_test'
+    )
+    puts result ? "✅ Real user tracking works" : "❌ Real user tracking failed"
+  else
+    puts "\n   ⚠️  No users found to test with real data"
+  end
+else
+  puts "⚠️  Skipping service tests - API key not configured"
+end
+
+# Test network connectivity
+puts "\n3. Testing Network Connectivity:"
+begin
+  require 'net/http'
+  uri = URI('https://app.posthog.com/decide/')
+  response = Net::HTTP.get_response(uri)
+  puts "✅ PostHog endpoint reachable (status: #{response.code})"
+rescue => e
+  puts "❌ Network connectivity issue: #{e.message}"
+end
+
+puts "\n" + "=" * 50
+puts "🎯 Test Summary:"
+puts "   - Configure PostHog API key in Rails credentials or ENV"
+puts "   - Verify network connectivity to PostHog"
+puts "   - Check Rails logs for detailed error messages"
+puts "   - Events should appear in PostHog Live Events feed"
+
+if api_key.present?
+  puts "\n🚀 PostHog backend service is ready for production!"
+else
+  puts "\n⚙️  Complete setup by adding your PostHog API key"
+end 

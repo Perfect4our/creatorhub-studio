@@ -1,0 +1,106 @@
+#!/usr/bin/env ruby
+
+require_relative '../config/environment'
+
+puts "🔧 CreatorHub Studio - Stripe Integration Test"
+puts "=" * 50
+
+# Check configuration sources
+puts "\n📋 Configuration Check:"
+
+# Check encrypted credentials
+credentials_keys = {
+  'test_publishable_key' => Rails.application.credentials.dig(:stripe, :test_publishable_key),
+  'test_secret_key' => Rails.application.credentials.dig(:stripe, :test_secret_key),
+  'test_webhook_secret' => Rails.application.credentials.dig(:stripe, :test_webhook_secret),
+  'webhook_secret' => Rails.application.credentials.dig(:stripe, :webhook_secret),
+  'publishable_key' => Rails.application.credentials.dig(:stripe, :publishable_key),
+  'secret_key' => Rails.application.credentials.dig(:stripe, :secret_key),
+  'monthly_price_id' => Rails.application.credentials.dig(:stripe, :monthly_price_id),
+  'yearly_price_id' => Rails.application.credentials.dig(:stripe, :yearly_price_id)
+}
+
+puts "🔐 Encrypted Credentials:"
+credentials_keys.each do |key, value|
+  if value && !value.include?('your_') && !value.include?('here')
+    masked_value = value[0..7] + '...' + value[-4..-1]
+    puts "✅ stripe.#{key}: #{masked_value}"
+  else
+    puts "❌ stripe.#{key}: Not configured"
+  end
+end
+
+# Check environment variables (fallback)
+puts "\n🌍 Environment Variables (fallback):"
+env_keys = {
+  'STRIPE_PUBLISHABLE_KEY' => ENV['STRIPE_PUBLISHABLE_KEY'],
+  'STRIPE_SECRET_KEY' => ENV['STRIPE_SECRET_KEY'],
+  'STRIPE_WEBHOOK_SECRET' => ENV['STRIPE_WEBHOOK_SECRET'],
+  'STRIPE_MONTHLY_PRICE_ID' => ENV['STRIPE_MONTHLY_PRICE_ID'],
+  'STRIPE_YEARLY_PRICE_ID' => ENV['STRIPE_YEARLY_PRICE_ID']
+}
+
+env_keys.each do |key, value|
+  if value && !value.include?('YOUR_') && !value.include?('HERE')
+    masked_value = value[0..7] + '...' + value[-4..-1]
+    puts "✅ #{key}: #{masked_value}"
+  else
+    puts "❌ #{key}: Not configured"
+  end
+end
+
+# Test Stripe connection
+puts "\n🔌 Stripe Connection Test:"
+begin
+  if Stripe.api_key.include?('placeholder')
+    puts "❌ Using placeholder key - please configure real Stripe keys"
+  else
+    # Test API connection
+    account = Stripe::Account.retrieve
+    puts "✅ Connected to Stripe account: #{account.business_profile&.name || account.id}"
+    puts "   Country: #{account.country}"
+    puts "   Currency: #{account.default_currency&.upcase}"
+  end
+rescue => e
+  puts "❌ Stripe connection failed: #{e.message}"
+end
+
+# Test products and prices
+puts "\n💰 Products and Prices Test:"
+begin
+  monthly_price_id = Rails.application.credentials.dig(:stripe, :monthly_price_id) || ENV['STRIPE_MONTHLY_PRICE_ID']
+  yearly_price_id = Rails.application.credentials.dig(:stripe, :yearly_price_id) || ENV['STRIPE_YEARLY_PRICE_ID']
+  
+  if monthly_price_id && !monthly_price_id.include?('YOUR_') && !monthly_price_id.include?('here')
+    monthly_price = Stripe::Price.retrieve(monthly_price_id)
+    puts "✅ Monthly Price: #{monthly_price.currency.upcase} #{monthly_price.unit_amount / 100.0}"
+  else
+    puts "❌ Monthly price ID not configured"
+  end
+  
+  if yearly_price_id && !yearly_price_id.include?('YOUR_') && !yearly_price_id.include?('here')
+    yearly_price = Stripe::Price.retrieve(yearly_price_id)
+    puts "✅ Yearly Price: #{yearly_price.currency.upcase} #{yearly_price.unit_amount / 100.0}"
+  else
+    puts "❌ Yearly price ID not configured"
+  end
+rescue => e
+  puts "❌ Price retrieval failed: #{e.message}"
+end
+
+puts "\n🚀 Next Steps:"
+all_configured = credentials_keys.values.all? { |v| v && !v.include?('your_') && !v.include?('here') }
+
+if !all_configured
+  puts "1. Edit encrypted credentials: EDITOR=\"nano\" bin/rails credentials:edit"
+  puts "2. Add your Stripe keys to the credentials file"
+  puts "3. Create products and prices in Stripe Dashboard"
+  puts "4. Run this script again to verify configuration"
+else
+  puts "1. Test the pricing page: http://localhost:3000/pricing"
+  puts "2. Use test card: 4242424242424242"
+  puts "3. Set up webhooks for production"
+  puts "4. Configure live keys for production deployment"
+end
+
+puts "\n📖 For detailed setup instructions, see: STRIPE_SETUP_GUIDE.md" 

@@ -1,0 +1,583 @@
+<%= render "shared/navbar" %>
+
+<div class="container-fluid p-0">
+  <div class="row g-0">
+    <!-- Sidebar -->
+    <%= render 'shared/sidebar' %>
+    
+    <!-- Sidebar backdrop for mobile -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    
+    <!-- Main content -->
+    <div class="col-md-10 main-content">
+      <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+          <div>
+            <h1 class="h2">
+              <i class="fas fa-credit-card me-2"></i>
+              Billing & Subscription
+            </h1>
+            <p class="text-muted mb-0">Manage your subscription, view usage, and billing history</p>
+          </div>
+          <div class="btn-toolbar mb-2 mb-md-0">
+            <%= link_to pricing_path, class: "btn btn-outline-primary" do %>
+              <i class="fas fa-eye me-1"></i> View Plans
+            <% end %>
+          </div>
+        </div>
+
+        <% if notice %>
+          <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <%= notice %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        <% end %>
+
+        <% if alert %>
+          <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <%= alert %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        <% end %>
+
+        <% if @first_time_viewing %>
+          <div class="alert alert-info alert-dismissible fade show mb-4" role="alert" id="firstTimeWelcome">
+            <div class="d-flex align-items-start">
+              <i class="fas fa-star me-3 mt-1" style="font-size: 1.2rem;"></i>
+              <div class="flex-grow-1">
+                <h5 class="alert-heading mb-2">
+                  <i class="fas fa-sparkles me-1"></i>
+                  Welcome to Your Billing Dashboard!
+                </h5>
+                <p class="mb-2">
+                  This is your central hub for managing your CreatorHub Studio subscription. Here you can:
+                </p>
+                <ul class="mb-2">
+                  <li>View your current subscription details and renewal dates</li>
+                  <li>Monitor your usage statistics and connected accounts</li>
+                  <li>Access your complete billing history and invoices</li>
+                  <li>Manage your subscription or payment methods</li>
+                </ul>
+                <p class="mb-0">
+                  <strong>Tip:</strong> You can always return to this page from your profile dropdown or the dashboard.
+                </p>
+              </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% end %>
+
+        <div class="row">
+          <!-- Subscription Overview -->
+          <div class="col-lg-8">
+            <div class="card mb-4<%= ' first-time-highlight' if @first_time_viewing %>">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <i class="fas fa-crown me-2"></i>
+                  Current Subscription
+                </h5>
+              </div>
+              <div class="card-body">
+                <% if @subscription_details %>
+                  <div class="row">
+                    <div class="col-md-8">
+                      <div class="d-flex align-items-center mb-3">
+                        <div class="subscription-icon me-3">
+                          <% if @subscription_details[:plan_name] == 'Development Plan' %>
+                            <i class="fas fa-code text-warning" style="font-size: 2rem;"></i>
+                          <% else %>
+                            <i class="fas fa-crown text-warning" style="font-size: 2rem;"></i>
+                          <% end %>
+                        </div>
+                        <div>
+                          <h4 class="mb-1"><%= @subscription_details[:plan_name] %></h4>
+                          <% if @subscription_details[:plan_name] != 'Development Plan' %>
+                            <p class="text-muted mb-0">
+                              <%= @subscription_details[:currency] %> $<%= number_with_precision(@subscription_details[:amount], precision: 2) %>
+                              per <%= @subscription_details[:interval] %>
+                            </p>
+                          <% else %>
+                            <p class="text-muted mb-0">Development access - Free</p>
+                          <% end %>
+                        </div>
+                      </div>
+                      
+                      <div class="subscription-status mb-3">
+                        <span class="badge bg-<%= @subscription_details[:status] == 'active' ? 'success' : 'warning' %> me-2">
+                          <i class="fas fa-<%= @subscription_details[:status] == 'active' ? 'check' : 'clock' %> me-1"></i>
+                          <%= @subscription_details[:status].capitalize %>
+                        </span>
+                        <% if @subscription_details[:cancel_at_period_end] %>
+                          <span class="badge bg-warning">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Cancelling at period end
+                          </span>
+                        <% end %>
+                      </div>
+
+                      <div class="subscription-dates">
+                        <div class="row">
+                          <div class="col-sm-6">
+                            <small class="text-muted d-block">Current Period</small>
+                            <strong><%= @subscription_details[:current_period_start].strftime('%B %d, %Y') %></strong>
+                          </div>
+                          <div class="col-sm-6">
+                            <small class="text-muted d-block">
+                              <%= @subscription_details[:cancel_at_period_end] ? 'Ends' : 'Renews' %>
+                            </small>
+                            <strong><%= @subscription_details[:current_period_end].strftime('%B %d, %Y') %></strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="text-md-end">
+                        <% if @subscription_details[:plan_name] != 'Development Plan' %>
+                          <% unless @subscription_details[:cancel_at_period_end] %>
+                            <button type="button" class="btn btn-outline-danger btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#cancelSubscriptionModal">
+                              <i class="fas fa-times me-1"></i>
+                              Cancel Subscription
+                            </button>
+                          <% end %>
+                          
+                          <%= form_with url: billing_portal_path, method: :post, local: true, class: "d-inline" do |form| %>
+                            <%= form.submit "Stripe Portal", class: "btn btn-outline-primary btn-sm" %>
+                          <% end %>
+                        <% else %>
+                          <%= link_to "Upgrade to Pro", pricing_path, class: "btn btn-primary" %>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Payment Method -->
+                  <% if @subscription_details[:payment_method] %>
+                    <hr>
+                    <div class="payment-method">
+                      <h6 class="mb-2">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Payment Method
+                      </h6>
+                      <div class="d-flex align-items-center">
+                        <i class="fab fa-cc-<%= @subscription_details[:payment_method][:brand].downcase %> me-2 text-muted" style="font-size: 1.5rem;"></i>
+                        <div>
+                          <strong><%= @subscription_details[:payment_method][:brand] %> •••• <%= @subscription_details[:payment_method][:last4] %></strong>
+                          <small class="text-muted d-block">
+                            Expires <%= @subscription_details[:payment_method][:exp_month] %>/<%= @subscription_details[:payment_method][:exp_year] %>
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <div class="text-center py-4">
+                    <i class="fas fa-exclamation-circle text-muted mb-3" style="font-size: 3rem;"></i>
+                    <h5>No Active Subscription</h5>
+                    <p class="text-muted mb-3">You don't have an active subscription yet.</p>
+                    <%= link_to "Choose a Plan", pricing_path, class: "btn btn-primary" %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Billing History -->
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <i class="fas fa-history me-2"></i>
+                  Billing History
+                </h5>
+              </div>
+              <div class="card-body">
+                <% if @billing_history.any? %>
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Description</th>
+                          <th>Amount</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% @billing_history.each do |invoice| %>
+                          <tr>
+                            <td>
+                              <strong><%= invoice[:created].strftime('%b %d, %Y') %></strong>
+                              <small class="text-muted d-block"><%= invoice[:created].strftime('%I:%M %p') %></small>
+                            </td>
+                            <td>
+                              CreatorHub Studio Pro
+                              <% if invoice[:period_start] && invoice[:period_end] %>
+                                <small class="text-muted d-block">
+                                  <%= invoice[:period_start].strftime('%b %d') %> - <%= invoice[:period_end].strftime('%b %d, %Y') %>
+                                </small>
+                              <% end %>
+                            </td>
+                            <td>
+                              <strong><%= invoice[:currency] %> $<%= number_with_precision(invoice[:amount_paid], precision: 2) %></strong>
+                            </td>
+                            <td>
+                              <span class="badge bg-<%= invoice[:status] == 'paid' ? 'success' : 'warning' %>">
+                                <%= invoice[:status].capitalize %>
+                              </span>
+                            </td>
+                            <td>
+                              <% if invoice[:hosted_invoice_url] %>
+                                <a href="<%= invoice[:hosted_invoice_url] %>" target="_blank" class="btn btn-outline-primary btn-sm">
+                                  <i class="fas fa-external-link-alt me-1"></i>
+                                  View
+                                </a>
+                              <% end %>
+                              <% if invoice[:invoice_pdf] %>
+                                <a href="<%= invoice[:invoice_pdf] %>" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                  <i class="fas fa-download me-1"></i>
+                                  PDF
+                                </a>
+                              <% end %>
+                            </td>
+                          </tr>
+                        <% end %>
+                      </tbody>
+                    </table>
+                  </div>
+                <% else %>
+                  <div class="text-center py-4">
+                    <i class="fas fa-receipt text-muted mb-3" style="font-size: 3rem;"></i>
+                    <h6>No Billing History</h6>
+                    <p class="text-muted mb-0">Your billing history will appear here once you have transactions.</p>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Usage Stats -->
+          <div class="col-lg-4">
+            <div class="card mb-4<%= ' first-time-highlight-delayed' if @first_time_viewing %>">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <i class="fas fa-chart-bar me-2"></i>
+                  Usage This Period
+                </h5>
+              </div>
+              <div class="card-body">
+                <% if @usage_stats %>
+                  <div class="usage-stat mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <i class="fas fa-link text-primary me-2"></i>
+                        <span>Connected Accounts</span>
+                      </div>
+                      <strong class="text-primary"><%= @usage_stats[:connected_accounts] %></strong>
+                    </div>
+                  </div>
+
+                  <div class="usage-stat mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <i class="fas fa-eye text-success me-2"></i>
+                        <span>Total Views Tracked</span>
+                      </div>
+                      <strong class="text-success"><%= number_with_delimiter(@usage_stats[:total_views]) %></strong>
+                    </div>
+                  </div>
+
+                  <div class="usage-stat mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <i class="fas fa-calendar text-info me-2"></i>
+                        <span>Days Used</span>
+                      </div>
+                      <strong class="text-info"><%= @usage_stats[:days_used] %></strong>
+                    </div>
+                  </div>
+
+                  <div class="usage-stat">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <i class="fas fa-clock text-warning me-2"></i>
+                        <span>Days Remaining</span>
+                      </div>
+                      <strong class="text-warning"><%= @usage_stats[:days_remaining] %></strong>
+                    </div>
+                  </div>
+
+                  <hr>
+                  
+                  <small class="text-muted">
+                    <strong>Billing Period:</strong><br>
+                    <%= @usage_stats[:period_start].strftime('%B %d, %Y') %> to<br>
+                    <%= @usage_stats[:period_end].strftime('%B %d, %Y') %>
+                  </small>
+                <% else %>
+                  <div class="text-center py-4">
+                    <i class="fas fa-chart-bar text-muted mb-3" style="font-size: 2rem;"></i>
+                    <p class="text-muted mb-0">Usage statistics will appear here when you have an active subscription.</p>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <i class="fas fa-bolt me-2"></i>
+                  Quick Actions
+                </h5>
+              </div>
+              <div class="card-body">
+                <div class="d-grid gap-2">
+                  <%= link_to pricing_path, class: "btn btn-outline-primary" do %>
+                    <i class="fas fa-eye me-2"></i>
+                    View All Plans
+                  <% end %>
+                  
+                  <%= link_to settings_path, class: "btn btn-outline-secondary" do %>
+                    <i class="fas fa-cog me-2"></i>
+                    Account Settings
+                  <% end %>
+                  
+                  <%= link_to subscriptions_path, class: "btn btn-outline-info" do %>
+                    <i class="fas fa-link me-2"></i>
+                    Manage Accounts
+                  <% end %>
+                  
+                  <%= link_to dashboard_path, class: "btn btn-outline-success" do %>
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    Back to Dashboard
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Subscription Modal -->
+<div class="modal fade" id="cancelSubscriptionModal" tabindex="-1" aria-labelledby="cancelSubscriptionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cancelSubscriptionModalLabel">
+          <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+          Cancel Subscription
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning">
+          <i class="fas fa-info-circle me-2"></i>
+          <strong>Important:</strong> Your subscription will remain active until the end of your current billing period.
+        </div>
+        
+        <p>Are you sure you want to cancel your subscription? You will:</p>
+        <ul>
+          <li>Keep access until <strong><%= @subscription_details&.[](:current_period_end)&.strftime('%B %d, %Y') %></strong></li>
+          <li>Lose access to premium features after that date</li>
+          <li>Be able to resubscribe at any time</li>
+          <li>Keep all your data and connected accounts</li>
+        </ul>
+        
+        <p class="text-muted">You can always reactivate your subscription before it expires.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>
+          Keep Subscription
+        </button>
+        <%= form_with url: cancel_subscription_path, method: :post, local: true, class: "d-inline" do |form| %>
+          <%= form.submit "Cancel Subscription", class: "btn btn-danger", 
+                          data: { confirm: "Are you absolutely sure? This action cannot be undone." } %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render "shared/footer" %>
+
+<% if @first_time_viewing %>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Scroll to welcome message after page loads
+  setTimeout(function() {
+    const welcomeAlert = document.getElementById('firstTimeWelcome');
+    if (welcomeAlert) {
+      welcomeAlert.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start',
+        inline: 'nearest' 
+      });
+      
+      // Add a gentle bounce effect
+      welcomeAlert.style.animation = 'welcome-bounce 1s ease-out 0.5s';
+    }
+  }, 500);
+  
+  // Auto-dismiss the welcome message after 30 seconds (optional)
+  setTimeout(function() {
+    const welcomeAlert = document.getElementById('firstTimeWelcome');
+    if (welcomeAlert && !welcomeAlert.classList.contains('show')) {
+      const alertInstance = bootstrap.Alert.getOrCreateInstance(welcomeAlert);
+      alertInstance.close();
+    }
+  }, 30000);
+});
+</script>
+<% end %>
+
+<style>
+.usage-stat {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.usage-stat:last-child {
+  border-bottom: none;
+}
+
+.subscription-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 193, 7, 0.1);
+  border-radius: 50%;
+}
+
+.payment-method {
+  background: rgba(0,0,0,0.02);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.table th {
+  border-top: none;
+  font-weight: 600;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+.btn-ripple:after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #000 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform .5s, opacity 1s;
+}
+
+.btn-ripple:active:after {
+  transform: scale(0, 0);
+  opacity: .2;
+  transition: 0s;
+}
+
+/* First-time viewing highlights */
+.first-time-highlight {
+  animation: gentle-glow 2s ease-in-out;
+  border: 2px solid rgba(13, 110, 253, 0.3) !important;
+}
+
+.first-time-highlight-delayed {
+  animation: gentle-glow 2s ease-in-out 0.5s;
+  border: 2px solid rgba(25, 135, 84, 0.3) !important;
+}
+
+@keyframes gentle-glow {
+  0% {
+    box-shadow: 0 0 0 rgba(13, 110, 253, 0);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(13, 110, 253, 0.3);
+    transform: scale(1.02);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(13, 110, 253, 0);
+    transform: scale(1);
+  }
+}
+
+/* Welcome alert styling */
+#firstTimeWelcome {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border: 2px solid #2196f3;
+  border-radius: 12px;
+  animation: welcome-slide-in 0.8s ease-out;
+}
+
+#firstTimeWelcome .alert-heading {
+  color: #1565c0;
+}
+
+#firstTimeWelcome ul li {
+  margin-bottom: 0.25rem;
+}
+
+@keyframes welcome-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes welcome-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Pulse animation for important buttons on first visit */
+<% if @first_time_viewing %>
+.btn-primary, .btn-outline-primary {
+  animation: subtle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes subtle-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+<% end %>
+</style>

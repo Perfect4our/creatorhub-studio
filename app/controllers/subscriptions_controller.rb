@@ -137,6 +137,14 @@ class SubscriptionsController < ApplicationController
             enable_realtime: true
           )
           
+          # Track platform connection server-side (critical event)
+          PosthogService.track_platform_connection(
+            user: current_user,
+            platform: 'youtube',
+            connection_type: has_analytics_scope ? 'analytics_api' : 'basic',
+            success: true
+          )
+          
           # Create initial analytics snapshot to avoid validation errors
           create_initial_snapshot(subscription)
           
@@ -204,6 +212,14 @@ class SubscriptionsController < ApplicationController
           enable_realtime: true
         )
         
+        # Track platform connection server-side (critical event)
+        PosthogService.track_platform_connection(
+          user: current_user,
+          platform: 'tiktok',
+          connection_type: 'basic',
+          success: true
+        )
+        
         # Create initial analytics snapshot to avoid validation errors
         create_initial_snapshot(subscription)
         
@@ -219,9 +235,17 @@ class SubscriptionsController < ApplicationController
   end
 
   def destroy
+    platform_name = @subscription.platform
+    
+    # Track platform disconnection server-side before destroying
+    PosthogService.track_platform_disconnection(
+      user: current_user,
+      platform: platform_name
+    )
+    
     @subscription.destroy
     
-    redirect_to subscriptions_path, notice: "#{@subscription.platform.capitalize} account disconnected successfully."
+    redirect_to subscriptions_path, notice: "#{platform_name.capitalize} account disconnected successfully."
   end
   
   private

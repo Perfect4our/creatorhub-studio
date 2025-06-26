@@ -1,4 +1,17 @@
 module ApplicationHelper
+  def admin_user?
+    user_signed_in? && current_user.email == 'perfect4ouryt@gmail.com'
+  end
+  
+  def posthog_api_key
+    Rails.application.credentials.dig(:posthog, :public_key) || 'YOUR_PUBLIC_POSTHOG_API_KEY'
+  end
+  
+  def posthog_configured?
+    Rails.application.credentials.dig(:posthog, :public_key).present? && 
+    !Rails.application.credentials.dig(:posthog, :public_key).to_s.include?('placeholder')
+  end
+  
   def format_large_number(number)
     return '0' if number.nil? || number == 0
     

@@ -1,0 +1,34 @@
+<% if current_user.subscriptions.active.empty? && !current_user.has_active_subscription? %>
+  <div class="alert alert-info alert-dismissible fade show mb-3" role="alert" id="connect-accounts-banner">
+    <div class="d-flex align-items-center">
+      <i class="fas fa-plus-circle me-2"></i>
+      <div class="flex-grow-1">
+        <strong>Welcome to CreatorHub Studio!</strong>
+        Connect your social media accounts to start tracking your content performance.
+      </div>
+      <button type="button" class="btn btn-primary btn-sm me-2" data-action="click->button#connectAccounts">
+        <i class="fas fa-link me-1"></i> Connect Accounts
+      </button>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" id="dismissConnectBanner"></button>
+  </div>
+
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const banner = document.getElementById('connect-accounts-banner');
+      
+      // Check if banner was previously dismissed
+      if (localStorage.getItem('connectBannerDismissed') === 'true' && banner) {
+        banner.style.display = 'none';
+      }
+      
+      // Handle dismissal - Bootstrap handles the animation, we just store the preference
+      if (banner) {
+        banner.addEventListener('closed.bs.alert', function() {
+          localStorage.setItem('connectBannerDismissed', 'true');
+        });
+      }
+    });
+  </script>
+<% end %> 

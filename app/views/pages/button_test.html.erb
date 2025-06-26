@@ -1,0 +1,483 @@
+<% content_for :title, "Button Management Test Suite" %>
+
+<div class="container mt-4" data-controller="button analytics">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title mb-0">
+            <i class="fas fa-vial me-2"></i>
+            Button Management System Test Suite
+          </h2>
+          <p class="mb-0 mt-2">Testing enhanced button interactions with RequestManager integration</p>
+        </div>
+        
+        <div class="card-body">
+          <!-- System Status Section -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <h4><i class="fas fa-heartbeat me-2"></i>System Status</h4>
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="card border-info">
+                    <div class="card-body text-center">
+                      <h5 class="card-title">RequestManager</h5>
+                      <div id="request-manager-status" class="badge bg-secondary">Checking...</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card border-info">
+                    <div class="card-body text-center">
+                      <h5 class="card-title">Active Requests</h5>
+                      <div id="active-requests-count" class="badge bg-secondary">0</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card border-info">
+                    <div class="card-body text-center">
+                      <h5 class="card-title">Loading Buttons</h5>
+                      <div id="loading-buttons-count" class="badge bg-secondary">0</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Button Tests Section -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <h4><i class="fas fa-mouse-pointer me-2"></i>Button Interaction Tests</h4>
+              
+              <!-- Rapid Click Prevention Test -->
+              <div class="mb-3">
+                <h5>1. Rapid Click Prevention</h5>
+                <p class="text-muted">These buttons should prevent rapid clicking and show loading states:</p>
+                <div class="btn-group me-3" role="group">
+                  <button class="btn btn-primary" 
+                          data-request="true" 
+                          data-loading-text="Processing..."
+                          data-analytics-track="test_rapid_click_1">
+                    <i class="fas fa-rocket me-2"></i>Test Button 1
+                  </button>
+                  <button class="btn btn-success" 
+                          data-request="true" 
+                          data-loading-text="Working..."
+                          data-analytics-track="test_rapid_click_2">
+                    <i class="fas fa-cog me-2"></i>Test Button 2
+                  </button>
+                  <button class="btn btn-warning" 
+                          data-request="true" 
+                          data-loading-text="Please wait..."
+                          data-analytics-track="test_rapid_click_3">
+                    <i class="fas fa-clock me-2"></i>Test Button 3
+                  </button>
+                </div>
+              </div>
+
+              <!-- Form Submission Test -->
+              <div class="mb-3">
+                <h5>2. Form Submission Protection</h5>
+                <p class="text-muted">This form should prevent double submission:</p>
+                <form data-analytics-track="test_form_submission" class="d-inline-block">
+                  <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Enter test data" required>
+                    <button type="submit" class="btn btn-primary" data-loading-text="Submitting...">
+                      <i class="fas fa-paper-plane me-2"></i>Submit Test Form
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Navigation Link Test -->
+              <div class="mb-3">
+                <h5>3. Navigation Link Management</h5>
+                <p class="text-muted">These links should show loading states during navigation:</p>
+                <div class="btn-group" role="group">
+                  <a href="<%= dashboard_path %>" 
+                     class="btn btn-outline-primary" 
+                     data-request="true"
+                     data-analytics-track="test_nav_dashboard">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                  </a>
+                  <a href="<%= analytics_demographics_path %>" 
+                     class="btn btn-outline-success" 
+                     data-request="true"
+                     data-analytics-track="test_nav_analytics">
+                    <i class="fas fa-chart-line me-2"></i>Analytics
+                  </a>
+                  <a href="<%= settings_path %>" 
+                     class="btn btn-outline-info" 
+                     data-request="true"
+                     data-analytics-track="test_nav_settings">
+                    <i class="fas fa-cog me-2"></i>Settings
+                  </a>
+                </div>
+              </div>
+
+              <!-- Dropdown Test -->
+              <div class="mb-3">
+                <h5>4. Dropdown Interaction Management</h5>
+                <p class="text-muted">Dropdowns should be disabled when requests are active:</p>
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" 
+                          type="button" 
+                          data-bs-toggle="dropdown" 
+                          aria-expanded="false">
+                    <i class="fas fa-list me-2"></i>Test Dropdown
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" data-period="7d" data-analytics-track="test_dropdown_7d">Last 7 days</a></li>
+                    <li><a class="dropdown-item" href="#" data-period="30d" data-analytics-track="test_dropdown_30d">Last 30 days</a></li>
+                    <li><a class="dropdown-item" href="#" data-period="90d" data-analytics-track="test_dropdown_90d">Last 90 days</a></li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Export/Share Test -->
+              <div class="mb-3">
+                <h5>5. Enhanced Export/Share Functions</h5>
+                <p class="text-muted">These should use managed requests with proper loading states:</p>
+                <div class="btn-group" role="group">
+                  <button class="btn btn-outline-secondary" 
+                          data-action="click->button#export"
+                          data-analytics-track="test_export">
+                    <i class="fas fa-download me-2"></i>Test Export
+                  </button>
+                  <button class="btn btn-outline-secondary" 
+                          data-action="click->button#share"
+                          data-analytics-track="test_share">
+                    <i class="fas fa-share me-2"></i>Test Share
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Stress Test Section -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <h4><i class="fas fa-dumbbell me-2"></i>Stress Tests</h4>
+              
+              <div class="mb-3">
+                <h5>Rapid Navigation Test</h5>
+                <p class="text-muted">Click these quickly to test navigation cancellation:</p>
+                <div class="btn-group" role="group">
+                  <a href="<%= dashboard_path %>?test=rapid1" 
+                     class="btn btn-sm btn-outline-primary" 
+                     data-request="true">Page 1</a>
+                  <a href="<%= analytics_demographics_path %>?test=rapid2" 
+                     class="btn btn-sm btn-outline-primary" 
+                     data-request="true">Page 2</a>
+                  <a href="<%= settings_path %>?test=rapid3" 
+                     class="btn btn-sm btn-outline-primary" 
+                     data-request="true">Page 3</a>
+                  <a href="<%= dashboard_path %>?test=rapid4" 
+                     class="btn btn-sm btn-outline-primary" 
+                     data-request="true">Page 4</a>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <h5>Multiple Request Test</h5>
+                <p class="text-muted">These simulate different types of concurrent requests:</p>
+                <div class="btn-group" role="group">
+                  <button class="btn btn-sm btn-warning" 
+                          data-url="/api/test/slow-request" 
+                          data-request="true"
+                          data-analytics-track="test_slow_request">
+                    Slow Request (5s)
+                  </button>
+                  <button class="btn btn-sm btn-info" 
+                          data-url="/api/test/medium-request" 
+                          data-request="true"
+                          data-analytics-track="test_medium_request">
+                    Medium Request (2s)
+                  </button>
+                  <button class="btn btn-sm btn-success" 
+                          data-url="/api/test/fast-request" 
+                          data-request="true"
+                          data-analytics-track="test_fast_request">
+                    Fast Request (0.5s)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Control Panel -->
+          <div class="row">
+            <div class="col-12">
+              <h4><i class="fas fa-sliders-h me-2"></i>Control Panel</h4>
+              
+              <div class="btn-group me-3" role="group">
+                <button class="btn btn-outline-success" onclick="resetAllStates()">
+                  <i class="fas fa-refresh me-2"></i>Reset All States
+                </button>
+                <button class="btn btn-outline-info" onclick="showSystemStats()">
+                  <i class="fas fa-info-circle me-2"></i>Show System Stats
+                </button>
+                <button class="btn btn-outline-warning" onclick="simulateError()">
+                  <i class="fas fa-exclamation-triangle me-2"></i>Simulate Error
+                </button>
+                <button class="btn btn-outline-primary" onclick="showDebugCommands()">
+                  <i class="fas fa-terminal me-2"></i>Debug Commands
+                </button>
+              </div>
+
+              <div class="mt-3">
+                <h6>Test Results Log</h6>
+                <div id="test-log" class="border rounded p-3 bg-light" style="height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.875rem;">
+                  <div class="text-muted">Test log initialized. Click buttons above to see results...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Test page JavaScript functions
+  
+  let testLogElement;
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    testLogElement = document.getElementById('test-log');
+    
+    // Initialize status monitoring
+    updateSystemStatus();
+    
+    // Update status every second
+    setInterval(updateSystemStatus, 1000);
+    
+    // Monitor button clicks for logging
+    document.addEventListener('click', function(event) {
+      const button = event.target.closest('button, .btn, a[href]');
+      if (button && button.dataset.analyticsTrack) {
+        logTest(`Button clicked: ${button.dataset.analyticsTrack} - ${button.textContent.trim()}`);
+      }
+    });
+    
+    // Monitor form submissions
+    document.addEventListener('submit', function(event) {
+      const form = event.target;
+      if (form.dataset.analyticsTrack) {
+        logTest(`Form submitted: ${form.dataset.analyticsTrack}`);
+      }
+    });
+    
+    logTest('Test page initialized successfully');
+  });
+  
+  function updateSystemStatus() {
+    try {
+      // Check RequestManager status
+      const body = document.querySelector('body[data-controller*="request-manager"]');
+      const rmStatus = document.getElementById('request-manager-status');
+      
+      if (body) {
+        const requestManager = window.application.getControllerForElementAndIdentifier(body, 'request-manager');
+        if (requestManager) {
+          rmStatus.textContent = 'Active';
+          rmStatus.className = 'badge bg-success';
+          
+          // Update stats
+          const stats = requestManager.getRequestStats();
+          document.getElementById('active-requests-count').textContent = stats.activeRequests;
+          document.getElementById('loading-buttons-count').textContent = stats.loadingButtons;
+          
+          // Update badge colors based on activity
+          const reqCount = document.getElementById('active-requests-count');
+          reqCount.className = stats.activeRequests > 0 ? 'badge bg-warning' : 'badge bg-success';
+          
+          const btnCount = document.getElementById('loading-buttons-count');
+          btnCount.className = stats.loadingButtons > 0 ? 'badge bg-warning' : 'badge bg-success';
+        } else {
+          rmStatus.textContent = 'Initializing';
+          rmStatus.className = 'badge bg-warning';
+        }
+      } else {
+        rmStatus.textContent = 'Not Found';
+        rmStatus.className = 'badge bg-danger';
+      }
+    } catch (error) {
+      console.error('Status update error:', error);
+    }
+  }
+  
+  function resetAllStates() {
+    try {
+      const body = document.querySelector('body[data-controller*="request-manager"]');
+      if (body) {
+        const requestManager = window.application.getControllerForElementAndIdentifier(body, 'request-manager');
+        if (requestManager) {
+          requestManager.cancelAllRequests();
+          requestManager.resetAllButtonStates();
+          logTest('All states reset successfully');
+        }
+      }
+    } catch (error) {
+      logTest(`Reset error: ${error.message}`, 'error');
+    }
+  }
+  
+  function showSystemStats() {
+    try {
+      const body = document.querySelector('body[data-controller*="request-manager"]');
+      if (body) {
+        const requestManager = window.application.getControllerForElementAndIdentifier(body, 'request-manager');
+        if (requestManager) {
+          const stats = requestManager.getRequestStats();
+          const statsText = JSON.stringify(stats, null, 2);
+          logTest(`System Stats:\n${statsText}`);
+        }
+      }
+    } catch (error) {
+      logTest(`Stats error: ${error.message}`, 'error');
+    }
+  }
+  
+  function simulateError() {
+    logTest('Simulating error condition...');
+    
+    // Trigger an unhandled promise rejection
+    Promise.reject(new Error('Simulated test error')).catch(() => {});
+    
+    // Trigger a JS error
+    setTimeout(() => {
+      try {
+        throw new Error('Simulated JavaScript error');
+      } catch (error) {
+        logTest(`Simulated error triggered: ${error.message}`, 'error');
+      }
+    }, 100);
+  }
+  
+  function showDebugCommands() {
+    const commands = [
+      'Available debug commands (run in browser console):',
+      '',
+      '// Check current system state',
+      'window.requestManagerDebug.state()',
+      '',
+      '// Force emergency reset if system is stuck',
+      'window.requestManagerDebug.reset()',
+      '',
+      '// Show request statistics',
+      'window.requestManagerDebug.stats()',
+      '',
+      '// Navigation issue? Try this sequence:',
+      'window.requestManagerDebug.reset()',
+      'location.reload()',
+      '',
+      '// If dropdowns are stuck on dashboard:',
+      'rebuildStuckDropdown() // (dashboard page only)',
+      '',
+      'Press F12 to open console and copy/paste these commands.'
+    ];
+    
+    logTest(commands.join('\n'));
+    
+    // Also show in an alert for easy access
+    alert('Debug commands logged to console. Open F12 console to see them.\n\nQuick fix: If system is stuck, run:\nwindow.requestManagerDebug.reset()');
+  }
+  
+  function logTest(message, type = 'info') {
+    if (!testLogElement) return;
+    
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = document.createElement('div');
+    
+    let className = 'text-primary';
+    let icon = '📝';
+    
+    if (type === 'error') {
+      className = 'text-danger';
+      icon = '❌';
+    } else if (type === 'success') {
+      className = 'text-success';
+      icon = '✅';
+    } else if (type === 'warning') {
+      className = 'text-warning';
+      icon = '⚠️';
+    }
+    
+    logEntry.className = className;
+    logEntry.innerHTML = `${icon} [${timestamp}] ${message}`;
+    
+    testLogElement.appendChild(logEntry);
+    testLogElement.scrollTop = testLogElement.scrollHeight;
+    
+    // Keep only last 50 log entries
+    const entries = testLogElement.children;
+    if (entries.length > 50) {
+      testLogElement.removeChild(entries[0]);
+    }
+  }
+  
+  // Override console.log for this page to capture debug info
+  const originalConsoleLog = console.log;
+  console.log = function(...args) {
+    originalConsoleLog.apply(console, args);
+    
+    if (args[0] && typeof args[0] === 'string') {
+      if (args[0].includes('🔧') || args[0].includes('📊') || args[0].includes('🛑')) {
+        logTest(args[0]);
+      }
+    }
+  };
+</script>
+
+<style>
+  .btn.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.8;
+  }
+  
+  .btn.disabled {
+    cursor: not-allowed;
+  }
+  
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .notification-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+  }
+  
+  .notification-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+  
+  .notification-close {
+    background: none;
+    border: none;
+    float: right;
+    font-size: 20px;
+    cursor: pointer;
+  }
+</style> 

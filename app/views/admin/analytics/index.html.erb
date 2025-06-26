@@ -1,0 +1,770 @@
+<% content_for :title, "Analytics Dashboard" %>
+
+<div class="container-fluid px-4 py-3" data-controller="admin-analytics"
+     data-admin-analytics-signups-data-value="<%= @signups_by_day.to_json %>"
+     data-admin-analytics-top-pages-data-value="<%= @top_pages_data.to_json %>"
+     data-admin-analytics-conversion-data-value="<%= @conversion_funnel_data.to_json %>"
+     data-admin-analytics-platform-data-value="<%= @platform_breakdown_data.to_json %>"
+     data-admin-analytics-revenue-data-value="<%= @revenue_by_day.to_json %>"
+     data-admin-analytics-retention-data-value="<%= @user_retention_data.to_json %>"
+     data-admin-analytics-geographic-data-value="<%= @geographic_data.to_json %>"
+     data-admin-analytics-subscription-data-value="<%= @subscription_status_data.to_json %>"
+     data-admin-analytics-posthog-events-value="<%= @posthog_top_events.to_json %>"
+     data-admin-analytics-posthog-conversion-value="<%= @posthog_conversion_data.to_json %>">
+
+  <!-- Page Header with Filters -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h2 mb-1 text-gray-800">
+        <i class="fas fa-chart-pie me-2 text-primary"></i>
+        Analytics Dashboard
+      </h1>
+      <p class="text-muted mb-0">Real-time insights and performance metrics</p>
+    </div>
+    
+    <div class="d-flex align-items-center gap-3">
+      <!-- Back to Dashboard Button -->
+      <div class="me-3">
+        <%= link_to root_path, class: "btn btn-sm btn-outline-secondary" do %>
+          <i class="fas fa-arrow-left me-1"></i>
+          Back to Dashboard
+        <% end %>
+      </div>
+
+      <!-- Date Range Filter -->
+      <div class="filter-group">
+        <label class="form-label text-sm text-muted mb-1">Time Period</label>
+        <select class="form-select form-select-sm" data-admin-analytics-target="dateFilter" 
+                data-action="change->admin-analytics#filterByDate">
+          <option value="7" <%= 'selected' if @date_range == '7' %>>Last 7 days</option>
+          <option value="30" <%= 'selected' if @date_range == '30' %>>Last 30 days</option>
+          <option value="90" <%= 'selected' if @date_range == '90' %>>Last 90 days</option>
+          <option value="365" <%= 'selected' if @date_range == '365' %>>Last year</option>
+        </select>
+      </div>
+
+      <!-- Role Filter -->
+      <div class="filter-group">
+        <label class="form-label text-sm text-muted mb-1">User Role</label>
+        <select class="form-select form-select-sm" data-admin-analytics-target="roleFilter"
+                data-action="change->admin-analytics#filterByRole">
+          <option value="all" <%= 'selected' if @role_filter == 'all' %>>All Users</option>
+          <option value="admin" <%= 'selected' if @role_filter == 'admin' %>>Admins</option>
+          <option value="user" <%= 'selected' if @role_filter == 'user' %>>Regular Users</option>
+        </select>
+      </div>
+
+      <!-- Platform Filter -->
+      <div class="filter-group">
+        <label class="form-label text-sm text-muted mb-1">Platform</label>
+        <select class="form-select form-select-sm" data-admin-analytics-target="platformFilter"
+                data-action="change->admin-analytics#filterByPlatform">
+          <option value="all" <%= 'selected' if @platform_filter == 'all' %>>All Platforms</option>
+          <option value="youtube" <%= 'selected' if @platform_filter == 'youtube' %>>YouTube</option>
+          <option value="tiktok" <%= 'selected' if @platform_filter == 'tiktok' %>>TikTok</option>
+          <option value="instagram" <%= 'selected' if @platform_filter == 'instagram' %>>Instagram</option>
+          <option value="facebook" <%= 'selected' if @platform_filter == 'facebook' %>>Facebook</option>
+        </select>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-primary" data-admin-analytics-target="exportButton"
+                data-action="click->admin-analytics#exportData">
+          <i class="fas fa-download me-1"></i>
+          Export
+        </button>
+        <button class="btn btn-sm btn-primary" data-admin-analytics-target="refreshButton"
+                data-action="click->admin-analytics#refreshData">
+          <i class="fas fa-sync-alt me-1"></i>
+          Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Metrics Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 shadow-sm h-100 metric-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="metric-icon bg-primary bg-gradient">
+              <i class="fas fa-users text-white"></i>
+            </div>
+            <div class="ms-3 flex-grow-1">
+              <div class="metric-value"><%= number_with_delimiter(@total_users) %></div>
+              <div class="metric-label">Total Users</div>
+              <div class="metric-change <%= @signup_growth >= 0 ? 'positive' : 'negative' %>">
+                <i class="fas fa-arrow-<%= @signup_growth >= 0 ? 'up' : 'down' %>"></i>
+                <%= @signup_growth >= 0 ? '+' : '' %><%= @signup_growth %>% growth
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 shadow-sm h-100 metric-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="metric-icon bg-success bg-gradient">
+              <i class="fas fa-credit-card text-white"></i>
+            </div>
+            <div class="ms-3 flex-grow-1">
+              <div class="metric-value"><%= number_with_delimiter(@active_subscriptions) %></div>
+              <div class="metric-label">Active Subscriptions</div>
+              <div class="metric-change positive">
+                <i class="fas fa-percentage"></i>
+                <%= sprintf('%.1f', (@active_subscriptions.to_f / [@total_users, 1].max) * 100) %>% conversion
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 shadow-sm h-100 metric-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="metric-icon bg-warning bg-gradient">
+              <i class="fas fa-dollar-sign text-white"></i>
+            </div>
+            <div class="ms-3 flex-grow-1">
+              <div class="metric-value">$<%= number_with_delimiter((@active_subscriptions * 29.99).to_i) %></div>
+              <div class="metric-label">Monthly Revenue</div>
+              <div class="metric-change positive">
+                <i class="fas fa-trending-up"></i>
+                MRR estimate
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 shadow-sm h-100 metric-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="metric-icon bg-info bg-gradient">
+              <i class="fas fa-globe text-white"></i>
+            </div>
+            <div class="ms-3 flex-grow-1">
+              <div class="metric-value" id="realtime-count">-</div>
+              <div class="metric-label">Online Now</div>
+              <div class="metric-change live">
+                <span class="live-dot"></span>
+                Live
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Grid -->
+  <div class="row g-4 mb-4">
+    <!-- Signups Over Time -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0">
+          <h6 class="card-title mb-0">
+            <i class="fas fa-chart-line me-2 text-primary"></i>
+            User Signups Over Time
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas data-admin-analytics-target="signupsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Platform Distribution -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0">
+          <h6 class="card-title mb-0">
+            <i class="fas fa-chart-pie me-2 text-info"></i>
+            Platform Distribution
+          </h6>
+        </div>
+        <div class="card-body">
+          <% if @platform_breakdown_data.empty? %>
+            <div class="text-center py-5 text-muted">
+              <i class="fas fa-chart-pie fa-3x mb-3 opacity-25"></i>
+              <p>No platform data available yet</p>
+              <small>Data will appear when users connect their social media accounts</small>
+            </div>
+          <% else %>
+            <div class="chart-container">
+              <canvas data-admin-analytics-target="platformChart"></canvas>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Top Pages -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0">
+          <h6 class="card-title mb-0">
+            <i class="fas fa-chart-bar me-2 text-success"></i>
+            Top Pages Performance
+          </h6>
+        </div>
+        <div class="card-body">
+          <% if @top_pages_data.empty? %>
+            <div class="text-center py-5 text-muted">
+              <i class="fas fa-chart-bar fa-3x mb-3 opacity-25"></i>
+              <p>Page analytics not available</p>
+              <small>Install PostHog or Google Analytics for page tracking</small>
+            </div>
+          <% else %>
+            <div class="chart-container">
+              <canvas data-admin-analytics-target="topPagesChart"></canvas>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversion Funnel -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0">
+          <h6 class="card-title mb-0">
+            <i class="fas fa-funnel-dollar me-2 text-warning"></i>
+            User Conversion
+          </h6>
+        </div>
+        <div class="card-body">
+          <% if @conversion_funnel_data.empty? %>
+            <div class="text-center py-5 text-muted">
+              <i class="fas fa-funnel-dollar fa-3x mb-3 opacity-25"></i>
+              <p>No user data available yet</p>
+              <small>Data will appear as users sign up and subscribe</small>
+            </div>
+          <% else %>
+            <div class="chart-container">
+              <canvas data-admin-analytics-target="conversionChart"></canvas>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Revenue Over Time -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0">
+          <h6 class="card-title mb-0">
+            <i class="fas fa-chart-area me-2 text-success"></i>
+            Revenue Trends
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas data-admin-analytics-target="revenueChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subscription Status -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0">
+          <h6 class="card-title mb-0">
+            <i class="fas fa-users-cog me-2 text-purple"></i>
+            User Status
+          </h6>
+        </div>
+        <div class="card-body">
+          <% if @subscription_status_data.empty? %>
+            <div class="text-center py-5 text-muted">
+              <i class="fas fa-users-cog fa-3x mb-3 opacity-25"></i>
+              <p>No users yet</p>
+              <small>Data will appear when users register</small>
+            </div>
+          <% else %>
+            <div class="chart-container">
+              <canvas data-admin-analytics-target="subscriptionChart"></canvas>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- User Retention -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0">
+          <h6 class="card-title mb-0">
+            <i class="fas fa-chart-column me-2 text-info"></i>
+            User Retention Cohorts
+          </h6>
+        </div>
+        <div class="card-body">
+          <% if @user_retention_data.empty? %>
+            <div class="text-center py-5 text-muted">
+              <i class="fas fa-chart-column fa-3x mb-3 opacity-25"></i>
+              <p>Retention tracking not implemented</p>
+              <small>Add user activity tracking for retention analysis</small>
+            </div>
+          <% else %>
+            <div class="chart-container">
+              <canvas data-admin-analytics-target="retentionChart"></canvas>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Geographic Distribution -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0">
+          <h6 class="card-title mb-0">
+            <i class="fas fa-globe-americas me-2 text-primary"></i>
+            Geographic Distribution
+          </h6>
+        </div>
+        <div class="card-body">
+          <% if @geographic_data.empty? %>
+            <div class="text-center py-5 text-muted">
+              <i class="fas fa-globe-americas fa-3x mb-3 opacity-25"></i>
+              <p>Geographic tracking not available</p>
+              <small>Add IP geolocation or user profile data for geographic insights</small>
+            </div>
+          <% else %>
+            <div class="chart-container">
+              <canvas data-admin-analytics-target="geographicChart"></canvas>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PostHog Integration Section -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0">
+          <h6 class="card-title mb-0">
+            <i class="fas fa-rocket me-2 text-purple"></i>
+            Top Events (PostHog)
+          </h6>
+        </div>
+        <div class="card-body">
+          <% if @posthog_top_events.empty? %>
+            <div class="text-center py-5 text-muted">
+              <i class="fas fa-rocket fa-3x mb-3 opacity-25"></i>
+              <p>PostHog integration not configured</p>
+              <small>Connect PostHog API for real-time event tracking</small>
+            </div>
+          <% else %>
+            <div class="events-list">
+              <% @posthog_top_events.each_with_index do |event, index| %>
+                <div class="event-item">
+                  <div class="event-rank"><%= index + 1 %></div>
+                  <div class="event-info">
+                    <div class="event-name"><%= event[:event].humanize %></div>
+                    <div class="event-count"><%= number_with_delimiter(event[:count]) %> events</div>
+                  </div>
+                  <div class="event-bar">
+                    <div class="event-fill" style="width: <%= (event[:count].to_f / @posthog_top_events.first[:count]) * 100 %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0">
+          <h6 class="card-title mb-0">
+            <i class="fas fa-chart-line me-2 text-success"></i>
+            Conversion Rates (PostHog)
+          </h6>
+        </div>
+        <div class="card-body">
+          <% if @posthog_conversion_data.empty? %>
+            <div class="text-center py-5 text-muted">
+              <i class="fas fa-chart-line fa-3x mb-3 opacity-25"></i>
+              <p>Conversion tracking not available</p>
+              <small>Connect PostHog API for conversion funnel analysis</small>
+            </div>
+          <% else %>
+            <div class="conversion-metrics">
+              <div class="conversion-item">
+                <div class="conversion-label">Pricing → Signup</div>
+                <div class="conversion-rate"><%= @posthog_conversion_data[:pricing_to_signup] %>%</div>
+              </div>
+              <div class="conversion-item">
+                <div class="conversion-label">Signup → Trial</div>
+                <div class="conversion-rate"><%= @posthog_conversion_data[:signup_to_trial] %>%</div>
+              </div>
+              <div class="conversion-item">
+                <div class="conversion-label">Trial → Paid</div>
+                <div class="conversion-rate"><%= @posthog_conversion_data[:trial_to_paid] %>%</div>
+              </div>
+              <div class="conversion-item highlight">
+                <div class="conversion-label">Overall Conversion</div>
+                <div class="conversion-rate"><%= @posthog_conversion_data[:overall_conversion] %>%</div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Feed -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent border-0">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="card-title mb-0">
+              <i class="fas fa-stream me-2 text-success"></i>
+              Live Activity Feed
+            </h6>
+            <div class="live-indicator">
+              <span class="live-dot"></span>
+              Live
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <% if @recent_activity.empty? %>
+            <div class="text-center py-4 text-muted">
+              <i class="fas fa-stream fa-2x mb-3 opacity-25"></i>
+              <p>No recent activity</p>
+              <small>User activities will appear here as they happen</small>
+            </div>
+          <% else %>
+            <div class="activity-feed">
+              <% @recent_activity.each do |activity| %>
+                <div class="activity-item">
+                  <div class="activity-icon activity-<%= activity[:type] %>">
+                    <% case activity[:type] %>
+                    <% when 'signup' %>
+                      <i class="fas fa-user-plus"></i>
+                    <% when 'subscription' %>
+                      <i class="fas fa-credit-card"></i>
+                    <% else %>
+                      <i class="fas fa-circle"></i>
+                    <% end %>
+                  </div>
+                  <div class="activity-content">
+                    <div class="activity-description"><%= activity[:description] %></div>
+                    <div class="activity-user"><%= activity[:user] %></div>
+                    <div class="activity-time"><%= time_ago_in_words(activity[:timestamp]) %> ago</div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Enhanced Admin Analytics Styles */
+.filter-group {
+  min-width: 140px;
+}
+
+.filter-group .form-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-card {
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+  border-left-color: var(--bs-primary);
+}
+
+.metric-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.metric-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.metric-change {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metric-change.positive { color: #059669; }
+.metric-change.negative { color: #dc2626; }
+.metric-change.live { color: #059669; }
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: #059669;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+}
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.event-item:last-child {
+  border-bottom: none;
+}
+
+.event-rank {
+  width: 24px;
+  height: 24px;
+  background: #f3f4f6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.event-info {
+  flex-grow: 1;
+}
+
+.event-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.875rem;
+}
+
+.event-count {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.event-bar {
+  width: 60px;
+  height: 4px;
+  background: #f3f4f6;
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.event-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  transition: width 0.3s ease;
+}
+
+.conversion-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.conversion-item {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.conversion-item.highlight {
+  background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+  border-color: #3b82f6;
+}
+
+.conversion-label {
+  font-weight: 500;
+  color: #374151;
+  flex-grow: 1;
+}
+
+.conversion-rate {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: #059669;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: #059669;
+  font-weight: 500;
+}
+
+.activity-feed {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.activity-icon.activity-signup {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.activity-icon.activity-subscription {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.activity-content {
+  flex-grow: 1;
+}
+
+.activity-description {
+  font-weight: 500;
+  color: #1f2937;
+  font-size: 0.875rem;
+}
+
+.activity-user {
+  color: #6b7280;
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.activity-time {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+/* Empty state styling */
+.opacity-25 {
+  opacity: 0.25;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .metric-value,
+[data-theme="dark"] .activity-description,
+[data-theme="dark"] .event-name {
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .conversion-item {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+[data-theme="dark"] .conversion-item.highlight {
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+  border-color: #3b82f6;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Simulate real-time user count
+  function updateRealtimeCount() {
+    const count = Math.floor(Math.random() * 20) + 5;
+    const element = document.getElementById('realtime-count');
+    if (element) {
+      element.textContent = count;
+    }
+  }
+  
+  updateRealtimeCount();
+  setInterval(updateRealtimeCount, 10000); // Update every 10 seconds
+});
+</script> 

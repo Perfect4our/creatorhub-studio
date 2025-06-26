@@ -129,7 +129,7 @@
           end
         end
       %>
-      <h6 class="mb-0">Top Videos (<%= time_window_display %>)</h6>
+      <h6 class="mb-0">Top Videos (<span data-top-videos-title><%= time_window_display %></span>)</h6>
       <% if defined?(@analytics_data) && @analytics_data.any? %>
         <% @analytics_data.each do |platform, data| %>
           <% if data[:has_analytics_api] %>
@@ -140,7 +140,7 @@
         <% end %>
       <% end %>
     </div>
-    <div class="card-body">
+    <div class="card-body" data-top-videos-container>
       <% 
         # Collect all videos from all platforms for the time frame
         all_videos = []

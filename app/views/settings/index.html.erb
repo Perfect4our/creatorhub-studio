@@ -3,51 +3,10 @@
 <div class="container-fluid p-0">
   <div class="row g-0">
     <!-- Sidebar -->
-    <div class="col-md-2 d-md-block bg-light sidebar">
-      <div class="sidebar-sticky">
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link" href="<%= dashboard_path %>">
-              <i class="fas fa-tachometer-alt"></i>
-              Dashboard
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<%= subscriptions_path %>">
-              <i class="fas fa-link"></i>
-              Linked Accounts
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<%= videos_path %>">
-              <i class="fas fa-video"></i>
-              Videos
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<%= analytics_demographics_path %>">
-              <i class="fas fa-chart-bar"></i>
-              Analytics
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <i class="fas fa-dollar-sign"></i>
-              Revenue
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="<%= settings_path %>">
-              <i class="fas fa-cog"></i>
-              Settings
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
+    <%= render 'shared/sidebar' %>
     
     <!-- Main content -->
-    <div class="col-md-10 main-content">
+    <div class="col-md-10 main-content" data-controller="button">
       <div class="notification-container" id="notificationContainer" data-notification-target="container"></div>
       
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -132,6 +91,63 @@
         </div>
       </div>
       
+      <!-- Billing & Subscription Section -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Subscription & Billing</h5>
+            </div>
+            <div class="card-body">
+              <% if current_user.stripe_subscribed? %>
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                  <div>
+                    <h6 class="mb-1">Current Plan</h6>
+                    <p class="text-muted mb-0">
+                      <strong><%= current_user.plan_name || "Pro Plan" %></strong>
+                      <% if current_user.current_period_end %>
+                        <br>
+                        <% days_remaining = current_user.subscription_days_remaining %>
+                        <% if days_remaining && days_remaining > 0 %>
+                          <small>Renews in <%= pluralize(days_remaining, 'day') %> (<%= current_user.current_period_end.strftime('%B %d, %Y') %>)</small>
+                        <% else %>
+                          <small>Expires <%= current_user.current_period_end.strftime('%B %d, %Y') %></small>
+                        <% end %>
+                      <% end %>
+                    </p>
+                  </div>
+                  <div>
+                    <span class="badge bg-success">Active</span>
+                  </div>
+                </div>
+                
+                <div class="d-flex gap-2 flex-wrap">
+                  <% if current_user.stripe_customer_id.present? %>
+                    <%= form_with url: billing_portal_path, method: :post, local: true, class: "d-inline" do |form| %>
+                      <%= form.submit "Manage Billing", class: "btn btn-primary" %>
+                    <% end %>
+                  <% elsif current_user.plan_name == 'Development Plan' %>
+                    <%= link_to "Upgrade to Pro", pricing_path, class: "btn btn-primary" %>
+                  <% end %>
+                  <%= link_to "View Pricing", pricing_path, class: "btn btn-outline-secondary" %>
+                </div>
+              <% elsif current_user.has_permanent_subscription? %>
+                <div class="alert alert-success">
+                  <h6 class="alert-heading">Permanent Access</h6>
+                  <p class="mb-0">You have permanent access to all CreatorHub Studio features.</p>
+                </div>
+              <% else %>
+                <div class="alert alert-info">
+                  <h6 class="alert-heading">Upgrade to Pro</h6>
+                  <p class="mb-3">Get access to advanced analytics, real-time tracking, and multi-platform insights.</p>
+                  <%= link_to "View Pricing Plans", pricing_path, class: "btn btn-primary" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="row mt-4">
         <div class="col-12">
           <div class="card">

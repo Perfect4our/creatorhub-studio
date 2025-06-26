@@ -163,4 +163,70 @@ Run the debug script to check your credentials:
 ## 📚 Additional Resources
 
 - [Rails Guides: Securing Rails Applications](https://guides.rubyonrails.org/security.html#custom-credentials)
-- [Rails Credentials Documentation](https://guides.rubyonrails.org/configuring.html#custom-credentials) 
+- [Rails Credentials Documentation](https://guides.rubyonrails.org/configuring.html#custom-credentials)
+
+# Rails Encrypted Credentials Setup for Stripe
+
+## Opening the Credentials File
+
+```bash
+EDITOR="nano" bin/rails credentials:edit
+```
+
+## Add This Structure to Your Credentials File
+
+```yaml
+# Stripe Configuration
+stripe:
+  # Test Keys (for development)
+  test_publishable_key: pk_test_your_test_publishable_key_here
+  test_secret_key: sk_test_your_test_secret_key_here
+  test_webhook_secret: whsec_your_test_webhook_secret_here
+  
+  # Live Keys (for production)
+  publishable_key: pk_live_your_live_publishable_key_here
+  secret_key: sk_live_your_live_secret_key_here
+  webhook_secret: whsec_your_live_webhook_secret_here
+  
+  # Price IDs
+  monthly_price_id: price_your_monthly_price_id_here
+  yearly_price_id: price_your_yearly_price_id_here
+  
+  # Live Price IDs (for production - usually the same as test)
+  live_monthly_price_id: price_your_live_monthly_price_id_here
+  live_yearly_price_id: price_your_live_yearly_price_id_here
+
+# Your existing secret_key_base should remain unchanged
+secret_key_base: your_existing_secret_key_base_here
+```
+
+## How to Edit:
+
+1. **Run**: `EDITOR="nano" bin/rails credentials:edit`
+2. **Add the stripe section** above (replace with your actual keys)
+3. **Save**: `Ctrl+X`, then `Y`, then `Enter`
+4. **Test**: `bin/rails credentials:show` to verify
+
+## Security Notes:
+
+- ✅ **DO** commit `config/credentials.yml.enc` to git
+- ❌ **DON'T** commit `config/master.key` to git
+- ✅ **DO** store `config/master.key` securely (environment variable in production)
+- ✅ **DO** use different keys for test and production
+
+## Production Deployment:
+
+Set this environment variable on your production server:
+```bash
+RAILS_MASTER_KEY=your_master_key_from_config/master.key
+```
+
+## Testing Credentials:
+
+```bash
+# View credentials
+bin/rails credentials:show
+
+# Test specific values
+bin/rails runner "puts Rails.application.credentials.dig(:stripe, :test_secret_key)"
+``` 

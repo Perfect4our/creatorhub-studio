@@ -3,135 +3,14 @@
 <div class="container-fluid p-0">
   <div class="row g-0">
     <!-- Sidebar -->
-    <div class="col-md-2 d-md-block bg-light sidebar" id="sidebar">
-      <div class="sidebar-sticky">
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link active" href="<%= dashboard_path %>">
-              <i class="fas fa-tachometer-alt"></i>
-              Dashboard
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<%= subscriptions_path %>">
-              <i class="fas fa-link"></i>
-              Linked Accounts
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<%= videos_path %>">
-              <i class="fas fa-video"></i>
-              Videos
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<%= analytics_demographics_path %>">
-              <i class="fas fa-chart-bar"></i>
-              Analytics
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <i class="fas fa-dollar-sign"></i>
-              Revenue
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<%= settings_path %>">
-              <i class="fas fa-cog"></i>
-              Settings
-            </a>
-          </li>
-          
-          <!-- Platform Selector for Sidebar -->
-          <li class="nav-item mt-4">
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-              <span>Platforms</span>
-            </h6>
-          </li>
-          
-          <!-- All Platforms option -->
-          <li class="nav-item">
-            <a class="nav-link <%= @selected_platform.blank? ? 'active' : '' %>" href="<%= dashboard_path(time_window: @selected_time_window) %>">
-              <i class="fas fa-globe"></i>
-              All Platforms
-            </a>
-          </li>
-          
-          <!-- Individual Platform Links -->
-          <% current_user.subscriptions.active.distinct.pluck(:platform).each do |platform| %>
-              <li class="nav-item">
-              <a class="nav-link <%= @selected_platform == platform ? 'active' : '' %>" href="<%= dashboard_path(platform: platform, time_window: @selected_time_window) %>">
-                <% case platform %>
-                <% when 'tiktok' %>
-                  <i class="fab fa-tiktok"></i>
-                <% when 'youtube' %>
-                  <i class="fab fa-youtube"></i>
-                <% when 'instagram' %>
-                  <i class="fab fa-instagram"></i>
-                <% when 'facebook' %>
-                  <i class="fab fa-facebook"></i>
-                <% when 'twitter' %>
-                  <i class="fab fa-twitter"></i>
-                <% when 'linkedin' %>
-                  <i class="fab fa-linkedin"></i>
-                <% when 'twitch' %>
-                  <i class="fab fa-twitch"></i>
-                <% else %>
-                  <i class="fas fa-video"></i>
-                <% end %>
-                  <%= platform&.capitalize || 'Unknown' %>
-                </a>
-              </li>
-            <% end %>
-          
-          <!-- Show placeholder platforms if no subscriptions -->
-          <% if current_user.subscriptions.active.empty? %>
-            <li class="nav-item">
-              <a class="nav-link disabled text-muted" href="#">
-                <i class="fab fa-tiktok"></i>
-                TikTok
-                <small class="d-block">Not connected</small>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled text-muted" href="#">
-                <i class="fab fa-youtube"></i>
-                YouTube
-                <small class="d-block">Not connected</small>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled text-muted" href="#">
-                <i class="fab fa-instagram"></i>
-                Instagram
-                <small class="d-block">Not connected</small>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled text-muted" href="#">
-                <i class="fab fa-facebook"></i>
-                Facebook
-                <small class="d-block">Not connected</small>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled text-muted" href="#">
-                <i class="fab fa-twitter"></i>
-                Twitter
-                <small class="d-block">Not connected</small>
-              </a>
-            </li>
-          <% end %>
-        </ul>
-      </div>
-    </div>
+    <%= render 'shared/sidebar' %>
     
     <!-- Sidebar backdrop for mobile -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     
     <!-- Main content -->
-    <div class="col-md-10 main-content">
+    <div class="col-md-10 main-content" data-controller="button" data-section="dashboard"
+         data-subscription-status="<%= current_user.stripe_subscribed? ? 'active' : 'inactive' %>">
       <div class="row">
         <!-- Left column - Main dashboard content -->
         <div class="col-lg-9">
@@ -168,9 +47,19 @@
               <% end %>
             </h1>
         <div class="btn-toolbar mb-2 mb-md-0">
-          <div class="dropdown me-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" id="timeWindowDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-              <span id="selectedTimeWindowText">
+          <div class="time-selector me-2" 
+               data-controller="time-selector" 
+               data-time-selector-platform-value="<%= @selected_platform %>"
+               data-time-selector-current-value-value="<%= @selected_time_window %>"
+               data-time-selector-update-url-value="/dashboard/update_dashboard_data">
+            <button type="button" class="btn btn-sm btn-outline-secondary time-selector-btn" 
+                    data-time-selector-target="button" 
+                    data-action="click->time-selector#toggleDropdown"
+                    data-analytics-track="dashboard_interaction"
+                    data-analytics-type="time_selector_opened"
+                    aria-expanded="false">
+              <i class="fas fa-calendar me-1"></i>
+              <span data-time-selector-target="selected">
                 <% case @selected_time_window.to_s %>
                 <% when '7' %>
                   Last 7 Days
@@ -192,49 +81,99 @@
               </span>
               <i class="fas fa-chevron-down ms-1"></i>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="timeWindowDropdown">
-              <li><a class="dropdown-item <%= @selected_time_window.to_s == '7' ? 'active' : '' %>" href="<%= dashboard_path(platform: @selected_platform, time_window: 7) %>">
-                <% if @selected_time_window.to_s == '7' %><i class="fas fa-check me-2 text-primary"></i><% end %>
+            <div class="time-selector-menu" data-time-selector-target="dropdown">
+              <button type="button" class="time-selector-item <%= @selected_time_window.to_s == '7' ? 'active' : '' %>" 
+                      data-period="7" 
+                      data-action="click->time-selector#selectPeriod"
+                      data-analytics-track="dashboard_interaction"
+                      data-analytics-type="time_period_changed"
+                      data-analytics-period="7">
                 Last 7 Days
-              </a></li>
-              <li><a class="dropdown-item <%= @selected_time_window.to_s == '28' ? 'active' : '' %>" href="<%= dashboard_path(platform: @selected_platform, time_window: 28) %>">
-                <% if @selected_time_window.to_s == '28' %><i class="fas fa-check me-2 text-primary"></i><% end %>
+              </button>
+              <button type="button" class="time-selector-item <%= @selected_time_window.to_s == '28' ? 'active' : '' %>" 
+                      data-period="28" 
+                      data-action="click->time-selector#selectPeriod"
+                      data-analytics-track="dashboard_interaction"
+                      data-analytics-type="time_period_changed"
+                      data-analytics-period="28">
                 Last 28 Days
-              </a></li>
-              <li><a class="dropdown-item <%= @selected_time_window.to_s == '90' ? 'active' : '' %>" href="<%= dashboard_path(platform: @selected_platform, time_window: 90) %>">
-                <% if @selected_time_window.to_s == '90' %><i class="fas fa-check me-2 text-primary"></i><% end %>
+              </button>
+              <button type="button" class="time-selector-item <%= @selected_time_window.to_s == '90' ? 'active' : '' %>" 
+                      data-period="90" 
+                      data-action="click->time-selector#selectPeriod"
+                      data-analytics-track="dashboard_interaction"
+                      data-analytics-type="time_period_changed"
+                      data-analytics-period="90">
                 Last 90 Days
-              </a></li>
-              <li><a class="dropdown-item <%= @selected_time_window.to_s == '365' ? 'active' : '' %>" href="<%= dashboard_path(platform: @selected_platform, time_window: 365) %>">
-                <% if @selected_time_window.to_s == '365' %><i class="fas fa-check me-2 text-primary"></i><% end %>
+              </button>
+              <button type="button" class="time-selector-item <%= @selected_time_window.to_s == '365' ? 'active' : '' %>" 
+                      data-period="365" 
+                      data-action="click->time-selector#selectPeriod"
+                      data-analytics-track="dashboard_interaction"
+                      data-analytics-type="time_period_changed"
+                      data-analytics-period="365">
                 Last 365 Days
-              </a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item <%= @selected_time_window.to_s == '2025' ? 'active' : '' %>" href="<%= dashboard_path(platform: @selected_platform, time_window: '2025') %>">
-                <% if @selected_time_window.to_s == '2025' %><i class="fas fa-check me-2 text-primary"></i><% end %>
+              </button>
+              <div class="time-selector-divider"></div>
+              <button type="button" class="time-selector-item <%= @selected_time_window.to_s == '2025' ? 'active' : '' %>" 
+                      data-period="2025" 
+                      data-action="click->time-selector#selectPeriod"
+                      data-analytics-track="dashboard_interaction"
+                      data-analytics-type="time_period_changed"
+                      data-analytics-period="2025">
                 Year 2025
-              </a></li>
-              <li><a class="dropdown-item <%= @selected_time_window.to_s == '2024' ? 'active' : '' %>" href="<%= dashboard_path(platform: @selected_platform, time_window: '2024') %>">
-                <% if @selected_time_window.to_s == '2024' %><i class="fas fa-check me-2 text-primary"></i><% end %>
+              </button>
+              <button type="button" class="time-selector-item <%= @selected_time_window.to_s == '2024' ? 'active' : '' %>" 
+                      data-period="2024" 
+                      data-action="click->time-selector#selectPeriod"
+                      data-analytics-track="dashboard_interaction"
+                      data-analytics-type="time_period_changed"
+                      data-analytics-period="2024">
                 Year 2024
-              </a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li>
-                <a class="dropdown-item <%= @selected_time_window.to_s == 'custom' ? 'active' : '' %>" href="#" id="customRangeLink">
-                  <% if @selected_time_window.to_s == 'custom' %><i class="fas fa-check me-2 text-primary"></i><% else %><i class="fas fa-calendar-alt me-2"></i><% end %>
-                  Custom Range
-                </a>
-              </li>
-            </ul>
+              </button>
+              <div class="time-selector-divider"></div>
+              <button type="button" class="time-selector-item custom-range-btn" 
+                      data-action="click->time-selector#customRange"
+                      data-analytics-track="dashboard_interaction"
+                      data-analytics-type="custom_date_range_opened">
+                <i class="fas fa-calendar-alt me-2"></i>Custom Range
+              </button>
+            </div>
+            
+            <!-- Custom Date Range Modal -->
+            <div class="custom-date-modal" data-time-selector-target="customModal" style="display: none;">
+              <div class="custom-date-modal-content">
+                <div class="custom-date-modal-header">
+                  <h5>Select Custom Date Range</h5>
+                  <button type="button" class="btn-close" data-action="click->time-selector#closeCustomModal"></button>
+                </div>
+                <div class="custom-date-modal-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label class="form-label">Start Date</label>
+                      <input type="date" class="form-control" data-time-selector-target="startDate">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">End Date</label>
+                      <input type="date" class="form-control" data-time-selector-target="endDate">
+                    </div>
+                  </div>
+                </div>
+                <div class="custom-date-modal-footer">
+                  <button type="button" class="btn btn-secondary" data-action="click->time-selector#closeCustomModal">Cancel</button>
+                  <button type="button" class="btn btn-primary" data-action="click->time-selector#applyCustomRange">Apply Range</button>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="tooltip-wrapper">
-            <button type="button" class="btn btn-sm btn-outline-secondary me-2 btn-ripple" id="shareBtn">
+            <button type="button" class="btn btn-sm btn-outline-secondary me-2 btn-ripple" data-action="click->button#share">
               <i class="fas fa-share-alt me-1"></i> Share
             </button>
             <span class="tooltip-content">Share dashboard</span>
           </div>
           <div class="tooltip-wrapper">
-            <button type="button" class="btn btn-sm btn-outline-secondary me-2 btn-ripple" id="exportBtn">
+            <button type="button" class="btn btn-sm btn-outline-secondary me-2 btn-ripple" data-action="click->button#export">
               <i class="fas fa-download me-1"></i> Export
             </button>
             <span class="tooltip-content">Export as CSV/PDF</span>
@@ -242,10 +181,50 @@
             </div>
       </div>
       
+      <!-- Subscription Status Notification -->
+      <% if current_user.stripe_subscribed? && current_user.should_show_subscription_status? %>
+        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert" id="billingNotification" 
+             data-controller="dashboard" data-dashboard-user-id-value="<%= current_user.id %>">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle me-2"></i>
+            <div class="flex-grow-1">
+              <strong><%= current_user.plan_name&.gsub('Plan', '')&.strip || "Pro" %> Plan Active</strong>
+              <% if current_user.current_period_end %>
+                <% days_remaining = current_user.subscription_days_remaining %>
+                <% if days_remaining && days_remaining > 0 %>
+                  • Renews in <%= pluralize(days_remaining, 'day') %> (<%= current_user.current_period_end.strftime('%B %d, %Y') %>)
+                <% else %>
+                  • Expires <%= current_user.current_period_end.strftime('%B %d, %Y') %>
+                <% end %>
+              <% end %>
+            </div>
+            <% if current_user.stripe_customer_id.present? || current_user.plan_name == 'Development Plan' %>
+              <div class="position-relative d-inline-block">
+                <%= link_to billing_path, class: "btn btn-outline-success btn-sm me-2#{ ' first-time-billing-btn' if current_user.first_time_billing_viewer? }", 
+                           data: { action: "click->dashboard#acknowledgeSubscription" } do %>
+                  <i class="fas fa-credit-card me-1"></i>
+                  Manage Billing
+                <% end %>
+                <% if current_user.first_time_billing_viewer? %>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info">
+                    New
+                    <span class="visually-hidden">new billing features</span>
+                  </span>
+                <% end %>
+              </div>
+            <% else %>
+              <%= link_to "Upgrade to Pro", pricing_path, class: "btn btn-outline-primary btn-sm me-2" %>
+            <% end %>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" 
+                  data-action="click->dashboard#acknowledgeSubscription"></button>
+        </div>
+      <% end %>
+
       <!-- Real-time status banner -->
       <div id="realtime-status-container">
             <% realtime_enabled = @stats&.[](:realtime_enabled) || false %>
-        <%= render "shared/realtime_status_banner", realtime_disabled: !realtime_enabled, message: "Real-time updates are currently disabled for all platforms." if defined?(realtime_enabled) && !realtime_enabled %>
+                  <%= render "shared/connect_accounts_cta" %>
       </div>
       
           <!-- Summary Panel - Always show when user has subscriptions -->
@@ -300,7 +279,7 @@
                           comparison_period = "vs previous #{@selected_time_window} days"
                         end
                       %>
-                      <%= summary_title %>
+                      <span data-summary-title><%= summary_title %></span>
                     </h5>
                   </div>
                   <div class="card-body">
@@ -308,7 +287,7 @@
                       <div class="col-md-3 col-sm-6 mb-3">
                         <div class="summary-metric">
                           <div class="metric-value">
-                            <h3><%= format_large_number(@stats[:views] || 0) %></h3>
+                            <h3 data-stat="views"><%= format_large_number(@stats[:views] || 0) %></h3>
                             <% if @stats[:views_growth].present? %>
                               <div class="metric-change <%= @stats[:views_growth] >= 0 ? 'positive' : 'negative' %>">
                                 <i class="fas fa-arrow-<%= @stats[:views_growth] >= 0 ? 'up' : 'down' %>"></i>
@@ -341,7 +320,7 @@
                       <div class="col-md-3 col-sm-6 mb-3">
                         <div class="summary-metric">
                           <div class="metric-value">
-                            <h3><%= format_large_number(@stats[:followers] || 0) %></h3>
+                            <h3 data-stat="followers"><%= format_large_number(@stats[:followers] || 0) %></h3>
                             <% if @stats[:followers_growth].present? %>
                               <div class="metric-change <%= @stats[:followers_growth] >= 0 ? 'positive' : 'negative' %>">
                                 <i class="fas fa-arrow-<%= @stats[:followers_growth] >= 0 ? 'up' : 'down' %>"></i>
@@ -361,7 +340,7 @@
                       <div class="col-md-3 col-sm-6 mb-3">
                         <div class="summary-metric">
                           <div class="metric-value">
-                            <h3>$0.00</h3>
+                            <h3 data-stat="revenue">$0.00</h3>
                             <div class="metric-change coming-soon">
                               <i class="fas fa-clock"></i>
                               <span>Coming Soon</span>
@@ -382,7 +361,7 @@
               <div class="col-12">
                 <div class="card">
                   <div class="card-header">
-                    <h5 class="mb-0">Views Over Time (<%= summary_title.gsub(' Summary', '') %>)</h5>
+                    <h5 class="mb-0">Views Over Time (<span data-chart-title><%= summary_title.gsub(' Summary', '') %></span>)</h5>
                   </div>
                   <div class="card-body">
                     <% has_enough_data = @platform_data&.values&.any? { |data| data[:has_enough_data] } %>
@@ -780,24 +759,13 @@
       }
     }
     
-    // Track if we've already initialized to prevent double initialization
-    // Use window scope to avoid redeclaration errors
-    window.dashboardInitialized = window.dashboardInitialized || false;
-    window.dropdownInitialized = window.dropdownInitialized || false;
-    
+    // Initialize dashboard safely
     function safeDashboardInit() {
-      if (!window.dashboardInitialized) {
-        console.log('Initializing dashboard for the first time');
-        window.dashboardInitialized = true;
+      // Only initialize charts if we have the proper dashboard elements
+      if (document.querySelector('[data-controller*="time-selector"]')) {
+        console.log('Initializing dashboard charts');
         initializeDashboardCharts();
-      } else {
-        console.log('Dashboard already initialized, skipping charts');
       }
-      
-      // Always re-initialize dropdown since it can get stuck
-      console.log('Re-initializing dropdown');
-      window.dropdownInitialized = false;
-      initializeTimeWindowDropdown();
     }
     
     // Initialize when DOM is ready
@@ -806,50 +774,11 @@
     } else {
       safeDashboardInit();
     }
-    
-    // Handle Turbo navigation
+
+    // Handle Turbo navigation 
     document.addEventListener('turbo:load', function() {
-      console.log('Turbo load event detected');
       safeDashboardInit();
     });
-    
-         // Handle Turbo before visits (cleanup)
-     document.addEventListener('turbo:before-visit', function() {
-       console.log('Turbo before visit - cleaning up');
-       window.dashboardInitialized = false;
-       window.dropdownInitialized = false;
-       
-       // Clean up intervals to prevent memory leaks
-       if (window.dropdownCheckInterval) {
-         clearInterval(window.dropdownCheckInterval);
-         window.dropdownCheckInterval = null;
-       }
-       
-       // Clean up any stuck dropdowns
-       document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-         menu.classList.remove('show');
-       });
-     });
-    
-    // Additional safety net - periodically check if dropdown is stuck
-    // Clear any existing interval to prevent memory leaks
-    if (window.dropdownCheckInterval) {
-      clearInterval(window.dropdownCheckInterval);
-    }
-    
-    window.dropdownCheckInterval = setInterval(function() {
-      const dropdownElement = document.getElementById('timeWindowDropdown');
-      if (dropdownElement) {
-        const isDisabled = dropdownElement.hasAttribute('disabled') || 
-                          dropdownElement.style.pointerEvents === 'none' ||
-                          dropdownElement.classList.contains('disabled');
-        
-                 if (isDisabled && !window.dropdownInitialized) {
-          console.log('Dropdown appears stuck, attempting recovery');
-          initializeTimeWindowDropdown();
-        }
-      }
-    }, 5000); // Check every 5 seconds
     
     // Nuclear option: If dropdown gets stuck, rebuild it completely
     function rebuildStuckDropdown() {
@@ -916,7 +845,7 @@
         // Wait a moment then try Bootstrap again, if that fails, go manual
         setTimeout(() => {
           try {
-            initializeTimeWindowDropdown();
+            
             
             // Test if it works after 1 second
             setTimeout(() => {
@@ -1100,19 +1029,27 @@
     }
     
     // Initialize dropdown and custom date picker - needs to be initialized on every page load
-    function initializeTimeWindowDropdown() {
+    // function initializeTimeWindowDropdown() {
       console.log('Initializing time window dropdown...');
+      
+      // First check if we're still on the dashboard page
+      const dropdownElement = document.getElementById('timeWindowDropdown');
+      if (!dropdownElement) {
+        console.log('Dropdown element not found - not on dashboard page');
+        return;
+      }
       
       // Use a longer delay to ensure Bootstrap is fully loaded and DOM is stable
       setTimeout(function() {
+        // Double-check the element still exists after timeout
         const dropdownElement = document.getElementById('timeWindowDropdown');
         const dropdownMenu = document.querySelector('#timeWindowDropdown + .dropdown-menu');
         
         if (!dropdownElement) {
-          console.warn('Dropdown element not found');
+          console.log('Dropdown element disappeared during initialization');
           return;
         }
-        
+
         console.log('Found dropdown element, initializing...');
         
         // Step 1: Clean up any existing Bootstrap dropdown instances
@@ -1178,7 +1115,7 @@
                
                // Test the dropdown immediately after initialization
                setTimeout(function() {
-                 testDropdownFunctionality();
+                 // testDropdownFunctionality();
                }, 500);
             } else {
               console.error('Bootstrap is not available');
@@ -1352,3 +1289,36 @@
     }
   </script>
 <% end %>
+
+<style>
+  /* First-time billing button highlight */
+  .first-time-billing-btn {
+    animation: billing-highlight 2s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .first-time-billing-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s;
+  }
+
+  .first-time-billing-btn:hover::before {
+    left: 100%;
+  }
+
+  @keyframes billing-highlight {
+    0%, 100% {
+      box-shadow: 0 0 0 rgba(25, 135, 84, 0);
+    }
+    50% {
+      box-shadow: 0 0 15px rgba(25, 135, 84, 0.4);
+    }
+  }
+</style>

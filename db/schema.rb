@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_24_023316) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_26_014102) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -23,6 +23,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_023316) do
     t.date "snapshot_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["subscription_id", "snapshot_date"], name: "index_analytics_snapshots_on_subscription_and_date"
     t.index ["subscription_id"], name: "index_analytics_snapshots_on_subscription_id"
   end
 
@@ -35,6 +36,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_023316) do
     t.string "platform"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["subscription_id", "date"], name: "index_daily_stats_on_subscription_and_date"
+    t.index ["subscription_id", "id"], name: "index_daily_stats_on_subscription_and_id"
     t.index ["subscription_id"], name: "index_daily_stats_on_subscription_id"
   end
 
@@ -50,8 +53,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_023316) do
     t.json "platform_metadata"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["subscription_id", "id"], name: "index_daily_view_trackings_on_subscription_and_id"
     t.index ["subscription_id", "tracked_date"], name: "index_daily_tracking_lookup"
     t.index ["subscription_id", "tracked_date"], name: "index_daily_tracking_unique", unique: true
+    t.index ["subscription_id", "tracked_date"], name: "index_daily_view_trackings_on_subscription_and_date"
     t.index ["subscription_id"], name: "index_daily_view_trackings_on_subscription_id"
     t.index ["tracked_date"], name: "index_daily_view_trackings_on_tracked_date"
   end
@@ -71,6 +76,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_023316) do
     t.string "account_name"
     t.string "account_username"
     t.string "channel_id"
+    t.index ["user_id", "active"], name: "index_subscriptions_on_user_and_active"
+    t.index ["user_id", "platform", "active"], name: "index_subscriptions_on_user_platform_active"
     t.index ["user_id", "platform", "channel_id"], name: "index_subscriptions_on_user_platform_channel", unique: true
     t.index ["user_id", "platform"], name: "index_subscriptions_on_user_platform"
     t.index ["user_id"], name: "index_subscriptions_on_user_id"
@@ -88,6 +95,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_023316) do
     t.string "thumbnail_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["subscription_id", "created_at_tiktok"], name: "index_tik_tok_videos_on_subscription_and_date"
     t.index ["subscription_id"], name: "index_tik_tok_videos_on_subscription_id"
   end
 
@@ -102,6 +110,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_023316) do
     t.datetime "remember_created_at"
     t.boolean "admin", default: false, null: false
     t.boolean "permanent_subscription", default: false, null: false
+    t.string "stripe_customer_id"
+    t.string "subscription_status"
+    t.datetime "current_period_end"
+    t.string "plan_name"
+    t.boolean "cancel_at_period_end"
+    t.string "stripe_subscription_id"
+    t.datetime "billing_viewed_at"
+    t.datetime "subscription_status_acknowledged_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 

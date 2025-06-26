@@ -1,0 +1,214 @@
+<% content_for :title, "PostHog Test Page" %>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">
+            <i class="fas fa-chart-line me-2"></i>
+            PostHog Integration Test
+          </h3>
+        </div>
+        <div class="card-body">
+          <!-- Configuration Status -->
+          <div class="mb-4">
+            <h5>Configuration Status</h5>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="card bg-light">
+                  <div class="card-body">
+                    <h6 class="card-title">API Key Status</h6>
+                    <% if posthog_configured? %>
+                      <span class="badge bg-success">
+                        <i class="fas fa-check me-1"></i>
+                        Configured
+                      </span>
+                      <p class="mt-2 mb-0 small text-muted">
+                        Key: <%= posthog_api_key[0..10] %>...
+                      </p>
+                    <% else %>
+                      <span class="badge bg-danger">
+                        <i class="fas fa-times me-1"></i>
+                        Not Configured
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card bg-light">
+                  <div class="card-body">
+                    <h6 class="card-title">JavaScript Status</h6>
+                    <span class="badge bg-warning" id="js-status">
+                      <i class="fas fa-clock me-1"></i>
+                      Checking...
+                    </span>
+                    <p class="mt-2 mb-0 small text-muted" id="js-details">
+                      Testing PostHog JavaScript loading...
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Test Buttons -->
+          <div class="mb-4">
+            <h5>Test Events</h5>
+            <div class="d-grid gap-2">
+              <button class="btn btn-primary" id="test-pageview">
+                <i class="fas fa-eye me-2"></i>
+                Test Page View Event
+              </button>
+              <button class="btn btn-success" id="test-custom">
+                <i class="fas fa-rocket me-2"></i>
+                Test Custom Event
+              </button>
+              <% if user_signed_in? %>
+                <button class="btn btn-info" id="test-identify">
+                  <i class="fas fa-user me-2"></i>
+                  Test User Identification
+                </button>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Event Log -->
+          <div class="mb-4">
+            <h5>Event Log</h5>
+            <div class="card bg-light">
+              <div class="card-body">
+                <div id="event-log" style="height: 200px; overflow-y: auto;">
+                  <p class="text-muted mb-0">Events will appear here...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Information -->
+          <% if user_signed_in? %>
+            <div class="mb-4">
+              <h5>Current User Info</h5>
+              <div class="card bg-light">
+                <div class="card-body">
+                  <p><strong>ID:</strong> <%= current_user.id %></p>
+                  <p><strong>Email:</strong> <%= current_user.email %></p>
+                  <p><strong>Role:</strong> <%= admin_user? ? 'admin' : 'user' %></p>
+                  <p><strong>Subscription:</strong> <%= current_user.stripe_subscribed? ? 'Active' : 'None' %></p>
+                  <p class="mb-0"><strong>Signup Date:</strong> <%= current_user.created_at.strftime('%Y-%m-%d') %></p>
+                </div>
+              </div>
+            </div>
+          <% else %>
+            <div class="mb-4">
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Sign in to test user identification features.
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Instructions -->
+          <div class="mb-4">
+            <h5>Testing Instructions</h5>
+            <ol>
+              <li>Check that the API key status shows "Configured"</li>
+              <li>Wait for JavaScript status to show "Loaded"</li>
+              <li>Click the test buttons to send events</li>
+              <li>Check your PostHog dashboard's Live Events feed</li>
+              <li>Verify events appear in the Event Log below</li>
+            </ol>
+          </div>
+
+          <div class="text-center">
+            <%= link_to "Back to Dashboard", root_path, class: "btn btn-outline-secondary" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const eventLog = document.getElementById('event-log');
+  const jsStatus = document.getElementById('js-status');
+  const jsDetails = document.getElementById('js-details');
+  
+  function logEvent(message, type = 'info') {
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = document.createElement('div');
+    logEntry.className = `alert alert-${type} alert-sm mb-1 py-1`;
+    logEntry.innerHTML = `<small><strong>${timestamp}:</strong> ${message}</small>`;
+    
+    if (eventLog.firstChild && eventLog.firstChild.textContent.includes('Events will appear here')) {
+      eventLog.innerHTML = '';
+    }
+    
+    eventLog.appendChild(logEntry);
+    eventLog.scrollTop = eventLog.scrollHeight;
+  }
+  
+  // Check PostHog status
+  setTimeout(function() {
+    if (window.posthog) {
+      jsStatus.innerHTML = '<i class="fas fa-check me-1"></i> Loaded';
+      jsStatus.className = 'badge bg-success';
+      jsDetails.textContent = 'PostHog JavaScript library loaded successfully';
+      logEvent('PostHog JavaScript library loaded', 'success');
+    } else {
+      jsStatus.innerHTML = '<i class="fas fa-times me-1"></i> Failed';
+      jsStatus.className = 'badge bg-danger';
+      jsDetails.textContent = 'PostHog JavaScript library failed to load';
+      logEvent('PostHog JavaScript library failed to load', 'danger');
+    }
+  }, 2000);
+  
+  // Test buttons
+  document.getElementById('test-pageview')?.addEventListener('click', function() {
+    if (window.posthog) {
+      posthog.capture('test_pageview_manual', {
+        test_source: 'manual_test_page',
+        timestamp: new Date().toISOString()
+      });
+      logEvent('Test page view event sent', 'primary');
+    } else {
+      logEvent('PostHog not available - cannot send event', 'danger');
+    }
+  });
+  
+  document.getElementById('test-custom')?.addEventListener('click', function() {
+    if (window.posthog) {
+      posthog.capture('test_custom_event', {
+        test_type: 'custom_event',
+        button_clicked: 'test_custom',
+        timestamp: new Date().toISOString(),
+        page_location: 'posthog_test_page'
+      });
+      logEvent('Custom test event sent', 'success');
+    } else {
+      logEvent('PostHog not available - cannot send event', 'danger');
+    }
+  });
+  
+  document.getElementById('test-identify')?.addEventListener('click', function() {
+    if (window.posthog) {
+      <% if user_signed_in? %>
+      posthog.identify("<%= current_user.id %>", {
+        email: "<%= current_user.email %>",
+        role: "<%= admin_user? ? 'admin' : 'user' %>",
+        test_identification: true,
+        timestamp: new Date().toISOString()
+      });
+      logEvent('User identification test sent', 'info');
+      <% end %>
+    } else {
+      logEvent('PostHog not available - cannot identify user', 'danger');
+    }
+  });
+  
+  // Log initial page load
+  logEvent('Test page loaded', 'info');
+});
+</script> 

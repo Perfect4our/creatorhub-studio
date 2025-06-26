@@ -13,32 +13,55 @@
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <% if user_signed_in? %>
           <li class="nav-item">
-            <a class="nav-link <%= current_page?(dashboard_path) ? 'active' : '' %>" href="<%= dashboard_path %>">
+            <a class="nav-link <%= current_page?(dashboard_path) ? 'active' : '' %>" href="<%= dashboard_path %>"
+               data-analytics-track="navigation_clicked"
+               data-analytics-destination="dashboard"
+               data-analytics-location="navbar"
+               data-action="click->analytics#trackNavigation">
               <i class="fas fa-tachometer-alt me-1"></i> Dashboard
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link <%= current_page?(videos_path) ? 'active' : '' %>" href="<%= videos_path %>">
+            <a class="nav-link <%= current_page?(videos_path) ? 'active' : '' %>" href="<%= videos_path %>"
+               data-analytics-track="navigation_clicked"
+               data-analytics-destination="videos"
+               data-analytics-location="navbar"
+               data-action="click->analytics#trackNavigation">
               <i class="fas fa-video me-1"></i> Videos
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link <%= current_page?(subscriptions_path) ? 'active' : '' %>" href="<%= subscriptions_path %>">
+            <a class="nav-link <%= current_page?(subscriptions_path) ? 'active' : '' %>" href="<%= subscriptions_path %>"
+               data-analytics-track="navigation_clicked"
+               data-analytics-destination="accounts"
+               data-analytics-location="navbar"
+               data-action="click->analytics#trackNavigation">
               <i class="fas fa-link me-1"></i> Accounts
             </a>
           </li>
         <% else %>
           <li class="nav-item">
-            <a class="nav-link <%= current_page?(root_path) ? 'active' : '' %>" href="<%= root_path %>">
+            <a class="nav-link <%= current_page?(root_path) ? 'active' : '' %>" href="<%= root_path %>"
+               data-analytics-track="navigation_clicked"
+               data-analytics-destination="home"
+               data-analytics-location="navbar"
+               data-action="click->analytics#trackNavigation">
               <i class="fas fa-home me-1"></i>Home
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= current_page?(pricing_path) ? 'active' : '' %>" href="<%= pricing_path %>"
+               data-analytics-track="navigation_clicked"
+               data-analytics-destination="pricing"
+               data-analytics-location="navbar"
+               data-action="click->analytics#trackNavigation">
+              <i class="fas fa-crown me-1"></i>Pricing
             </a>
           </li>
         <% end %>
       </ul>
       
       <% if user_signed_in? %>
-
-        
         <!-- Connection status indicator -->
         <div class="tooltip-wrapper connection-tooltip me-3">
           <div id="connection-status-indicator" class="connection-status">
@@ -63,8 +86,28 @@
               <%= current_user.email %>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" href="<%= edit_user_registration_path %>">Profile</a></li>
+              <li><a class="dropdown-item" href="<%= edit_user_registration_path %>"><i class="fas fa-user me-1"></i>Profile</a></li>
               <li><a class="dropdown-item" href="<%= settings_path %>"><i class="fas fa-cog me-1"></i>Settings</a></li>
+              <% if admin_user? %>
+                <li><a class="dropdown-item" href="<%= admin_analytics_path %>"><i class="fas fa-chart-line me-2"></i>Analytics</a></li>
+                <li><a class="dropdown-item" href="<%= posthog_test_path %>"
+                       data-analytics-event="admin_posthog_test_access"
+                       data-analytics-location="navbar_dropdown">
+                  <i class="fas fa-flask me-2"></i>PostHog Testing
+                </a></li>
+              <% end %>
+              <li><hr class="dropdown-divider"></li>
+              <% if current_user.stripe_subscribed? %>
+                <li>
+                  <a class="dropdown-item d-flex justify-content-between align-items-center" href="<%= billing_path %>">
+                    <span><i class="fas fa-credit-card me-1"></i>Billing</span>
+                    <% if current_user.first_time_billing_viewer? %>
+                      <span class="badge bg-info rounded-pill">NEW</span>
+                    <% end %>
+                  </a>
+                </li>
+              <% end %>
+              <li><a class="dropdown-item" href="<%= pricing_path %>"><i class="fas fa-dollar-sign me-1"></i>Pricing</a></li>
               <li><hr class="dropdown-divider"></li>
               <li>
                 <%= button_to destroy_user_session_path, method: :delete, class: "dropdown-item" do %>

@@ -1,0 +1,216 @@
+<% content_for :title, "PostHog Test" %>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">
+            <i class="fas fa-chart-line me-2"></i>
+            PostHog Integration Test
+          </h3>
+        </div>
+        <div class="card-body">
+          <!-- Configuration Status -->
+          <div class="mb-4">
+            <h5>Configuration Status</h5>
+            <div class="alert alert-<%= posthog_configured? ? 'success' : 'danger' %>">
+              <% if posthog_configured? %>
+                <i class="fas fa-check me-2"></i>
+                PostHog API key is configured: <%= posthog_api_key[0..10] %>...
+              <% else %>
+                <i class="fas fa-times me-2"></i>
+                PostHog API key is not configured
+              <% end %>
+            </div>
+          </div>
+
+          <!-- JavaScript Status -->
+          <div class="mb-4">
+            <h5>JavaScript Status</h5>
+            <div class="alert alert-info" id="js-status">
+              <i class="fas fa-clock me-2"></i>
+              Checking PostHog JavaScript loading...
+            </div>
+          </div>
+
+          <!-- Test Buttons -->
+          <div class="mb-4">
+            <h5>Test Events</h5>
+            <div class="d-grid gap-2">
+              <button class="btn btn-primary" id="test-event">
+                <i class="fas fa-rocket me-2"></i>
+                Send Test Event
+              </button>
+              <% if user_signed_in? %>
+                <button class="btn btn-success" id="test-identify">
+                  <i class="fas fa-user me-2"></i>
+                  Test User Identification
+                </button>
+              <% else %>
+                <div class="alert alert-info">
+                  <i class="fas fa-info-circle me-2"></i>
+                  <%= link_to "Sign in", new_user_session_path, class: "alert-link" %> to test user identification features.
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Event Log -->
+          <div class="mb-4">
+            <h5>Event Log</h5>
+            <div class="card bg-light" style="height: 200px; overflow-y: auto;">
+              <div class="card-body" id="event-log">
+                <p class="text-muted">Events will appear here...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Information -->
+          <% if user_signed_in? %>
+            <div class="mb-4">
+              <h5>Current User Info</h5>
+              <div class="card bg-light">
+                <div class="card-body">
+                  <p><strong>ID:</strong> <%= current_user.id %></p>
+                  <p><strong>Email:</strong> <%= current_user.email %></p>
+                  <p><strong>Role:</strong> <%= admin_user? ? 'admin' : 'user' %></p>
+                  <p><strong>Subscription:</strong> <%= current_user.stripe_subscribed? ? 'Active' : 'None' %></p>
+                  <p class="mb-0"><strong>Signup Date:</strong> <%= current_user.created_at.strftime('%Y-%m-%d') %></p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Instructions -->
+          <div class="mb-4">
+            <h5>Testing Instructions</h5>
+            <ol>
+              <li>Check that the API key status shows "Configured"</li>
+              <li>Wait for JavaScript status to show "Loaded"</li>
+              <li>Click the test buttons to send events</li>
+              <li>Check your PostHog dashboard's Live Events feed</li>
+              <li>Verify events appear in the Event Log below</li>
+            </ol>
+            <div class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              <strong>Note:</strong> Events should appear in your PostHog Live Events feed within a few seconds.
+            </div>
+          </div>
+
+          <div class="text-center">
+            <%= link_to "Back to Dashboard", root_path, class: "btn btn-outline-secondary" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const eventLog = document.getElementById('event-log');
+  const jsStatus = document.getElementById('js-status');
+  
+  function logEvent(message, type = 'info') {
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = document.createElement('div');
+    logEntry.className = `alert alert-${type} py-1 mb-1`;
+    logEntry.innerHTML = `<small><strong>${timestamp}:</strong> ${message}</small>`;
+    
+    if (eventLog.textContent.includes('Events will appear here')) {
+      eventLog.innerHTML = '';
+    }
+    
+    eventLog.appendChild(logEntry);
+    eventLog.scrollTop = eventLog.scrollHeight;
+  }
+  
+  // Check PostHog status
+  function checkPostHogStatus() {
+    console.log('Checking PostHog status:', {
+      windowPosthog: !!window.posthog,
+      posthogLoaded: window.posthog && window.posthog._loaded,
+      posthogReady: window.posthog && typeof window.posthog.capture === 'function',
+      posthogInit: window.posthog && window.posthog.__loaded
+    });
+    
+    if (window.posthog && typeof window.posthog.capture === 'function') {
+      // PostHog is available and ready to use
+      jsStatus.innerHTML = '<i class="fas fa-check me-2"></i>PostHog JavaScript loaded successfully!';
+      jsStatus.className = 'alert alert-success';
+      logEvent('PostHog JavaScript library loaded and ready', 'success');
+      
+      // Test if PostHog is properly initialized
+      try {
+        posthog.capture('posthog_test_page_loaded', {
+          test_page: true,
+          timestamp: new Date().toISOString()
+        });
+        logEvent('Automatic page load event sent', 'info');
+      } catch (e) {
+        logEvent('Error sending automatic event: ' + e.message, 'danger');
+      }
+    } else if (window.posthog && window.posthog._i) {
+      // PostHog exists but is still in stub mode
+      logEvent('PostHog stub loaded, waiting for full library...', 'warning');
+      setTimeout(checkPostHogStatus, 500);
+    } else if (window.posthog) {
+      // PostHog exists but capture function not available yet
+      logEvent('PostHog object exists but not fully loaded...', 'warning');
+      setTimeout(checkPostHogStatus, 500);
+    } else {
+      // PostHog not loaded at all
+      jsStatus.innerHTML = '<i class="fas fa-times me-2"></i>PostHog JavaScript failed to load';
+      jsStatus.className = 'alert alert-danger';
+      logEvent('PostHog JavaScript library failed to load', 'danger');
+    }
+  }
+  
+  // Start checking PostHog status
+  setTimeout(checkPostHogStatus, 1000);
+  
+  // Test event button
+  document.getElementById('test-event')?.addEventListener('click', function() {
+    if (window.posthog && typeof window.posthog.capture === 'function') {
+      try {
+        posthog.capture('manual_test_event', {
+          test_source: 'test_page_button',
+          button_clicked: 'test-event',
+          timestamp: new Date().toISOString(),
+          user_agent: navigator.userAgent
+        });
+        logEvent('Manual test event sent to PostHog', 'primary');
+      } catch (e) {
+        logEvent('Error sending test event: ' + e.message, 'danger');
+      }
+    } else {
+      logEvent('Cannot send event - PostHog not loaded or initialized', 'danger');
+    }
+  });
+  
+  // Test identify button
+  document.getElementById('test-identify')?.addEventListener('click', function() {
+    if (window.posthog && typeof window.posthog.capture === 'function') {
+      try {
+        <% if user_signed_in? %>
+        posthog.identify("<%= current_user.id %>", {
+          email: "<%= current_user.email %>",
+          role: "<%= admin_user? ? 'admin' : 'user' %>",
+          test_mode: true,
+          identification_test: true,
+          timestamp: new Date().toISOString()
+        });
+        logEvent('User identification sent to PostHog (ID: <%= current_user.id %>)', 'success');
+        <% end %>
+      } catch (e) {
+        logEvent('Error identifying user: ' + e.message, 'danger');
+      }
+    } else {
+      logEvent('Cannot identify user - PostHog not loaded or initialized', 'danger');
+    }
+  });
+  
+  logEvent('Test page initialized');
+});
+</script> 

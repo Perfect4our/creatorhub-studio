@@ -1,11 +1,36 @@
-<%# Homepage for CreatorHub Studio %>
+<%# Homepage for CreatorHub Studio - Enhanced Version %>
 <% content_for :title, "CreatorHub Studio - Multi-Platform Creator Analytics" %>
 
-<!-- Hero Section -->
-<section class="hero-section bg-gradient-to-br from-blue-600 to-purple-700 text-white py-20">
+<!-- Floating CTA Button -->
+<div id="floating-cta" class="floating-cta">
+  <% if user_signed_in? %>
+    <%= link_to dashboard_path, class: "btn btn-warning btn-floating",
+                data: { 
+                  analytics_track: "cta_clicked",
+                  analytics_location: "floating_cta",
+                  analytics_type: "dashboard_access"
+                } do %>
+      <i class="fas fa-chart-line me-2"></i>
+      Dashboard
+    <% end %>
+  <% else %>
+    <%= link_to new_user_registration_path, class: "btn btn-warning btn-floating",
+                data: { 
+                  analytics_track: "cta_clicked",
+                  analytics_location: "floating_cta",
+                  analytics_type: "signup_start"
+                } do %>
+      <i class="fas fa-rocket me-2"></i>
+      Start Free
+    <% end %>
+  <% end %>
+</div>
+
+<!-- Hero Section with Animated Background -->
+<section class="hero-section animated-hero-bg text-white py-20" data-section="hero">
   <div class="container">
     <div class="row align-items-center">
-      <div class="col-lg-6">
+      <div class="col-lg-6 text-center" data-animate="fade-in-left">
         <h1 class="display-4 fw-bold mb-4">
           Your Creator Dashboard<br>
           <span class="text-warning">All Platforms, One View</span>
@@ -13,57 +38,112 @@
         <p class="lead mb-4">
           Track, analyze, and grow your content across YouTube, TikTok, Instagram, Twitter, LinkedIn, and Twitch with real-time analytics and powerful insights.
         </p>
-        <div class="hero-buttons">
+        <div class="hero-buttons floating-hero-buttons">
           <% if user_signed_in? %>
-            <%= link_to dashboard_path, class: "btn btn-warning btn-lg me-3" do %>
+            <%= link_to dashboard_path, class: "btn btn-warning btn-lg me-3 animated-btn",
+                        data: { 
+                          analytics_track: "cta_clicked",
+                          analytics_location: "hero_primary",
+                          analytics_type: "dashboard_access",
+                          action: "click->analytics#trackCTA"
+                        } do %>
               <i class="fas fa-chart-line me-2"></i>
               Go to Dashboard
             <% end %>
           <% else %>
-            <%= link_to new_user_registration_path, class: "btn btn-warning btn-lg me-3" do %>
+            <%= link_to new_user_registration_path, class: "btn btn-warning btn-lg me-3 animated-btn",
+                        data: { 
+                          analytics_track: "cta_clicked",
+                          analytics_location: "hero_primary",
+                          analytics_type: "signup_start",
+                          action: "click->analytics#trackCTA"
+                        } do %>
               <i class="fas fa-rocket me-2"></i>
               Get Started Free
             <% end %>
-            <%= link_to new_user_session_path, class: "btn btn-outline-light btn-lg" do %>
+            <%= link_to new_user_session_path, class: "btn btn-outline-light btn-lg animated-btn",
+                        data: { 
+                          analytics_track: "cta_clicked",
+                          analytics_location: "hero_secondary",
+                          analytics_type: "signin_start",
+                          action: "click->analytics#trackCTA"
+                        } do %>
               <i class="fas fa-sign-in-alt me-2"></i>
               Sign In
             <% end %>
           <% end %>
         </div>
-        <p class="mt-3 text-white-50">
-          <small><i class="fas fa-check me-1"></i> Free forever plan available</small>
-        </p>
+        <% unless user_signed_in? %>
+          <div class="hero-features text-center mt-4">
+            <p class="text-white-75 mb-0">
+              <i class="fas fa-check me-2"></i>Free forever
+              <span class="mx-3">•</span>
+              <i class="fas fa-shield-alt me-2"></i>No credit card
+              <span class="mx-3">•</span>
+              <i class="fas fa-bolt me-2"></i>2-min setup
+            </p>
+          </div>
+        <% end %>
       </div>
-      <div class="col-lg-6">
-        <div class="hero-image text-center">
+      <div class="col-lg-6" data-animate="fade-in-right">
+        <div class="hero-demo-container">
+          <!-- Animated Demo Video/Animation -->
+          <div class="demo-animation-container">
           <div class="dashboard-preview bg-white rounded-lg shadow-lg p-4">
+              <div class="demo-header mb-3">
+                <div class="d-flex align-items-center">
+                  <div class="demo-profile-pic"></div>
+                  <div class="ms-2">
+                    <h6 class="mb-0 text-dark">Creator Dashboard</h6>
+                    <small class="text-muted">Real-time analytics</small>
+                  </div>
+                  <div class="ms-auto">
+                    <div class="live-indicator-demo">
+                      <span class="live-dot"></span>
+                      <small class="text-success fw-bold">LIVE</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
             <div class="row g-3">
               <div class="col-6">
-                <div class="metric-card bg-danger text-white rounded p-3">
+                  <div class="metric-card bg-danger text-white rounded p-3 animated-metric" data-count="1200000">
                   <i class="fab fa-youtube fa-2x mb-2"></i>
-                  <h4>1.2M</h4>
+                    <h4 class="counter">1.2M</h4>
                   <small>YouTube Views</small>
                 </div>
               </div>
               <div class="col-6">
-                <div class="metric-card bg-dark text-white rounded p-3">
+                  <div class="metric-card bg-dark text-white rounded p-3 animated-metric" data-count="850000">
                   <i class="fab fa-tiktok fa-2x mb-2"></i>
-                  <h4>850K</h4>
+                    <h4 class="counter">850K</h4>
                   <small>TikTok Views</small>
                 </div>
               </div>
               <div class="col-6">
-                <div class="metric-card bg-primary text-white rounded p-3">
+                  <div class="metric-card bg-primary text-white rounded p-3 animated-metric" data-count="45300">
                   <i class="fab fa-twitter fa-2x mb-2"></i>
-                  <h4>45.3K</h4>
+                    <h4 class="counter">45.3K</h4>
                   <small>Twitter Followers</small>
                 </div>
               </div>
               <div class="col-6">
-                <div class="metric-card bg-info text-white rounded p-3">
+                  <div class="metric-card bg-info text-white rounded p-3 animated-metric" data-count="12800">
                   <i class="fab fa-linkedin fa-2x mb-2"></i>
-                  <h4>12.8K</h4>
+                    <h4 class="counter">12.8K</h4>
                   <small>LinkedIn Connections</small>
+                  </div>
+                </div>
+              </div>
+              <!-- Mini Chart Animation -->
+              <div class="demo-chart mt-3">
+                <div class="chart-bars">
+                  <div class="chart-bar" style="--delay: 0.1s; --height: 60%"></div>
+                  <div class="chart-bar" style="--delay: 0.2s; --height: 80%"></div>
+                  <div class="chart-bar" style="--delay: 0.3s; --height: 45%"></div>
+                  <div class="chart-bar" style="--delay: 0.4s; --height: 90%"></div>
+                  <div class="chart-bar" style="--delay: 0.5s; --height: 75%"></div>
+                  <div class="chart-bar" style="--delay: 0.6s; --height: 95%"></div>
                 </div>
               </div>
             </div>
@@ -75,7 +155,7 @@
 </section>
 
 <!-- Platform Integrations -->
-<section class="platforms-section py-16 bg-light">
+<section class="platforms-section py-16 bg-light" data-animate="fade-in-up">
   <div class="container">
     <div class="row">
       <div class="col-lg-12 text-center mb-12">
@@ -86,44 +166,44 @@
     <div class="row justify-content-center">
       <div class="col-lg-10">
         <div class="platform-grid row g-4">
-          <div class="col-md-4 col-sm-6">
-            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
-              <i class="fab fa-youtube fa-3x text-danger mb-3"></i>
+          <div class="col-md-4 col-sm-6" data-animate="slide-up" data-delay="0.1s">
+            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100 hover-lift">
+              <i class="fab fa-youtube fa-3x text-danger mb-3 hover-pop"></i>
               <h5>YouTube</h5>
               <p class="text-muted">Advanced YouTube Analytics API integration with real-time subscriber counts, video performance, and revenue tracking.</p>
             </div>
           </div>
-          <div class="col-md-4 col-sm-6">
-            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
-              <i class="fab fa-tiktok fa-3x text-dark mb-3"></i>
+          <div class="col-md-4 col-sm-6" data-animate="slide-up" data-delay="0.2s">
+            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100 hover-lift">
+              <i class="fab fa-tiktok fa-3x text-dark mb-3 hover-pop"></i>
               <h5>TikTok</h5>
               <p class="text-muted">Track viral videos, engagement rates, and follower growth with TikTok's creator tools integration.</p>
             </div>
           </div>
-          <div class="col-md-4 col-sm-6">
-            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
-              <i class="fab fa-instagram fa-3x text-info mb-3"></i>
+          <div class="col-md-4 col-sm-6" data-animate="slide-up" data-delay="0.3s">
+            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100 hover-lift">
+              <i class="fab fa-instagram fa-3x text-info mb-3 hover-pop"></i>
               <h5>Instagram</h5>
               <p class="text-muted">Monitor posts, stories, and reels performance with detailed audience insights and engagement metrics.</p>
             </div>
           </div>
-          <div class="col-md-4 col-sm-6">
-            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
-              <i class="fab fa-twitter fa-3x text-primary mb-3"></i>
+          <div class="col-md-4 col-sm-6" data-animate="slide-up" data-delay="0.4s">
+            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100 hover-lift">
+              <i class="fab fa-twitter fa-3x text-primary mb-3 hover-pop"></i>
               <h5>Twitter</h5>
               <p class="text-muted">Analyze tweet performance, follower growth, and engagement trends across your Twitter presence.</p>
             </div>
           </div>
-          <div class="col-md-4 col-sm-6">
-            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
-              <i class="fab fa-linkedin fa-3x text-primary mb-3"></i>
+          <div class="col-md-4 col-sm-6" data-animate="slide-up" data-delay="0.5s">
+            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100 hover-lift">
+              <i class="fab fa-linkedin fa-3x text-primary mb-3 hover-pop"></i>
               <h5>LinkedIn</h5>
               <p class="text-muted">Professional network insights including post reach, connection growth, and industry engagement.</p>
             </div>
           </div>
-          <div class="col-md-4 col-sm-6">
-            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100">
-              <i class="fab fa-twitch fa-3x text-purple mb-3"></i>
+          <div class="col-md-4 col-sm-6" data-animate="slide-up" data-delay="0.6s">
+            <div class="platform-card text-center p-4 bg-white rounded-lg shadow-sm h-100 hover-lift">
+              <i class="fab fa-twitch fa-3x text-purple mb-3 hover-pop"></i>
               <h5>Twitch</h5>
               <p class="text-muted">Stream analytics, viewer engagement, subscriber tracking, and chat analysis for live content.</p>
             </div>
@@ -134,8 +214,69 @@
   </div>
 </section>
 
+<!-- How It Works Section -->
+<section class="how-it-works-section py-16" data-animate="fade-in-up">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center mb-12">
+        <h2 class="display-5 fw-bold mb-4">How CreatorHub Works</h2>
+        <p class="lead text-muted">Get started in minutes and see your content performance like never before</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-3 col-md-6" data-animate="slide-up" data-delay="0.1s">
+        <div class="how-it-works-card text-center p-4 h-100">
+          <div class="step-number">1</div>
+          <div class="step-animation connect-animation mb-3">
+            <i class="fas fa-plug fa-3x text-primary"></i>
+            <div class="connection-line"></div>
+            <i class="fab fa-youtube fa-2x text-danger"></i>
+          </div>
+          <h5>Connect Your Accounts</h5>
+          <p class="text-muted">Securely link your social media accounts with just a few clicks. We support all major platforms.</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6" data-animate="slide-up" data-delay="0.2s">
+        <div class="how-it-works-card text-center p-4 h-100">
+          <div class="step-number">2</div>
+          <div class="step-animation analytics-animation mb-3">
+            <i class="fas fa-chart-line fa-3x text-success"></i>
+            <div class="pulse-ring"></div>
+          </div>
+          <h5>Track Real-Time Analytics</h5>
+          <p class="text-muted">Watch your views, followers, and engagement update live across all platforms in one unified dashboard.</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6" data-animate="slide-up" data-delay="0.3s">
+        <div class="how-it-works-card text-center p-4 h-100">
+          <div class="step-number">3</div>
+          <div class="step-animation insights-animation mb-3">
+            <i class="fas fa-lightbulb fa-3x text-warning"></i>
+            <div class="sparkle sparkle-1"></div>
+            <div class="sparkle sparkle-2"></div>
+            <div class="sparkle sparkle-3"></div>
+          </div>
+          <h5>Get AI Insights</h5>
+          <p class="text-muted">Receive personalized recommendations and insights to optimize your content strategy and grow faster.</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6" data-animate="slide-up" data-delay="0.4s">
+        <div class="how-it-works-card text-center p-4 h-100">
+          <div class="step-number">4</div>
+          <div class="step-animation export-animation mb-3">
+            <i class="fas fa-download fa-3x text-info"></i>
+            <div class="download-arrow"></div>
+          </div>
+          <h5>Export Professional Reports</h5>
+          <p class="text-muted">Generate beautiful, branded reports for clients, sponsors, or personal tracking with one click.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Features Section -->
-<section class="features-section py-16">
+<section class="features-section py-16 bg-light" data-animate="fade-in-up">
   <div class="container">
     <div class="row">
       <div class="col-lg-12 text-center mb-12">
@@ -144,55 +285,55 @@
       </div>
     </div>
     <div class="row g-4">
-      <div class="col-lg-4">
-        <div class="feature-card p-4 h-100">
+      <div class="col-lg-4" data-animate="slide-up" data-delay="0.1s">
+        <div class="feature-card p-4 h-100 hover-lift">
           <div class="feature-icon mb-3">
-            <i class="fas fa-chart-line fa-3x text-primary"></i>
+            <i class="fas fa-chart-line fa-3x text-primary hover-pop"></i>
           </div>
           <h4>Real-Time Analytics</h4>
           <p class="text-muted">Get instant updates on your content performance with live data from all connected platforms.</p>
         </div>
       </div>
-      <div class="col-lg-4">
-        <div class="feature-card p-4 h-100">
+      <div class="col-lg-4" data-animate="slide-up" data-delay="0.2s">
+        <div class="feature-card p-4 h-100 hover-lift">
           <div class="feature-icon mb-3">
-            <i class="fas fa-lightbulb fa-3x text-warning"></i>
+            <i class="fas fa-lightbulb fa-3x text-warning hover-pop"></i>
           </div>
           <h4>Smart Insights</h4>
           <p class="text-muted">AI-powered recommendations to help you optimize your content strategy and grow your audience.</p>
         </div>
       </div>
-      <div class="col-lg-4">
-        <div class="feature-card p-4 h-100">
+      <div class="col-lg-4" data-animate="slide-up" data-delay="0.3s">
+        <div class="feature-card p-4 h-100 hover-lift">
           <div class="feature-icon mb-3">
-            <i class="fas fa-history fa-3x text-success"></i>
+            <i class="fas fa-history fa-3x text-success hover-pop"></i>
           </div>
           <h4>Historical Tracking</h4>
           <p class="text-muted">Track your growth over time with detailed historical data and trend analysis.</p>
         </div>
       </div>
-      <div class="col-lg-4">
-        <div class="feature-card p-4 h-100">
+      <div class="col-lg-4" data-animate="slide-up" data-delay="0.4s">
+        <div class="feature-card p-4 h-100 hover-lift">
           <div class="feature-icon mb-3">
-            <i class="fas fa-users fa-3x text-info"></i>
+            <i class="fas fa-users fa-3x text-info hover-pop"></i>
           </div>
           <h4>Audience Demographics</h4>
           <p class="text-muted">Understand your audience with detailed demographic insights and engagement patterns.</p>
         </div>
       </div>
-      <div class="col-lg-4">
-        <div class="feature-card p-4 h-100">
+      <div class="col-lg-4" data-animate="slide-up" data-delay="0.5s">
+        <div class="feature-card p-4 h-100 hover-lift">
           <div class="feature-icon mb-3">
-            <i class="fas fa-download fa-3x text-secondary"></i>
+            <i class="fas fa-download fa-3x text-secondary hover-pop"></i>
           </div>
           <h4>Export & Reports</h4>
           <p class="text-muted">Generate custom reports and export your data for deeper analysis and client presentations.</p>
         </div>
       </div>
-      <div class="col-lg-4">
-        <div class="feature-card p-4 h-100">
+      <div class="col-lg-4" data-animate="slide-up" data-delay="0.6s">
+        <div class="feature-card p-4 h-100 hover-lift">
           <div class="feature-icon mb-3">
-            <i class="fas fa-mobile-alt fa-3x text-purple"></i>
+            <i class="fas fa-mobile-alt fa-3x text-purple hover-pop"></i>
           </div>
           <h4>Mobile Optimized</h4>
           <p class="text-muted">Access your dashboard anywhere with our fully responsive design optimized for all devices.</p>
@@ -202,29 +343,38 @@
   </div>
 </section>
 
+<!-- 
+TODO: TESTIMONIALS SECTION TEMPORARILY REMOVED FOR LAUNCH
+Uncomment when we have real users and testimonials
+
+<section class="creator-stats-section py-16" data-animate="fade-in-up">
+  [STATS AND TESTIMONIALS CONTENT - See git history for full section]
+</section>
+-->
+
 <!-- Security & Trust Section -->
-<section class="security-section py-16 bg-light">
+<section class="security-section py-16 bg-light" data-animate="fade-in-up">
   <div class="container">
     <div class="row align-items-center">
       <div class="col-lg-6">
         <h2 class="display-5 fw-bold mb-4">Secure & Trustworthy</h2>
         <p class="lead mb-4">Your data security and privacy are our top priorities</p>
         <div class="security-features">
-          <div class="security-item d-flex mb-3">
+          <div class="security-item d-flex mb-3" data-animate="slide-up" data-delay="0.1s">
             <i class="fas fa-shield-alt fa-2x text-success me-3"></i>
             <div>
               <h5>Bank-Level Security</h5>
               <p class="text-muted mb-0">All data encrypted in transit and at rest using industry-standard protocols.</p>
             </div>
           </div>
-          <div class="security-item d-flex mb-3">
+          <div class="security-item d-flex mb-3" data-animate="slide-up" data-delay="0.2s">
             <i class="fas fa-user-shield fa-2x text-success me-3"></i>
             <div>
               <h5>Privacy First</h5>
               <p class="text-muted mb-0">We never sell your data. Your information is used solely to provide our service.</p>
             </div>
           </div>
-          <div class="security-item d-flex mb-3">
+          <div class="security-item d-flex mb-3" data-animate="slide-up" data-delay="0.3s">
             <i class="fas fa-certificate fa-2x text-success me-3"></i>
             <div>
               <h5>Certified APIs</h5>
@@ -233,7 +383,7 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6" data-animate="slide-up" data-delay="0.2s">
         <div class="compliance-badges text-center">
           <div class="badge-item mb-4">
             <i class="fab fa-google fa-4x text-primary mb-2"></i>
@@ -261,19 +411,19 @@
 </section>
 
 <!-- CTA Section -->
-<section class="cta-section py-16 bg-gradient-to-br from-purple-600 to-blue-700 text-white">
+<section class="cta-section py-16 animated-footer-bg text-white" data-animate="fade-in-up">
   <div class="container">
     <div class="row">
       <div class="col-lg-12 text-center">
         <h2 class="display-5 fw-bold mb-4">Ready to Grow Your Audience?</h2>
         <p class="lead mb-5">Join thousands of creators who trust CreatorHub Studio for their analytics needs</p>
         <% if user_signed_in? %>
-          <%= link_to dashboard_path, class: "btn btn-warning btn-lg" do %>
+          <%= link_to dashboard_path, class: "btn btn-warning btn-lg animated-btn" do %>
             <i class="fas fa-chart-line me-2"></i>
             Go to Dashboard
           <% end %>
         <% else %>
-          <%= link_to new_user_registration_path, class: "btn btn-warning btn-lg" do %>
+          <%= link_to new_user_registration_path, class: "btn btn-warning btn-lg animated-btn" do %>
             <i class="fas fa-rocket me-2"></i>
             Start Free Today
           <% end %>
@@ -358,101 +508,249 @@
   </div>
 </footer>
 
-<style>
-.hero-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 80vh;
-  display: flex;
-  align-items: center;
-}
-
-.dashboard-preview {
-  transform: perspective(1000px) rotateY(-5deg);
-  transition: transform 0.3s ease;
-}
-
-.dashboard-preview:hover {
-  transform: perspective(1000px) rotateY(0deg);
-}
-
-.metric-card {
-  transition: transform 0.2s ease;
-}
-
-.metric-card:hover {
-  transform: translateY(-2px);
-}
-
-.platform-card {
-  transition: all 0.3s ease;
-  border: 1px solid #e9ecef;
-}
-
-.platform-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
-}
-
-.feature-card {
-  transition: transform 0.3s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-3px);
-}
-
-.text-purple {
-  color: #764ba2 !important;
-}
-
-.text-white-75 {
-  color: rgba(255, 255, 255, 0.75) !important;
-}
-
-.text-white-50 {
-  color: rgba(255, 255, 255, 0.5) !important;
-}
-
-.border-white-25 {
-  border-color: rgba(255, 255, 255, 0.25) !important;
-}
-
-.py-16 {
-  padding-top: 4rem;
-  padding-bottom: 4rem;
-}
-
-.py-20 {
-  padding-top: 5rem;
-  padding-bottom: 5rem;
-}
-
-.py-12 {
-  padding-top: 3rem;
-  padding-bottom: 3rem;
-}
-
-.mb-12 {
-  margin-bottom: 3rem;
-}
-
-.rounded-lg {
-  border-radius: 0.75rem;
-}
-
-@media (max-width: 768px) {
-  .hero-section {
-    min-height: 60vh;
-    text-align: center;
+<%= content_for :page_scripts do %>
+<script src="https://cdn.jsdelivr.net/npm/countup.js@2.3.2/dist/countUp.umd.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Scroll-based animations with Intersection Observer
+  const animatedElements = document.querySelectorAll('[data-animate]');
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const element = entry.target;
+        const animationType = element.getAttribute('data-animate');
+        const delay = element.getAttribute('data-delay') || '0s';
+        
+        element.style.animationDelay = delay;
+        element.classList.add('animate-' + animationType);
+        observer.unobserve(element);
+      }
+    });
+  }, { threshold: 0.1 });
+  
+  animatedElements.forEach(el => {
+    observer.observe(el);
+  });
+  
+  // Floating CTA button
+  const floatingCta = document.getElementById('floating-cta');
+  if (floatingCta) {
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 800) {
+        floatingCta.classList.add('show');
+      } else {
+        floatingCta.classList.remove('show');
+      }
+    });
   }
   
-  .display-4 {
-    font-size: 2.5rem;
+  // Counter animations with fallback - Repeating on scroll
+  const counters = document.querySelectorAll('.counter-stat');
+  const counterAnimations = new Map(); // Track active animations
+  
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const counter = entry.target;
+      const target = parseInt(counter.getAttribute('data-count'));
+      const hasPlus = counter.getAttribute('data-count') !== counter.textContent.replace(/[^\d]/g, '');
+      const suffix = hasPlus || counter.textContent.includes('+') ? '+' : '';
+      
+      if (entry.isIntersecting) {
+        // Clear any existing animation
+        if (counterAnimations.has(counter)) {
+          const animation = counterAnimations.get(counter);
+          if (typeof animation === 'number') {
+            // It's a requestAnimationFrame ID
+            cancelAnimationFrame(animation);
+          } else {
+            // It's an interval ID (shouldn't happen with new code, but safety)
+            clearInterval(animation);
+          }
+          counterAnimations.delete(counter);
+        }
+        
+        // Reset counter to 0 before starting animation
+        counter.textContent = '0' + suffix;
+        
+        // Check if CountUp is available
+        if (typeof CountUp !== 'undefined') {
+          const countUp = new CountUp(counter, target, {
+            duration: 2.2,
+            separator: ',',
+            suffix: suffix,
+            startVal: 0,
+            easingFn: function(t, b, c, d) {
+              // Ease-out cubic: starts fast, slows down at the end
+              return c * ((t = t / d - 1) * t * t + 1) + b;
+            }
+          });
+          
+          if (!countUp.error) {
+            countUp.start();
+          } else {
+            // Fallback: eased animation
+            animateCounterWithEasing(counter, target, suffix);
+          }
+        } else {
+          // Fallback: eased animation
+          animateCounterWithEasing(counter, target, suffix);
+        }
+      } else {
+        // When out of view, reset to final value
+        counter.textContent = target.toLocaleString() + suffix;
+        
+        // Clear any running animation
+        if (counterAnimations.has(counter)) {
+          clearInterval(counterAnimations.get(counter));
+          counterAnimations.delete(counter);
+        }
+      }
+    });
+  }, { 
+    threshold: 0.3,
+    rootMargin: '-10% 0px -10% 0px' // Only trigger when well within view
+  });
+  
+  function animateCounterWithEasing(counter, target, suffix) {
+    const duration = 2200; // 2.2 seconds in milliseconds
+    const startTime = performance.now();
+    let animationFrame;
+    
+    function easeOutCubic(t) {
+      // Ease-out cubic: starts fast, slows down at the end
+      return 1 - Math.pow(1 - t, 3);
+    }
+    
+    function animate(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeOutCubic(progress);
+      const current = Math.floor(target * easedProgress);
+      
+      counter.textContent = current.toLocaleString() + suffix;
+      
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+        counterAnimations.set(counter, animationFrame);
+      } else {
+        counter.textContent = target.toLocaleString() + suffix;
+        counterAnimations.delete(counter);
+      }
+    }
+    
+    animationFrame = requestAnimationFrame(animate);
+    counterAnimations.set(counter, animationFrame);
   }
   
-  .dashboard-preview {
-    transform: none;
-    margin-top: 2rem;
+  counters.forEach(counter => {
+    // Store original values
+    const target = parseInt(counter.getAttribute('data-count'));
+    const suffix = counter.textContent.includes('+') ? '+' : '';
+    counter.setAttribute('data-original', counter.textContent);
+    
+    counterObserver.observe(counter);
+  });
+  
+  // Testimonials slider - Enhanced
+  let currentSlide = 0;
+  let sliderInterval;
+  const slides = document.querySelectorAll('.testimonial-slide');
+  const dots = document.querySelectorAll('.testimonial-dots .dot');
+  
+  console.log('Testimonial Slider initialized:', slides.length, 'slides found');
+  
+  function showSlide(index) {
+    if (slides.length === 0) return;
+    
+    // Ensure index is within bounds
+    currentSlide = Math.max(0, Math.min(index, slides.length - 1));
+    
+    slides.forEach((slide, i) => {
+      slide.classList.remove('active');
+      if (i === currentSlide) {
+        slide.classList.add('active');
+      }
+    });
+    
+    dots.forEach((dot, i) => {
+      dot.classList.remove('active');
+      if (i === currentSlide) {
+        dot.classList.add('active');
+      }
+    });
+    
+    console.log('Showing slide:', currentSlide);
   }
-}
-</style>
+  
+  function nextSlide() {
+    if (slides.length > 0) {
+      currentSlide = (currentSlide + 1) % slides.length;
+      showSlide(currentSlide);
+    }
+  }
+  
+  function startSlider() {
+    if (sliderInterval) clearInterval(sliderInterval);
+    sliderInterval = setInterval(nextSlide, 5000);
+  }
+  
+  function stopSlider() {
+    if (sliderInterval) clearInterval(sliderInterval);
+  }
+  
+  // Initialize testimonials slider if we have slides
+  if (slides.length > 0) {
+    // Ensure first slide is active on load
+    showSlide(0);
+    
+    // Start auto-advance
+    startSlider();
+    
+    // Dot click handlers
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', (e) => {
+        e.preventDefault();
+        stopSlider();
+        showSlide(index);
+        // Restart auto-advance after manual navigation
+        setTimeout(startSlider, 1000);
+      });
+    });
+    
+    // Pause on hover
+    const sliderContainer = document.querySelector('.testimonials-slider');
+    if (sliderContainer) {
+      sliderContainer.addEventListener('mouseenter', stopSlider);
+      sliderContainer.addEventListener('mouseleave', startSlider);
+    }
+    
+    console.log('Testimonial slider fully initialized');
+  } else {
+    console.warn('No testimonial slides found');
+  }
+  
+  // Demo animation
+  setTimeout(() => {
+    const metrics = document.querySelectorAll('.animated-metric');
+    metrics.forEach((metric, index) => {
+      setTimeout(() => {
+        metric.classList.add('pulse-effect');
+        setTimeout(() => metric.classList.remove('pulse-effect'), 600);
+      }, index * 200);
+    });
+  }, 2000);
+  
+  // Repeat demo animation
+  setInterval(() => {
+    const metrics = document.querySelectorAll('.animated-metric');
+    metrics.forEach((metric, index) => {
+      setTimeout(() => {
+        metric.classList.add('pulse-effect');
+        setTimeout(() => metric.classList.remove('pulse-effect'), 600);
+      }, index * 200);
+    });
+  }, 8000);
+});
+</script>
+<% end %>

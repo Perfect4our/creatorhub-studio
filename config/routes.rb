@@ -1,7 +1,9 @@
 Rails.application.routes.draw do
   get "settings/index"
   get "settings/update"
-  devise_for :users
+  devise_for :users, controllers: {
+    registrations: 'users/registrations'
+  }
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -20,6 +22,27 @@ Rails.application.routes.draw do
   
   # Custom dashboard route
   get "/dashboard", to: "pages#dashboard"
+  
+  # AJAX endpoints for dashboard performance optimization
+  get "/dashboard/load_analytics_data", to: "pages#load_analytics_data"
+  get "/dashboard/load_yearly_history", to: "pages#load_yearly_history"
+  get "/dashboard/update_dashboard_data", to: "pages#update_dashboard_data"
+  
+  # Billing routes
+  get "/pricing", to: "billing#pricing", as: :pricing
+  get "/billing", to: "billing#index", as: :billing
+  post "/billing/create_checkout_session", to: "billing#create_checkout_session", as: :create_checkout_session
+  get "/billing/success", to: "billing#success", as: :billing_success
+  get "/billing/cancel", to: "billing#cancel", as: :billing_cancel
+  post "/billing/portal", to: "billing#portal", as: :billing_portal
+  post "/billing/cancel_subscription", to: "billing#cancel_subscription", as: :cancel_subscription
+  post "/billing/dev_bypass", to: "billing#dev_bypass", as: :dev_bypass
+  
+  # Subscription status acknowledgment
+  post "/acknowledge_subscription_status", to: "pages#acknowledge_subscription_status"
+  
+  # Stripe webhooks
+  post "/webhooks/stripe", to: "stripe_webhooks#create"
   
   # OAuth start routes (redirect to provider)
   get "/auth/youtube", to: "subscriptions#youtube_oauth_start", as: :auth_youtube
@@ -53,6 +76,11 @@ Rails.application.routes.draw do
     end
   end
   
+  # Admin routes
+  namespace :admin do
+    resources :analytics, only: [:index]
+  end
+  
   # Sidekiq web UI (protected by admin authentication)
   require 'sidekiq/web'
   authenticate :user, lambda { |u| u.admin? } do
@@ -62,4 +90,6 @@ Rails.application.routes.draw do
   # Pages
   get 'privacy', to: 'pages#privacy'
   get 'terms', to: 'pages#terms'
+  get 'posthog_test', to: 'pages#posthog_test'
+  get 'button_test', to: 'pages#button_test'
 end
