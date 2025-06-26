@@ -15,13 +15,15 @@ Rails.application.configure do
                       "https://d3js.org", 
                       "https://cdnjs.cloudflare.com",
                       "https://us-assets.i.posthog.com",
-                      "https://app-static.eu.posthog.com"
+                      "https://app-static.eu.posthog.com",
+                      "*.posthog.com"
     policy.style_src   :self, :https, :unsafe_inline,
                       "https://cdn.jsdelivr.net",
                       "https://cdnjs.cloudflare.com"
     policy.connect_src :self, :https,
                       "https://us.i.posthog.com",
-                      "https://app.posthog.com"
+                      "https://app.posthog.com",
+                      "*.posthog.com"
     
     # Specify URI for violation reports
     # policy.report_uri "/csp-violation-report-endpoint"
@@ -32,5 +34,6 @@ Rails.application.configure do
   config.content_security_policy_nonce_directives = %w(script-src style-src)
 
   # Report violations without enforcing the policy.
-  # config.content_security_policy_report_only = true
+  # In development, we can be more permissive to avoid CORS issues
+  config.content_security_policy_report_only = Rails.env.development?
 end
