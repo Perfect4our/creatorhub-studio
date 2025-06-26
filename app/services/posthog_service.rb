@@ -29,7 +29,7 @@ class PosthogService
             'Content-Type' => 'application/json',
             'User-Agent' => 'CreatorHub Studio Rails Backend'
           },
-          timeout: 5
+          timeout: 2
         )
         
         log_request(event, response)
@@ -60,7 +60,7 @@ class PosthogService
             'Content-Type' => 'application/json',
             'User-Agent' => 'CreatorHub Studio Rails Backend'
           },
-          timeout: 5
+          timeout: 2
         )
         
         log_request('$identify', response)
@@ -172,6 +172,104 @@ class PosthogService
         }
       )
     end
+
+    # Get user's session recordings
+    def get_user_recordings(user_id:, limit: 10)
+      return [] unless posthog_configured? && secret_key.present?
+
+      begin
+        response = HTTParty.get(
+          "#{BASE_URL}/api/projects/#{project_id}/session_recordings",
+          headers: {
+            'Authorization' => "Bearer #{secret_key}",
+            'Content-Type' => 'application/json'
+          },
+          query: {
+            distinct_id: user_id.to_s,
+            limit: limit,
+            order: '-start_time'
+          },
+          timeout: 5
+        )
+
+        if response.success?
+          recordings = response.parsed_response['results'] || []
+          Rails.logger.info "PostHog: Retrieved #{recordings.length} recordings for user #{user_id}"
+          recordings
+        else
+          Rails.logger.error "PostHog: Failed to get recordings - #{response.code}: #{response.body}"
+          []
+        end
+      rescue => e
+        Rails.logger.error "PostHog recordings fetch failed: #{e.message}"
+        []
+      end
+    end
+
+    # Delete specific recording
+    def delete_recording(recording_id:)
+      return false unless posthog_configured? && secret_key.present?
+
+      begin
+        response = HTTParty.delete(
+          "#{BASE_URL}/api/projects/#{project_id}/session_recordings/#{recording_id}",
+          headers: {
+            'Authorization' => "Bearer #{secret_key}",
+            'Content-Type' => 'application/json'
+          },
+          timeout: 5
+        )
+
+        if response.success?
+          Rails.logger.info "PostHog: Successfully deleted recording #{recording_id}"
+          true
+        else
+          Rails.logger.error "PostHog: Failed to delete recording #{recording_id} - #{response.code}: #{response.body}"
+          false
+        end
+      rescue => e
+        Rails.logger.error "PostHog recording deletion failed: #{e.message}"
+        false
+      end
+    end
+
+    # Manage user recordings (keep only 5 most recent)
+    def manage_user_recordings(user_id:, max_recordings: 5)
+      return false unless posthog_configured?
+
+      recordings = get_user_recordings(user_id: user_id, limit: 20)
+      
+      if recordings.length > max_recordings
+        recordings_to_delete = recordings[max_recordings..-1]
+        
+        recordings_to_delete.each do |recording|
+          recording_id = recording['id']
+          if delete_recording(recording_id: recording_id)
+            Rails.logger.info "PostHog: Deleted old recording #{recording_id} for user #{user_id}"
+          end
+        end
+        
+        Rails.logger.info "PostHog: Cleaned up #{recordings_to_delete.length} old recordings for user #{user_id}"
+        true
+      else
+        Rails.logger.info "PostHog: User #{user_id} has #{recordings.length} recordings, no cleanup needed"
+        false
+      end
+    end
+
+    # Track recording events
+    def track_recording_event(user_id:, event_type:, recording_data: {})
+      track_event(
+        user_id: user_id,
+        event: "recording_#{event_type}",
+        properties: {
+          recording_management: true,
+          environment: Rails.env,
+          server_tracked: true,
+          **recording_data
+        }
+      )
+    end
     
     private
     
@@ -190,6 +288,12 @@ class PosthogService
       @secret_key ||= Rails.application.credentials.dig(:posthog, :secret_key) || 
                       Rails.application.credentials.posthog_secret_key ||
                       ENV['POSTHOG_SECRET_KEY']
+    end
+
+    def project_id
+      @project_id ||= Rails.application.credentials.dig(:posthog, :project_id) || 
+                      Rails.application.credentials.posthog_project_id ||
+                      ENV['POSTHOG_PROJECT_ID']
     end
     
     def default_properties

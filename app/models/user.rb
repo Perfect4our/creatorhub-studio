@@ -10,8 +10,7 @@ class User < ApplicationRecord
   
   # Permanent subscription emails (you can add more emails here)
   PERMANENT_SUBSCRIPTION_EMAILS = [
-    'adenshepard@gmail.com',  # Add your email here
-    'perfect4ouryt@gmail.com', # Existing email
+    'perfect4ouryt@gmail.com', # Aden's email - admin access
     # Add more emails as needed
   ].freeze
   
@@ -107,6 +106,29 @@ class User < ApplicationRecord
 
   def acknowledge_subscription_status!
     update!(subscription_status_acknowledged_at: Time.current)
+  end
+
+  # PostHog recording management methods
+  def get_posthog_recordings(limit: 10)
+    PosthogService.get_user_recordings(user_id: id, limit: limit)
+  end
+
+  def manage_posthog_recordings(max_recordings: 5)
+    PosthogService.manage_user_recordings(user_id: id, max_recordings: max_recordings)
+  end
+
+  def schedule_recording_cleanup
+    ManagePosthogRecordingsJob.schedule_for_user(user_id: id)
+  end
+
+  def recording_count
+    get_posthog_recordings.length
+  rescue
+    0
+  end
+
+  def needs_recording_cleanup?(max_recordings: 5)
+    recording_count > max_recordings
   end
   
   # Allow name to be updated through Devise

@@ -24,6 +24,12 @@ production:
     class: FetchRealYoutubeStatsJob
     queue: default
     schedule: at 3am every day
+  
+  cleanup_posthog_recordings:
+    class: ManagePosthogRecordingsJob
+    queue: default
+    args: []
+    schedule: every 6 hours
 
 development:
   snapshot_stats:
@@ -40,3 +46,9 @@ development:
     class: FetchRealYoutubeStatsJob
     queue: default
     schedule: at 3am every day
+  
+  cleanup_posthog_recordings:
+    class: ManagePosthogRecordingsJob
+    queue: default
+    args: []
+    schedule: every 6 hours

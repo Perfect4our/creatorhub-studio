@@ -13,6 +13,7 @@ import LoadingController from "controllers/loading_controller"
 import NotificationController from "controllers/notification_controller"
 import PlatformController from "controllers/platform_controller"
 import RequestManagerController from "controllers/request_manager_controller"
+import SubscriptionController from "controllers/subscription_controller"
 import ThemeController from "controllers/theme_controller"
 import TimeSelectorController from "controllers/time_selector_controller"
 import VideoController from "controllers/video_controller"
@@ -29,6 +30,7 @@ application.register("loading", LoadingController)
 application.register("notification", NotificationController)
 application.register("platform", PlatformController)
 application.register("request-manager", RequestManagerController)
+application.register("subscription", SubscriptionController)
 application.register("theme", ThemeController)
 application.register("time-selector", TimeSelectorController)
 application.register("video", VideoController)

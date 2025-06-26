@@ -6,28 +6,17 @@
     <%= render 'shared/sidebar' %>
     
     <!-- Main content -->
-    <div class="col-md-10 main-content" data-controller="button" data-section="accounts" 
-         data-connected-accounts="<%= @subscriptions.count %>">
+    <div class="col-md-10 main-content">
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Linked Accounts</h1>
         <div class="btn-group">
           <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                    data-analytics-track="connect_accounts_cta_clicked"
-                    data-analytics-platform="youtube"
-                    data-analytics-location="header_dropdown"
-                    data-action="click->analytics#trackConnectAccountsCTA">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="fab fa-youtube me-2"></i>Connect YouTube
             </button>
             <ul class="dropdown-menu">
               <li>
-                <%= link_to "/auth/youtube", class: "dropdown-item",
-                            data: { 
-                              analytics_track: "account_connection_started",
-                              analytics_platform: "youtube",
-                              analytics_type: "basic",
-                              action: "click->analytics#trackAccountConnection"
-                            } do %>
+                <%= link_to "/auth/youtube", class: "dropdown-item" do %>
                   <i class="fas fa-play me-2"></i>
                   <div>
                     <strong>Basic Connection</strong>
@@ -37,13 +26,7 @@
               </li>
               <li><hr class="dropdown-divider"></li>
               <li>
-                <%= link_to "/auth/youtube?analytics=true", class: "dropdown-item",
-                            data: { 
-                              analytics_track: "account_connection_started",
-                              analytics_platform: "youtube",
-                              analytics_type: "analytics_api",
-                              action: "click->analytics#trackAccountConnection"
-                            } do %>
+                <%= link_to "/auth/youtube?analytics=true", class: "dropdown-item" do %>
                   <i class="fas fa-chart-line me-2"></i>
                   <div>
                     <strong>Analytics API (Advanced)</strong>
@@ -54,13 +37,7 @@
               </li>
             </ul>
           </div>
-          <%= link_to auth_tiktok_callback_path, class: "btn btn-outline-primary",
-                      data: { 
-                        analytics_track: "account_connection_started",
-                        analytics_platform: "tiktok",
-                        analytics_type: "basic",
-                        action: "click->analytics#trackAccountConnection"
-                      } do %>
+          <%= link_to auth_tiktok_callback_path, class: "btn btn-outline-primary" do %>
             <i class="fab fa-tiktok me-2"></i>Connect TikTok
           <% end %>
         </div>
@@ -164,21 +141,14 @@
                   <% end %>
                 </div>
                 <div class="card-footer bg-transparent d-flex justify-content-between">
-                  <%= link_to dashboard_path(subscription_id: subscription.id), class: "btn btn-sm btn-outline-primary",
-                              data: { 
-                                analytics_track: "dashboard_interaction",
-                                analytics_type: "platform_analytics_access",
-                                analytics_platform: subscription.platform,
-                                action: "click->analytics#trackDashboardInteraction"
-                              } do %>
+                  <%= link_to dashboard_path(subscription_id: subscription.id), class: "btn btn-sm btn-outline-primary" do %>
                     <i class="fas fa-chart-line me-1"></i>View Analytics
                   <% end %>
-                  <%= button_to subscription_path(subscription), method: :delete, 
+                  <%= link_to subscription_path(subscription), 
+                      method: :delete,
                       data: { 
-                        turbo_confirm: "Are you sure you want to disconnect this #{subscription.platform&.capitalize} account?",
-                        analytics_track: "account_disconnected",
-                        analytics_platform: subscription.platform,
-                        analytics_location: "card_footer"
+                        confirm: "Are you sure you want to disconnect this #{subscription.platform&.capitalize} account?",
+                        turbo_method: :delete 
                       },
                       class: "btn btn-sm btn-outline-danger" do %>
                     <i class="fas fa-unlink me-1"></i>Disconnect
@@ -202,24 +172,13 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <div class="dropdown w-100">
-                    <button class="btn btn-outline-danger btn-lg w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                            data-analytics-track="connect_accounts_cta_clicked"
-                            data-analytics-platform="youtube"
-                            data-analytics-location="empty_state"
-                            data-action="click->analytics#trackConnectAccountsCTA">
+                    <button class="btn btn-outline-danger btn-lg w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                       <i class="fab fa-youtube fa-2x d-block mb-2"></i>
                       Connect YouTube
                     </button>
                     <ul class="dropdown-menu w-100">
                       <li>
-                        <%= link_to "/auth/youtube", class: "dropdown-item text-center py-3",
-                                    data: { 
-                                      analytics_track: "account_connection_started",
-                                      analytics_platform: "youtube",
-                                      analytics_type: "basic",
-                                      analytics_location: "empty_state",
-                                      action: "click->analytics#trackAccountConnection"
-                                    } do %>
+                        <%= link_to "/auth/youtube", class: "dropdown-item text-center py-3" do %>
                           <i class="fas fa-play me-2"></i>
                           <div>
                             <strong>Basic Connection</strong>
@@ -229,14 +188,7 @@
                       </li>
                       <li><hr class="dropdown-divider"></li>
                       <li>
-                        <%= link_to "/auth/youtube?analytics=true", class: "dropdown-item text-center py-3",
-                                    data: { 
-                                      analytics_track: "account_connection_started",
-                                      analytics_platform: "youtube",
-                                      analytics_type: "analytics_api",
-                                      analytics_location: "empty_state",
-                                      action: "click->analytics#trackAccountConnection"
-                                    } do %>
+                        <%= link_to "/auth/youtube?analytics=true", class: "dropdown-item text-center py-3" do %>
                           <i class="fas fa-chart-line me-2"></i>
                           <div>
                             <strong>Analytics API (Advanced)</strong>
@@ -249,14 +201,7 @@
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <%= link_to auth_tiktok_callback_path, class: "btn btn-outline-dark btn-lg w-100",
-                              data: { 
-                                analytics_track: "account_connection_started",
-                                analytics_platform: "tiktok",
-                                analytics_type: "basic",
-                                analytics_location: "empty_state",
-                                action: "click->analytics#trackAccountConnection"
-                              } do %>
+                  <%= link_to auth_tiktok_callback_path, class: "btn btn-outline-dark btn-lg w-100" do %>
                     <i class="fab fa-tiktok fa-2x d-block mb-2"></i>
                     Connect TikTok
                   <% end %>

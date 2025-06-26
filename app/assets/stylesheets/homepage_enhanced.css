@@ -841,4 +841,539 @@ body.dark-mode .creator-stats-section {
   body:not(.dark-mode) .creator-stats-section {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
   }
+}
+
+/* ===== COMPREHENSIVE DARK MODE STYLES FOR HOMEPAGE ===== */
+
+.dark-mode .animated-hero-bg {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #3730a3 50%, #4c1d95 75%, #6b21a8 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+.dark-mode .animated-hero-bg::before {
+  background: linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(49, 46, 129, 0.9) 50%, rgba(107, 33, 168, 0.95) 100%);
+}
+
+.dark-mode .animated-footer-bg {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+/* Hero Section Dark Mode */
+.dark-mode .hero-section h1 {
+  color: #f8fafc;
+}
+
+.dark-mode .hero-section .lead {
+  color: #e2e8f0;
+}
+
+.dark-mode .hero-features p {
+  color: #cbd5e1;
+}
+
+.dark-mode .text-white-75 {
+  color: rgba(248, 250, 252, 0.75) !important;
+}
+
+.dark-mode .text-white-50 {
+  color: rgba(248, 250, 252, 0.5) !important;
+}
+
+/* Dashboard Preview in Dark Mode */
+.dark-mode .dashboard-preview {
+  background-color: #1e293b !important;
+  border: 1px solid #334155;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode .demo-header h6 {
+  color: #f1f5f9 !important;
+}
+
+.dark-mode .demo-header .text-muted {
+  color: #94a3b8 !important;
+}
+
+/* Platform Section Dark Mode */
+.dark-mode .platforms-section {
+  background-color: #0f172a !important;
+}
+
+.dark-mode .platforms-section h2 {
+  color: #f8fafc;
+}
+
+.dark-mode .platforms-section .lead {
+  color: #cbd5e1;
+}
+
+.dark-mode .platform-card {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .platform-card::before {
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+}
+
+.dark-mode .platform-card:hover {
+  background-color: #334155;
+  border-color: #475569;
+  box-shadow: 0 24px 48px rgba(59, 130, 246, 0.3);
+}
+
+.dark-mode .platform-card p {
+  color: #cbd5e1;
+}
+
+.dark-mode .platform-card h5 {
+  color: #f8fafc;
+}
+
+/* How It Works Section Dark Mode */
+.dark-mode .how-it-works-section {
+  background-color: #111827;
+}
+
+.dark-mode .how-it-works-section h2 {
+  color: #f9fafb;
+}
+
+.dark-mode .how-it-works-section .lead {
+  color: #d1d5db;
+}
+
+.dark-mode .how-it-works-card {
+  background-color: #1f2937 !important;
+  border: 1px solid #374151;
+  color: #f9fafb !important;
+}
+
+.dark-mode .how-it-works-card:hover {
+  background-color: #374151;
+  border-color: #4b5563;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+}
+
+.dark-mode .how-it-works-card h5 {
+  color: #f9fafb;
+}
+
+.dark-mode .how-it-works-card p {
+  color: #d1d5db;
+}
+
+.dark-mode .step-number {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  color: white;
+}
+
+/* Features Section Dark Mode */
+.dark-mode .features-section {
+  background-color: #0f172a !important;
+}
+
+.dark-mode .features-section h2 {
+  color: #f8fafc;
+}
+
+.dark-mode .features-section .lead {
+  color: #cbd5e1;
+}
+
+.dark-mode .feature-card {
+  background-color: #1e293b !important;
+  border: 1px solid #334155;
+  color: #f1f5f9 !important;
+}
+
+.dark-mode .feature-card:hover {
+  background-color: #334155;
+  border-color: #475569;
+  box-shadow: 0 24px 48px rgba(59, 130, 246, 0.3);
+}
+
+.dark-mode .feature-card h4 {
+  color: #f8fafc;
+}
+
+.dark-mode .feature-card p {
+  color: #cbd5e1;
+}
+
+/* Security Section Dark Mode */
+.dark-mode .security-section {
+  background-color: #0f172a !important;
+}
+
+.dark-mode .security-section h2 {
+  color: #f8fafc;
+}
+
+.dark-mode .security-section .lead {
+  color: #cbd5e1;
+}
+
+.dark-mode .security-item h5 {
+  color: #f1f5f9;
+}
+
+.dark-mode .security-item p {
+  color: #94a3b8 !important;
+}
+
+.dark-mode .compliance-item {
+  background-color: #1e293b !important;
+  border: 1px solid #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .compliance-item:hover {
+  background-color: #334155;
+  border-color: #475569;
+}
+
+.dark-mode .compliance-item h6 {
+  color: #f8fafc;
+}
+
+.dark-mode .badge-item h6 {
+  color: #f1f5f9;
+}
+
+.dark-mode .badge-item p {
+  color: #94a3b8 !important;
+}
+
+/* CTA Section Dark Mode */
+.dark-mode .cta-section {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+.dark-mode .cta-section h2 {
+  color: #f8fafc;
+}
+
+.dark-mode .cta-section .lead {
+  color: #e2e8f0;
+}
+
+.dark-mode .cta-section .text-white-75 {
+  color: rgba(248, 250, 252, 0.75) !important;
+}
+
+/* Footer Dark Mode */
+.dark-mode .footer-section {
+  background-color: #020617 !important;
+  border-top: 1px solid #1e293b;
+}
+
+.dark-mode .footer-section h5,
+.dark-mode .footer-section h6 {
+  color: #f8fafc;
+}
+
+.dark-mode .footer-section .text-white-75 {
+  color: rgba(248, 250, 252, 0.75) !important;
+}
+
+.dark-mode .footer-section .text-white-75:hover {
+  color: #3b82f6 !important;
+}
+
+.dark-mode .footer-section .text-white-50 {
+  color: rgba(248, 250, 252, 0.5) !important;
+}
+
+.dark-mode .footer-section p {
+  color: #cbd5e1;
+}
+
+.dark-mode .footer-section hr {
+  border-color: #334155 !important;
+}
+
+.dark-mode .social-links a {
+  color: #f1f5f9 !important;
+  background: rgba(248, 250, 252, 0.1);
+  border: 1px solid rgba(248, 250, 252, 0.2);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-size: 1.1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .social-links a:hover {
+  color: #fbbf24 !important;
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.3);
+  box-shadow: 0 4px 20px rgba(251, 191, 36, 0.2);
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Button Dark Mode Enhancements */
+.dark-mode .btn-floating {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  border: 2px solid rgba(251, 191, 36, 0.3);
+  box-shadow: 0 8px 30px rgba(245, 158, 11, 0.5), 0 0 20px rgba(251, 191, 36, 0.3);
+  color: #1f2937 !important;
+  font-weight: 700;
+  text-shadow: none;
+}
+
+.dark-mode .btn-floating:hover {
+  background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 50%, #f59e0b 100%);
+  border-color: rgba(252, 211, 77, 0.5);
+  box-shadow: 0 15px 40px rgba(245, 158, 11, 0.7), 0 0 30px rgba(251, 191, 36, 0.5);
+  color: #111827 !important;
+  transform: translateY(-3px);
+}
+
+.dark-mode .animated-btn.btn-warning {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  border: 2px solid rgba(251, 191, 36, 0.4);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4), 0 0 15px rgba(251, 191, 36, 0.2);
+  color: #1f2937 !important;
+  font-weight: 700;
+  text-shadow: none;
+}
+
+.dark-mode .animated-btn.btn-warning:hover {
+  background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 50%, #f59e0b 100%);
+  border-color: rgba(252, 211, 77, 0.6);
+  box-shadow: 0 8px 30px rgba(245, 158, 11, 0.6), 0 0 25px rgba(251, 191, 36, 0.4);
+  color: #111827 !important;
+  transform: translateY(-2px);
+}
+
+.dark-mode .animated-btn.btn-outline-light {
+  background: rgba(248, 250, 252, 0.15);
+  border: 2px solid rgba(248, 250, 252, 0.5);
+  color: #f8fafc !important;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(248, 250, 252, 0.1);
+}
+
+.dark-mode .animated-btn.btn-outline-light:hover {
+  background: rgba(248, 250, 252, 0.25);
+  border-color: rgba(248, 250, 252, 0.7);
+  color: #f8fafc !important;
+  box-shadow: 0 8px 25px rgba(248, 250, 252, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Text Colors Dark Mode */
+.dark-mode .text-muted {
+  color: #94a3b8 !important;
+}
+
+.dark-mode .text-dark {
+  color: #f1f5f9 !important;
+}
+
+/* Chart/Demo Animations Dark Mode */
+.dark-mode .chart-bar {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+}
+
+/* Platform Icons Dark Mode Enhancement */
+.dark-mode .platform-card i {
+  filter: brightness(1.2) saturate(1.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .platform-card:hover i {
+  filter: brightness(1.4) saturate(1.5);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  transform: scale(1.05);
+}
+
+/* Feature Icons Dark Mode Enhancement */
+.dark-mode .feature-card i {
+  filter: brightness(1.2) saturate(1.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .feature-card:hover i {
+  filter: brightness(1.4) saturate(1.5);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  transform: scale(1.1);
+}
+
+/* How It Works Icons Dark Mode Enhancement */
+.dark-mode .how-it-works-card i {
+  filter: brightness(1.2) saturate(1.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .how-it-works-card:hover i {
+  filter: brightness(1.4) saturate(1.5);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Stats/Counter Section Dark Mode */
+.dark-mode .creator-stats-section {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+}
+
+.dark-mode .stat-counter-card {
+  background-color: #1e293b !important;
+  border: 1px solid #334155;
+  color: #f1f5f9 !important;
+}
+
+.dark-mode .stat-counter-card:hover {
+  background-color: #334155;
+  border-color: #475569;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+}
+
+.dark-mode .testimonial-card {
+  background-color: #1e293b !important;
+  border: 1px solid #334155;
+  color: #f1f5f9 !important;
+}
+
+.dark-mode .testimonial-card:hover {
+  background-color: #334155;
+  border-color: #475569;
+}
+
+.dark-mode .testimonial-card .blockquote p {
+  color: #e2e8f0;
+}
+
+.dark-mode .testimonial-card .blockquote-footer {
+  color: #cbd5e1;
+}
+
+/* Responsive Dark Mode Adjustments */
+@media (max-width: 768px) {
+  .dark-mode .platform-card,
+  .dark-mode .feature-card,
+  .dark-mode .how-it-works-card {
+    background-color: #1e293b !important;
+    border: 1px solid #334155;
+  }
+  
+  .dark-mode .dashboard-preview {
+    background-color: #1e293b !important;
+    border: 1px solid #334155;
+  }
+  
+  .dark-mode .floating-cta {
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 8px;
+  }
+}
+
+/* Ensure all sections have proper dark backgrounds */
+.dark-mode .bg-light {
+  background-color: #0f172a !important;
+}
+
+.dark-mode .bg-white {
+  background-color: #1e293b !important;
+}
+
+/* Animation and transition adjustments for dark mode */
+.dark-mode .hover-lift:hover {
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+}
+
+.dark-mode .hover-pop:hover {
+  filter: brightness(1.2);
+}
+
+/* Recording Indicator */
+.recording-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  background: rgba(220, 53, 69, 0.95);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 25px;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  backdrop-filter: blur(10px);
+  font-size: 0.85rem;
+  font-weight: 500;
+  animation: slideInRecording 0.5s ease-out;
+}
+
+.recording-indicator-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recording-dot {
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  animation: recordingPulse 2s infinite;
+}
+
+.recording-text {
+  white-space: nowrap;
+}
+
+@keyframes slideInRecording {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes recordingPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.8);
+  }
+}
+
+/* Dark mode recording indicator */
+[data-theme="dark"] .recording-indicator {
+  background: rgba(220, 53, 69, 0.9);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+/* Mobile recording indicator */
+@media (max-width: 768px) {
+  .recording-indicator {
+    top: 10px;
+    right: 10px;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+  
+  .recording-dot {
+    width: 6px;
+    height: 6px;
+  }
 } 

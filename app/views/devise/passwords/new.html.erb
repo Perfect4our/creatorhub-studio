@@ -1,3 +1,5 @@
+<%= yield :auth_navbar %>
+
 <div class="auth-page">
   <div class="container">
     <div class="row justify-content-center">
@@ -5,11 +7,11 @@
         <div class="auth-card">
           <div class="card-header text-center">
             <div class="auth-brand">
-              <i class="fab fa-tiktok"></i>
-              <span>TikTok Studio</span>
+              <i class="fas fa-chart-line"></i>
+              <span>CreatorHub Studio</span>
             </div>
             <h4 class="mb-0">Reset Password</h4>
-            <p class="text-white-50">Enter your email and we'll send you instructions.</p>
+            <p class="text-muted">Enter your email and we'll send you instructions.</p>
           </div>
           <div class="card-body">
             <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, class: "needs-validation" }) do |f| %>

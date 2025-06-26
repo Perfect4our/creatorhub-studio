@@ -6,6 +6,11 @@ class SubscriptionsController < ApplicationController
     @subscriptions = current_user.subscriptions.all
   end
 
+  def simple_index
+    @subscriptions = current_user.subscriptions.all
+    render :simple_index
+  end
+
   def new
     @subscription = current_user.subscriptions.new
     
@@ -115,8 +120,13 @@ class SubscriptionsController < ApplicationController
             active: true
           )
           
-          # Refresh YouTube data
-          FetchYoutubeDataJob.perform_later(existing.id)
+          # Refresh YouTube data immediately
+          begin
+            FetchYoutubeDataJob.new.perform(existing.id)
+          rescue => e
+            Rails.logger.error "Failed to refresh YouTube data immediately: #{e.message}"
+            FetchYoutubeDataJob.perform_later(existing.id)
+          end
           
           message = "YouTube account reconnected successfully."
           message += " Analytics API enabled!" if has_analytics_scope
@@ -148,8 +158,14 @@ class SubscriptionsController < ApplicationController
           # Create initial analytics snapshot to avoid validation errors
           create_initial_snapshot(subscription)
           
-          # Start fetching YouTube data
-          FetchYoutubeDataJob.perform_later(subscription.id)
+          # Start fetching YouTube data immediately (since Sidekiq may not be running)
+          begin
+            FetchYoutubeDataJob.new.perform(subscription.id)
+          rescue => e
+            Rails.logger.error "Failed to fetch YouTube data immediately: #{e.message}"
+            # Fallback to background job if available
+            FetchYoutubeDataJob.perform_later(subscription.id)
+          end
           
           message = "YouTube account connected successfully."
           message += " Analytics API enabled!" if has_analytics_scope
@@ -236,16 +252,12 @@ class SubscriptionsController < ApplicationController
 
   def destroy
     platform_name = @subscription.platform
-    
-    # Track platform disconnection server-side before destroying
-    PosthogService.track_platform_disconnection(
-      user: current_user,
-      platform: platform_name
-    )
-    
     @subscription.destroy
     
-    redirect_to subscriptions_path, notice: "#{platform_name.capitalize} account disconnected successfully."
+    respond_to do |format|
+      format.html { redirect_to subscriptions_path, notice: "#{platform_name.capitalize} account disconnected successfully." }
+      format.json { head :no_content }
+    end
   end
   
   private

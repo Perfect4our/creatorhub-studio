@@ -31,11 +31,23 @@ export default class extends Controller {
     
     // Handle escape key
     document.addEventListener('keydown', this.handleEscapeKey.bind(this))
+    
+    // Mobile touch events for better mobile experience
+    if ('ontouchstart' in window) {
+      document.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true })
+      document.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true })
+    }
   }
 
   disconnect() {
     document.removeEventListener('click', this.handleOutsideClick.bind(this))
     document.removeEventListener('keydown', this.handleEscapeKey.bind(this))
+    
+    // Remove mobile touch events
+    if ('ontouchstart' in window) {
+      document.removeEventListener('touchstart', this.handleTouchStart.bind(this))
+      document.removeEventListener('touchend', this.handleTouchEnd.bind(this))
+    }
 
     console.log('Time selector controller disconnected')
     this.cleanup()
@@ -614,6 +626,19 @@ export default class extends Controller {
         this.closeCustomModal(event)
       }
     }
+  }
+
+  // Mobile touch handling for better UX
+  handleTouchStart(event) {
+    this.touchStartTarget = event.target
+  }
+
+  handleTouchEnd(event) {
+    // Only handle if the touch started and ended on the same element
+    if (this.touchStartTarget === event.target) {
+      this.handleOutsideClick(event)
+    }
+    this.touchStartTarget = null
   }
 
   initializeDropdown() {

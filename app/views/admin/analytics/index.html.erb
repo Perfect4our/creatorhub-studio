@@ -20,6 +20,13 @@
         Analytics Dashboard
       </h1>
       <p class="text-muted mb-0">Real-time insights and performance metrics</p>
+      <div class="mt-2">
+        <div class="alert alert-info border-0 py-2 px-3" style="font-size: 0.85rem;">
+          <i class="fas fa-info-circle me-1"></i>
+          <strong>Data Sources:</strong> User metrics, subscription data, and "Online Now" counter are real. 
+          Page performance uses estimates based on actual user behavior. PostHog events reflect your live analytics tracking.
+        </div>
+      </div>
     </div>
     
     <div class="d-flex align-items-center gap-3">
@@ -153,11 +160,11 @@
               <i class="fas fa-globe text-white"></i>
             </div>
             <div class="ms-3 flex-grow-1">
-              <div class="metric-value" id="realtime-count">-</div>
+              <div class="metric-value" id="realtime-count"><%= @active_users_now %></div>
               <div class="metric-label">Online Now</div>
               <div class="metric-change live">
                 <span class="live-dot"></span>
-                Live
+                Real-time
               </div>
             </div>
           </div>
@@ -229,8 +236,31 @@
               <small>Install PostHog or Google Analytics for page tracking</small>
             </div>
           <% else %>
-            <div class="chart-container">
-              <canvas data-admin-analytics-target="topPagesChart"></canvas>
+            <div class="pages-list">
+              <% @top_pages_data.each_with_index do |page, index| %>
+                <div class="page-item d-flex align-items-center mb-3 p-3 bg-light rounded">
+                  <div class="page-rank me-3">
+                    <span class="badge bg-primary rounded-circle" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                      <%= index + 1 %>
+                    </span>
+                  </div>
+                  <div class="page-info flex-grow-1">
+                    <div class="page-title fw-bold text-dark"><%= page[:title] %></div>
+                    <div class="page-path text-muted small"><%= page[:path] %></div>
+                  </div>
+                  <div class="page-metrics text-end">
+                    <div class="page-views fw-bold text-primary"><%= number_with_delimiter(page[:views]) %> views</div>
+                    <div class="page-stats small text-muted">
+                      <%= page[:unique_visitors] %> unique • <%= page[:avg_time] %> avg time
+                    </div>
+                    <div class="bounce-rate small">
+                      <span class="badge bg-<%= page[:bounce_rate] > 50 ? 'warning' : 'success' %>">
+                        <%= page[:bounce_rate] %>% bounce
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
             </div>
           <% end %>
         </div>
@@ -480,6 +510,103 @@
                   </div>
                 </div>
               <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subscription Management Section -->
+  <div class="row g-4 mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent border-0">
+          <h6 class="card-title mb-0">
+            <i class="fas fa-users-gear me-2 text-danger"></i>
+            Subscription Management
+          </h6>
+          <small class="text-muted">Manage user subscriptions and billing</small>
+        </div>
+        <div class="card-body">
+          <% if @subscription_users.empty? %>
+            <div class="text-center py-5 text-muted">
+              <i class="fas fa-users-gear fa-3x mb-3 opacity-25"></i>
+              <p>No subscription users found</p>
+              <small>Users with active Stripe subscriptions will appear here</small>
+            </div>
+          <% else %>
+            <div class="table-responsive">
+              <table class="table table-hover subscription-table">
+                <thead class="table-light">
+                  <tr>
+                    <th>User</th>
+                    <th>Plan</th>
+                    <th>Status</th>
+                    <th>Expires</th>
+                    <th>Member Since</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @subscription_users.each do |user| %>
+                    <tr id="user-row-<%= user[:id] %>">
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="user-avatar me-3">
+                            <div class="avatar-circle bg-primary text-white">
+                              <%= user[:email].first.upcase %>
+                            </div>
+                          </div>
+                          <div>
+                            <div class="fw-bold text-dark"><%= user[:name] %></div>
+                            <div class="text-muted small"><%= user[:email] %></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="badge bg-info text-dark">
+                          <%= user[:plan] %>
+                        </span>
+                      </td>
+                      <td>
+                        <% if user[:cancel_at_period_end] %>
+                          <span class="badge bg-warning text-dark">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Canceling
+                          </span>
+                        <% else %>
+                          <span class="badge bg-success">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Active
+                          </span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <span class="text-dark fw-medium"><%= user[:expires_at] %></span>
+                      </td>
+                      <td>
+                        <span class="text-muted"><%= user[:created_at].strftime('%B %d, %Y') %></span>
+                      </td>
+                      <td class="text-end">
+                        <% unless user[:cancel_at_period_end] %>
+                          <button class="btn btn-outline-danger btn-sm cancel-subscription-btn" 
+                                  data-user-id="<%= user[:id] %>"
+                                  data-user-email="<%= user[:email] %>"
+                                  title="Cancel subscription">
+                            <i class="fas fa-times"></i>
+                          </button>
+                        <% else %>
+                          <span class="text-muted small">
+                            <i class="fas fa-clock me-1"></i>
+                            Ending
+                          </span>
+                        <% end %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
             </div>
           <% end %>
         </div>
@@ -751,20 +878,169 @@
   background: linear-gradient(135deg, #1e3a8a, #1e40af);
   border-color: #3b82f6;
 }
+
+/* Subscription Management Styles */
+.subscription-table {
+  margin-bottom: 0;
+}
+
+.subscription-table th {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.subscription-table td {
+  vertical-align: middle;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.user-avatar {
+  flex-shrink: 0;
+}
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.cancel-subscription-btn {
+  transition: all 0.2s ease;
+}
+
+.cancel-subscription-btn:hover {
+  background-color: #dc2626;
+  border-color: #dc2626;
+  color: white;
+  transform: scale(1.05);
+}
+
+.subscription-table tbody tr:hover {
+  background-color: #f8fafc;
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Simulate real-time user count
+  // Real-time user count updates
   function updateRealtimeCount() {
-    const count = Math.floor(Math.random() * 20) + 5;
-    const element = document.getElementById('realtime-count');
-    if (element) {
-      element.textContent = count;
-    }
+    // Fetch real active user count from server
+    fetch('/admin/analytics.json')
+      .then(response => response.json())
+      .then(data => {
+        const element = document.getElementById('realtime-count');
+        if (element && data.active_users_now !== undefined) {
+          element.textContent = data.active_users_now;
+        }
+      })
+      .catch(error => {
+        console.log('Real-time update error:', error);
+        // Don't change the display on error - keep showing last known count
+      });
   }
   
-  updateRealtimeCount();
-  setInterval(updateRealtimeCount, 10000); // Update every 10 seconds
+  // Update every 30 seconds for real-time feel without overwhelming server
+  setInterval(updateRealtimeCount, 30000);
+
+  // Subscription cancellation functionality
+  document.querySelectorAll('.cancel-subscription-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const userId = this.dataset.userId;
+      const userEmail = this.dataset.userEmail;
+      
+      if (confirm(`Are you sure you want to cancel the subscription for ${userEmail}?\n\nThis will mark their subscription for cancellation at the end of the current billing period.`)) {
+        cancelSubscription(userId, userEmail, this);
+      }
+    });
+  });
 });
+
+function cancelSubscription(userId, userEmail, button) {
+  // Disable button and show loading
+  button.disabled = true;
+  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  
+  // Get CSRF token
+  const token = document.querySelector('meta[name="csrf-token"]').content;
+  
+  fetch(`/admin/analytics/cancel_subscription/${userId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': token,
+      'Accept': 'application/json'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Update the UI to reflect cancellation
+      const row = document.getElementById(`user-row-${userId}`);
+      const statusCell = row.querySelector('td:nth-child(3)');
+      const actionCell = row.querySelector('td:nth-child(6)');
+      
+      // Update status badge
+      statusCell.innerHTML = `
+        <span class="badge bg-warning text-dark">
+          <i class="fas fa-exclamation-triangle me-1"></i>
+          Canceling
+        </span>
+      `;
+      
+      // Update action cell
+      actionCell.innerHTML = `
+        <span class="text-muted small">
+          <i class="fas fa-clock me-1"></i>
+          Ending
+        </span>
+      `;
+      
+      // Show success message
+      showNotification('success', data.message);
+    } else {
+      // Show error message
+      showNotification('error', data.message);
+      
+      // Re-enable button
+      button.disabled = false;
+      button.innerHTML = '<i class="fas fa-times"></i>';
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showNotification('error', 'An error occurred while canceling the subscription');
+    
+    // Re-enable button
+    button.disabled = false;
+    button.innerHTML = '<i class="fas fa-times"></i>';
+  });
+}
+
+function showNotification(type, message) {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+  notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+  notification.innerHTML = `
+    <strong>${type === 'success' ? 'Success!' : 'Error!'}</strong> ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  
+  // Add to page
+  document.body.appendChild(notification);
+  
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.remove();
+    }
+  }, 5000);
+}
 </script> 

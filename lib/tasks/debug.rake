@@ -92,7 +92,43 @@ namespace :tiktok_studio do
     debug_results << js_errors_result
     print_check_result("Common JS Issues", js_errors_result[:status], js_errors_result[:details])
     
-    # 8. Summary
+    # 8. PostHog & Analytics
+    puts "\n📊 PostHog & Analytics"
+    puts "-" * 20
+    
+    posthog_result = check_posthog_integration
+    debug_results << posthog_result
+    print_check_result("PostHog Integration", posthog_result[:status], posthog_result[:details])
+    
+    analytics_result = check_analytics_tracking
+    debug_results << analytics_result
+    print_check_result("Analytics Tracking", analytics_result[:status], analytics_result[:details])
+    
+    # 9. Content Security Policy
+    puts "\n🔒 Security Configuration"
+    puts "-" * 20
+    
+    csp_result = check_csp_configuration
+    debug_results << csp_result
+    print_check_result("CSP Configuration", csp_result[:status], csp_result[:details])
+    
+    cors_result = check_cors_issues
+    debug_results << cors_result
+    print_check_result("CORS Configuration", cors_result[:status], cors_result[:details])
+    
+    # 10. Performance & Errors
+    puts "\n⚡ Performance & Errors"
+    puts "-" * 20
+    
+    performance_result = check_performance_issues
+    debug_results << performance_result
+    print_check_result("Performance Issues", performance_result[:status], performance_result[:details])
+    
+    error_handling_result = check_error_handling
+    debug_results << error_handling_result
+    print_check_result("Error Handling", error_handling_result[:status], error_handling_result[:details])
+    
+    # 11. Summary
     print_summary(debug_results)
   end
   
@@ -499,16 +535,20 @@ namespace :tiktok_studio do
         
         youtube_subs.each do |sub|
           youtube_service = YoutubeService.new(sub)
-          if youtube_service.analytics_api_available?
-            analytics_enabled += 1
-            
-            # Test Analytics API call
-            begin
-              analytics_data = youtube_service.get_analytics_data(7.days.ago, Date.current)
-              analytics_available += 1
-            rescue => e
-              # Analytics API call failed
+          begin
+            if youtube_service.respond_to?(:analytics_api_available?) && youtube_service.analytics_api_available?
+              analytics_enabled += 1
+              
+              # Test Analytics API call
+              begin
+                analytics_data = youtube_service.get_analytics_data(7.days.ago, Date.current)
+                analytics_available += 1
+              rescue => e
+                # Analytics API call failed
+              end
             end
+          rescue => e
+            Rails.logger.warn "Error checking analytics for subscription #{sub.id}: #{e.message}"
           end
         end
         
@@ -691,5 +731,171 @@ namespace :tiktok_studio do
     
     puts "\nRun 'rails tiktok_studio:debug' again after fixing issues."
     puts ""
+  end
+
+  def check_posthog_integration
+    begin
+      # Check PostHog configuration
+      issues = []
+      
+      # Check if PostHog is properly configured
+      layout_content = File.read('app/views/layouts/application.html.erb')
+      
+      if layout_content.include?('window.posthog')
+        if layout_content.include?('/analytics/track')
+          { status: :pass, details: "PostHog configured with local analytics endpoint (CORS-safe)", platform: "PostHog" }
+        else
+          issues << "PostHog may have CORS issues - consider using local analytics endpoint"
+          { status: :warn, details: issues.join('; '), platform: "PostHog" }
+        end
+      else
+        { status: :warn, details: "PostHog not found in layout - analytics may not be working", platform: "PostHog" }
+      end
+    rescue => e
+      { status: :fail, details: "Error checking PostHog: #{e.message}", platform: "PostHog" }
+    end
+  end
+
+  def check_analytics_tracking
+    begin
+      # Check analytics controller and routes
+      issues = []
+      
+      # Check if analytics controller has track_event action
+      controller_content = File.read('app/controllers/analytics_controller.rb')
+      unless controller_content.include?('def track_event')
+        issues << "Missing track_event action in AnalyticsController"
+      end
+      
+      # Check routes
+      routes_content = File.read('config/routes.rb')
+      unless routes_content.include?('post "/analytics/track"') || routes_content.include?("post '/analytics/track'")
+        issues << "Missing analytics tracking route"
+      end
+      
+      # Check analytics JavaScript controller
+      if File.exist?('app/javascript/controllers/analytics_controller.js')
+        js_content = File.read('app/javascript/controllers/analytics_controller.js')
+        unless js_content.include?('trackEvent')
+          issues << "Analytics controller missing trackEvent method"
+        end
+      else
+        issues << "Missing analytics JavaScript controller"
+      end
+      
+      if issues.empty?
+        { status: :pass, details: "Analytics tracking properly configured", platform: "Analytics" }
+      else
+        { status: :warn, details: issues.join('; '), platform: "Analytics" }
+      end
+    rescue => e
+      { status: :fail, details: "Error checking analytics: #{e.message}", platform: "Analytics" }
+    end
+  end
+
+  def check_csp_configuration
+    begin
+      csp_content = File.read('config/initializers/content_security_policy.rb')
+      
+      if csp_content.include?('Rails.env.development?')
+        { status: :pass, details: "CSP properly configured for development/production", platform: "CSP" }
+      elsif csp_content.include?('policy.script_src')
+        { status: :warn, details: "CSP configured but may be too restrictive", platform: "CSP" }
+      else
+        { status: :skip, details: "CSP not configured", platform: "CSP" }
+      end
+    rescue => e
+      { status: :fail, details: "Error checking CSP: #{e.message}", platform: "CSP" }
+    end
+  end
+
+  def check_cors_issues
+    begin
+      issues = []
+      
+      # Check for external PostHog domains in application layout
+      layout_content = File.read('app/views/layouts/application.html.erb')
+      
+      external_domains = ['i.posthog.com', 'us-assets.i.posthog.com', 'app.posthog.com']
+      cors_risks = external_domains.select { |domain| layout_content.include?(domain) }
+      
+      if cors_risks.any?
+        issues << "External domains detected: #{cors_risks.join(', ')} (potential CORS issues)"
+      end
+      
+      # Check if using local analytics endpoint
+      if layout_content.include?('/analytics/track')
+        issues << "Using local analytics endpoint (good for avoiding CORS)"
+      end
+      
+      if issues.empty?
+        { status: :pass, details: "No obvious CORS issues detected", platform: "CORS" }
+      elsif issues.any? { |i| i.include?('potential CORS') }
+        { status: :warn, details: issues.join('; '), platform: "CORS" }
+      else
+        { status: :pass, details: issues.join('; '), platform: "CORS" }
+      end
+    rescue => e
+      { status: :fail, details: "Error checking CORS: #{e.message}", platform: "CORS" }
+    end
+  end
+
+  def check_performance_issues
+    begin
+      issues = []
+      
+      # Check for potential infinite loops in JavaScript
+      js_files = [
+        'app/javascript/controllers/analytics_controller.js',
+        'app/javascript/controllers/request_manager_controller.js'
+      ]
+      
+      js_files.each do |file|
+        if File.exist?(file)
+          content = File.read(file)
+          
+          # Check for recursion guards
+          unless content.include?('recursionGuard') || content.include?('recursion_guard')
+            issues << "#{file} may lack recursion protection"
+          end
+          
+          # Check for rate limiting
+          unless content.include?('setTimeout') || content.include?('throttle') || content.include?('debounce')
+            issues << "#{file} may lack rate limiting"
+          end
+        end
+      end
+      
+      if issues.empty?
+        { status: :pass, details: "No obvious performance issues detected", platform: "Performance" }
+      else
+        { status: :warn, details: issues.join('; '), platform: "Performance" }
+      end
+    rescue => e
+      { status: :fail, details: "Error checking performance: #{e.message}", platform: "Performance" }
+    end
+  end
+
+  def check_error_handling
+    begin
+      issues = []
+      
+      # Check dashboard for JavaScript error handling
+      dashboard_content = File.read('app/views/pages/dashboard.html.erb')
+      
+      # Look for try-catch blocks
+      try_catch_count = dashboard_content.scan(/try\s*{/).length
+      error_handling_count = dashboard_content.scan(/catch\s*\(/).length
+      
+      if try_catch_count > 0 && error_handling_count > 0
+        { status: :pass, details: "Error handling present in dashboard", platform: "Error Handling" }
+      elsif dashboard_content.include?('console.error') || dashboard_content.include?('console.warn')
+        { status: :warn, details: "Some error logging present but limited try-catch", platform: "Error Handling" }
+      else
+        { status: :warn, details: "Limited error handling in dashboard", platform: "Error Handling" }
+      end
+    rescue => e
+      { status: :fail, details: "Error checking error handling: #{e.message}", platform: "Error Handling" }
+    end
   end
 end 

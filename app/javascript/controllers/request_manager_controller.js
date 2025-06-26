@@ -164,12 +164,26 @@ export default class extends Controller {
 
   handleTurboSubmitStart(event) {
     const form = event.target
-    this.setFormLoading(form, true)
+    const submitButton = form.querySelector('button[type="submit"], input[type="submit"]')
+    
+    if (submitButton && !submitButton.disabled) {
+      // Just disable the button, don't change text or add loading class
+      submitButton.disabled = true
+      submitButton.dataset.wasDisabledByTurbo = 'true'
+      console.log("📝 Form submission started - button disabled")
+    }
   }
 
   handleTurboSubmitEnd(event) {
     const form = event.target
-    this.setFormLoading(form, false)
+    const submitButton = form.querySelector('button[type="submit"], input[type="submit"]')
+    
+    if (submitButton && submitButton.dataset.wasDisabledByTurbo) {
+      // Re-enable the button
+      submitButton.disabled = false
+      delete submitButton.dataset.wasDisabledByTurbo
+      console.log("📝 Form submission ended - button re-enabled")
+    }
   }
 
   // === BUTTON MANAGEMENT ===
@@ -181,6 +195,12 @@ export default class extends Controller {
   handleButtonClick(event) {
     const button = event.target.closest('button, .btn, [role="button"]')
     if (!button) return
+
+    // Skip form submission buttons - let Turbo handle them natively
+    if (button.type === 'submit' || button.form || button.closest('form')) {
+      console.log("📝 Skipping form button - letting Turbo handle it:", button)
+      return
+    }
 
     const buttonId = this.getElementId(button)
     

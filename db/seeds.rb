@@ -12,6 +12,23 @@ admin.assign_attributes(
 admin.save!
 puts "Admin user created or updated: #{admin.email}"
 
+# Make perfect4ouryt@gmail.com an admin
+aden_admin = User.where(email: 'perfect4ouryt@gmail.com').first_or_initialize
+aden_admin.assign_attributes(
+  admin: true,
+  name: 'Aden Shepard',
+  permanent_subscription: true
+)
+# Only set password if it's a new user
+if aden_admin.new_record?
+  aden_admin.assign_attributes(
+    password: 'temppassword123',
+    password_confirmation: 'temppassword123'
+  )
+end
+aden_admin.save!
+puts "✅ Aden admin user created or updated: #{aden_admin.email} (admin: #{aden_admin.admin?})"
+
 # Create regular user
 user = User.where(email: 'user@example.com').first_or_initialize
 user.assign_attributes(

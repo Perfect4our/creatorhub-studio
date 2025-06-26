@@ -425,9 +425,28 @@ class PagesController < ApplicationController
                                               .limit(5)
                                               .to_a
       when 'youtube'
-        # For YouTube, use cached data or return empty array
-        # Heavy YouTube API calls will be loaded via AJAX
-        platform_videos[platform] = []
+        # Get YouTube videos from API
+        begin
+          youtube_service = YoutubeService.new(subscription)
+          youtube_videos = youtube_service.get_videos(5) # Get top 5 videos
+          platform_videos[platform] = youtube_videos.map do |video|
+            {
+              video_id: video[:video_id],
+              title: video[:title],
+              description: video[:description],
+              view_count: video[:view_count],
+              like_count: video[:like_count],
+              comment_count: video[:comment_count],
+              created_at_tiktok: video[:published_at],
+              thumbnail_url: video[:thumbnail_url],
+              platform: 'youtube',
+              source: 'api'
+            }
+          end
+        rescue => e
+          Rails.logger.error "Error fetching YouTube videos for dashboard: #{e.message}"
+          platform_videos[platform] = []
+        end
       else
         platform_videos[platform] = []
       end

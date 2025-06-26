@@ -13,6 +13,7 @@ export default class extends Controller {
     this.initializeButtons()
     this.fixDropdowns()
     this.setupEnhancedClickHandling()
+    this.setupMobileOptimizations()
   }
 
   disconnect() {
@@ -456,20 +457,78 @@ export default class extends Controller {
       return
     }
     
-    // Fallback notification
+    // Fallback to Stimulus notification controller
+    const notificationElement = document.querySelector('[data-controller*="notification"]')
+    if (notificationElement) {
+      const controller = this.application.getControllerForElementAndIdentifier(notificationElement, 'notification')
+      if (controller) {
+        controller.show(message, type)
+        return
+      }
+    }
+    
+    // Final fallback - enhanced notification
+    this.createFallbackNotification(message, type)
+  }
+
+  createFallbackNotification(message, type) {
+    const getIcon = (type) => {
+      const icons = {
+        success: 'fa-check',
+        error: 'fa-exclamation-triangle',
+        warning: 'fa-exclamation-circle',
+        info: 'fa-info-circle'
+      }
+      return icons[type] || icons.info
+    }
+
     const notification = document.createElement('div')
     notification.className = `notification notification-${type}`
     notification.innerHTML = `
-      ${message}
-      <button type="button" class="notification-close">&times;</button>
+      <div class="notification-icon">
+        <i class="fas ${getIcon(type)}"></i>
+      </div>
+      <div class="notification-content">
+        <p class="notification-message">${message}</p>
+      </div>
+      <button type="button" class="notification-close">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="notification-progress"></div>
     `
     
-    // Add to container or body
-    const container = document.querySelector('.notification-container') || document.body
+    // Add to container or create one
+    let container = document.querySelector('.notification-container')
+    if (!container) {
+      container = document.createElement('div')
+      container.className = 'notification-container'
+      document.body.appendChild(container)
+    }
     container.appendChild(notification)
     
+    // Setup animations and lifecycle
+    notification.style.opacity = '0'
+    notification.style.transform = 'translateX(100%) scale(0.9)'
+    
+    requestAnimationFrame(() => {
+      notification.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'
+      notification.style.opacity = '1'
+      notification.style.transform = 'translateX(0) scale(1)'
+    })
+
+    // Progress bar
+    const progressBar = notification.querySelector('.notification-progress')
+    if (progressBar) {
+      progressBar.style.animation = 'notification-progress 5s linear forwards'
+    }
+    
     // Auto-remove and add close handler
-    const removeNotification = () => notification.remove()
+    const removeNotification = () => {
+      notification.style.opacity = '0'
+      notification.style.transform = 'translateX(100%) scale(0.9)'
+      setTimeout(() => notification.remove(), 300)
+    }
+    
     notification.querySelector('.notification-close').addEventListener('click', removeNotification)
     setTimeout(removeNotification, 5000)
   }
@@ -512,5 +571,67 @@ export default class extends Controller {
     
     this.trackPendingOperation(button)
     window.location.href = '/subscriptions'
+  }
+
+  // Mobile-specific optimizations
+  setupMobileOptimizations() {
+    if (!('ontouchstart' in window)) return
+    
+    console.log("📱 Setting up mobile optimizations")
+    
+    // Prevent iOS double-tap zoom on buttons
+    this.element.querySelectorAll('button, .btn').forEach(button => {
+      button.style.touchAction = 'manipulation'
+    })
+    
+    // Add mobile-friendly feedback for touch interactions
+    this.element.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true })
+    this.element.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true })
+    
+    // Optimize dropdown positioning for mobile
+    this.optimizeDropdownsForMobile()
+    
+    // Set up haptic feedback if available
+    this.setupHapticFeedback()
+  }
+
+  handleTouchStart(event) {
+    const target = event.target.closest('button, .btn')
+    if (target && !target.disabled) {
+      target.style.transform = 'scale(0.98)'
+      target.style.transition = 'transform 0.1s ease'
+    }
+  }
+
+  handleTouchEnd(event) {
+    const target = event.target.closest('button, .btn')
+    if (target) {
+      setTimeout(() => {
+        target.style.transform = ''
+        target.style.transition = ''
+      }, 100)
+    }
+  }
+
+  optimizeDropdownsForMobile() {
+    this.element.querySelectorAll('.dropdown-menu').forEach(menu => {
+      // Ensure dropdown menus are properly positioned on mobile
+      if (window.innerWidth <= 768) {
+        menu.style.transform = 'none'
+        menu.style.position = 'absolute'
+        menu.style.willChange = 'transform'
+      }
+    })
+  }
+
+  setupHapticFeedback() {
+    if ('vibrate' in navigator) {
+      this.element.addEventListener('click', (event) => {
+        const target = event.target.closest('button, .btn')
+        if (target && !target.disabled && target.dataset.haptic !== 'false') {
+          navigator.vibrate(10) // Short vibration
+        }
+      })
+    }
   }
 } 

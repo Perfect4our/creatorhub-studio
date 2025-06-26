@@ -427,10 +427,7 @@
   </div>
 </div>
 
-<!-- Mobile sidebar toggle button -->
-<div class="sidebar-toggle d-md-none" id="mobileToggleBtn">
-  <i class="fas fa-bars"></i>
-</div>
+
 
 <%= render "shared/footer" %>
 
@@ -614,17 +611,25 @@
       // Mobile sidebar toggle
       const sidebar = document.getElementById('sidebar');
       const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-      const mobileToggleBtn = document.getElementById('mobileToggleBtn');
+      const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
       
       function toggleSidebar() {
         if (sidebar && sidebarBackdrop) {
-        sidebar.classList.toggle('show');
-        sidebarBackdrop.classList.toggle('show');
+          sidebar.classList.toggle('show');
+          sidebarBackdrop.classList.toggle('show');
         }
       }
       
-      if (mobileToggleBtn) {
-        mobileToggleBtn.addEventListener('click', toggleSidebar);
+      if (mobileSidebarToggle) {
+        mobileSidebarToggle.addEventListener('click', toggleSidebar);
+      }
+      
+      // Close sidebar when backdrop is clicked
+      if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener('click', function() {
+          sidebar.classList.remove('show');
+          sidebarBackdrop.classList.remove('show');
+        });
       }
       
       if (sidebarBackdrop) {
@@ -1029,7 +1034,7 @@
     }
     
     // Initialize dropdown and custom date picker - needs to be initialized on every page load
-    // function initializeTimeWindowDropdown() {
+    function initializeTimeWindowDropdown() {
       console.log('Initializing time window dropdown...');
       
       // First check if we're still on the dashboard page

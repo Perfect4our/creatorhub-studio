@@ -1,13 +1,23 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark" data-controller="theme">
   <div class="container-fluid">
+    <!-- Mobile Sidebar Toggle (for dashboard pages) -->
+    <% if user_signed_in? && (current_page?(dashboard_path) || request.path.start_with?('/dashboard') || request.path.start_with?('/subscriptions') || request.path.start_with?('/videos') || request.path.start_with?('/analytics') || request.path.start_with?('/settings')) %>
+      <button class="navbar-toggler d-lg-none me-2" type="button" id="mobileSidebarToggle" aria-label="Toggle sidebar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    <% end %>
+    
     <a class="navbar-brand d-flex align-items-center" href="<%= root_path %>">
-              <i class="fas fa-chart-line me-2"></i>
+      <i class="fas fa-chart-line me-2"></i>
       CreatorHub Studio
     </a>
     
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+    <!-- Standard navbar toggle (for non-dashboard pages) -->
+    <% unless user_signed_in? && (current_page?(dashboard_path) || request.path.start_with?('/dashboard') || request.path.start_with?('/subscriptions') || request.path.start_with?('/videos') || request.path.start_with?('/analytics') || request.path.start_with?('/settings')) %>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    <% end %>
     
     <div class="collapse navbar-collapse" id="navbarContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -127,4 +137,25 @@
       </ul>
     </div>
   </div>
-</nav> 
+</nav>
+
+<!-- Minimal Auth Navbar (for sign-in/sign-up pages) -->
+<% content_for :auth_navbar do %>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark auth-navbar" data-controller="theme">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center" href="<%= root_path %>">
+        <i class="fas fa-chart-line me-2"></i>
+        CreatorHub Studio
+      </a>
+      
+      <div class="ms-auto d-flex align-items-center">
+        <div class="form-check form-switch me-3 d-flex align-items-center">
+          <input class="form-check-input" type="checkbox" id="darkModeSwitch" data-theme-target="toggle" data-action="change->theme#toggle">
+          <label class="form-check-label ms-2 text-light" for="darkModeSwitch">
+            <i class="fas fa-moon"></i>
+          </label>
+        </div>
+      </div>
+    </div>
+  </nav>
+<% end %> 

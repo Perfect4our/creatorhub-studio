@@ -58,7 +58,11 @@ Rails.application.routes.draw do
   get "/auth/:platform/callback", to: "subscriptions#create"
   
   # Subscription resources
-  resources :subscriptions, only: [:index, :new, :create, :destroy]
+  resources :subscriptions, only: [:index, :new, :create, :destroy] do
+    collection do
+      get :simple, action: :simple_index
+    end
+  end
   
   # Videos resources
   resources :videos, only: [:index, :show]
@@ -66,6 +70,8 @@ Rails.application.routes.draw do
   # Analytics routes
   get "/analytics/demographics", to: "analytics#demographics", as: :analytics_demographics
   get "/analytics/comparison", to: "analytics#comparison"
+  post "/analytics/track", to: "analytics#track_event"
+  post "/analytics/manage_recordings", to: "analytics#manage_recordings"
   
   # Settings routes
   get "/settings", to: "settings#index"
@@ -81,7 +87,11 @@ Rails.application.routes.draw do
   
   # Admin routes
   namespace :admin do
-    resources :analytics, only: [:index]
+    resources :analytics, only: [:index] do
+      collection do
+        delete 'cancel_subscription/:user_id', to: 'analytics#cancel_subscription', as: 'cancel_subscription'
+      end
+    end
   end
   
   # Sidekiq web UI (protected by admin authentication)
