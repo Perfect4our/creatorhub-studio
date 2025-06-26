@@ -20,9 +20,7 @@ Rails.application.configure do
                         "https://cdn.jsdelivr.net",
                         "https://d3js.org", 
                         "https://cdnjs.cloudflare.com",
-                        "https://us-assets.i.posthog.com",
-                        "https://app-static.eu.posthog.com",
-                        "https://eu-assets.i.posthog.com"
+                        "https://app.posthog.com"
       
       # Style sources for external CSS libraries
       policy.style_src   :self, :https, 
