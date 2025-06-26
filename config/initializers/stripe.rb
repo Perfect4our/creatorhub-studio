@@ -26,10 +26,13 @@ Rails.application.configure do
   end
   
   # Log the key being used (partially hidden for security)
-  if Stripe.api_key && !Stripe.api_key.include?('placeholder')
+  if Stripe.api_key.present? && !Stripe.api_key.include?('placeholder')
     masked_key = Stripe.api_key[0..7] + '...' + Stripe.api_key[-4..-1]
     Rails.logger.info "Stripe initialized with key: #{masked_key}"
-  elsif Stripe.api_key.include?('placeholder')
+  elsif Stripe.api_key.present? && Stripe.api_key.include?('placeholder')
     Rails.logger.warn "Stripe using placeholder key - configure real keys for full functionality"
+  else
+    Rails.logger.warn "Stripe API key is nil or blank - using fallback configuration"
+    Stripe.api_key = 'sk_test_placeholder_key'
   end
 end 
