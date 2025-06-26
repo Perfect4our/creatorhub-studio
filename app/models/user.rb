@@ -26,7 +26,7 @@ class User < ApplicationRecord
   
   # Stripe subscription methods
   def stripe_subscribed?
-    subscription_status == 'active' && current_period_end&.future?
+    subscription_status.present? && subscription_status == 'active' && current_period_end&.future?
   end
   
   def stripe_subscription_expired?
