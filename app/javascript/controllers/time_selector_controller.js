@@ -136,9 +136,9 @@ export default class extends Controller {
     if (this.hasCustomModalTarget) {
       this.customModalTarget.style.display = 'block'
       
-      // Set default dates
+      // Set default dates (28 days)
       const endDate = new Date().toISOString().split('T')[0]
-      const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      const startDate = new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       
       this.startDateTarget.value = startDate
       this.endDateTarget.value = endDate

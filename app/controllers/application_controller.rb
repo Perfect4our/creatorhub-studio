@@ -16,13 +16,15 @@ class ApplicationController < ActionController::Base
   helper_method :admin_user?
 
   # CSP violation reporting endpoint for production security monitoring
+  skip_before_action :verify_authenticity_token, only: [:csp_violation_report]
+
   def csp_violation_report
     if Rails.env.production?
       Rails.logger.warn "CSP Violation: #{request.body.read}"
       # In production, you might want to send this to a monitoring service
       # like DataDog, Sentry, or similar
     end
-    head :ok
+    head :no_content
   end
 
   protected
