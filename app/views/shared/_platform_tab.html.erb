@@ -120,7 +120,7 @@
                       <td>
                         <div class="d-flex align-items-center">
                           <div class="progress flex-grow-1 progress-small">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: <%= [video.engagement_rate, 100].min %>%"></div>
+                            <div class="progress-bar bg-success" role="progressbar" data-width="<%= [video.engagement_rate, 100].min %>"></div>
                           </div>
                           <span class="ms-2"><%= video.engagement_rate %>%</span>
                         </div>

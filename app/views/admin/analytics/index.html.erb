@@ -416,7 +416,7 @@
                     <div class="event-count"><%= number_with_delimiter(event[:count]) %> events</div>
                   </div>
                   <div class="event-bar">
-                    <div class="event-fill" style="width: <%= (event[:count].to_f / @posthog_top_events.first[:count]) * 100 %>%"></div>
+                    <div class="event-fill" data-width="<%= (event[:count].to_f / @posthog_top_events.first[:count]) * 100 %>"></div>
                   </div>
                 </div>
               <% end %>
