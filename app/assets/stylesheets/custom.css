@@ -4687,3 +4687,134 @@ body {
     color: #ff6b7a;
   }
 }
+
+/* CSP-Compliant Styles - Replacing inline styles */
+
+/* Icon sizes */
+.icon-size-1-2 { font-size: 1.2rem; }
+.icon-size-1-5 { font-size: 1.5rem; }
+.icon-size-2 { font-size: 2rem; }
+.icon-size-3 { font-size: 3rem; }
+.icon-size-4 { font-size: 4rem; }
+
+/* Chart bars with CSS custom properties */
+.chart-bar {
+  --delay: 0.1s;
+  --height: 60%;
+  animation: chartBarGrow 1s ease-out var(--delay) forwards;
+  height: var(--height);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px 4px 0 0;
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: bottom;
+}
+
+/* Progress bars */
+.progress-thin { height: 4px; }
+.progress-medium { height: 6px; }
+.progress-small { height: 6px; width: 60px; }
+
+/* Modal display */
+.custom-modal-hidden { display: none; }
+
+/* Card styles */
+.card-dashed-info {
+  border: 2px dashed #17a2b8;
+  background: #f1f9ff;
+}
+
+.card-rounded-left {
+  border-radius: 8px 0 0 8px;
+}
+
+.card-rounded-right {
+  border-radius: 0 8px 8px 0;
+}
+
+/* Form controls */
+.form-control-fixed-width {
+  width: 300px;
+}
+
+/* Log containers */
+.log-container {
+  height: 200px;
+  overflow-y: auto;
+}
+
+.log-container-monospace {
+  height: 200px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+/* Recording indicator */
+.recording-indicator {
+  display: none;
+}
+
+/* Alert styles */
+.alert-small {
+  font-size: 0.85rem;
+}
+
+/* Badge styles */
+.badge-circle {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-small {
+  font-size: 0.6rem;
+}
+
+.badge-extra-small {
+  font-size: 0.7rem;
+}
+
+/* Image styles */
+.thumbnail-small {
+  width: 60px;
+  height: 45px;
+  object-fit: cover;
+}
+
+.thumbnail-placeholder {
+  width: 60px;
+  height: 45px;
+}
+
+/* Event fill */
+.event-fill {
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* Chart bar animation */
+@keyframes chartBarGrow {
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+/* Chart bars with data attributes for CSP compliance */
+.chart-bar[data-delay="0.1s"] { animation-delay: 0.1s; }
+.chart-bar[data-delay="0.2s"] { animation-delay: 0.2s; }
+.chart-bar[data-delay="0.3s"] { animation-delay: 0.3s; }
+.chart-bar[data-delay="0.4s"] { animation-delay: 0.4s; }
+.chart-bar[data-delay="0.5s"] { animation-delay: 0.5s; }
+.chart-bar[data-delay="0.6s"] { animation-delay: 0.6s; }
+
+.chart-bar[data-height="60%"] { height: 60%; }
+.chart-bar[data-height="80%"] { height: 80%; }
+.chart-bar[data-height="45%"] { height: 45%; }
+.chart-bar[data-height="90%"] { height: 90%; }
+.chart-bar[data-height="75%"] { height: 75%; }
+.chart-bar[data-height="95%"] { height: 95%; }

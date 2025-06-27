@@ -46,7 +46,7 @@
         <% if @first_time_viewing %>
           <div class="alert alert-info alert-dismissible fade show mb-4" role="alert" id="firstTimeWelcome">
             <div class="d-flex align-items-start">
-              <i class="fas fa-star me-3 mt-1" style="font-size: 1.2rem;"></i>
+              <i class="fas fa-star me-3 mt-1 icon-size-1-2"></i>
               <div class="flex-grow-1">
                 <h5 class="alert-heading mb-2">
                   <i class="fas fa-sparkles me-1"></i>
@@ -87,9 +87,9 @@
                       <div class="d-flex align-items-center mb-3">
                         <div class="subscription-icon me-3">
                           <% if @subscription_details[:plan_name] == 'Development Plan' %>
-                            <i class="fas fa-code text-warning" style="font-size: 2rem;"></i>
+                            <i class="fas fa-code text-warning icon-size-2"></i>
                           <% else %>
-                            <i class="fas fa-crown text-warning" style="font-size: 2rem;"></i>
+                            <i class="fas fa-crown text-warning icon-size-2"></i>
                           <% end %>
                         </div>
                         <div>
@@ -163,7 +163,7 @@
                         Payment Method
                       </h6>
                       <div class="d-flex align-items-center">
-                        <i class="fab fa-cc-<%= @subscription_details[:payment_method][:brand].downcase %> me-2 text-muted" style="font-size: 1.5rem;"></i>
+                        <i class="fab fa-cc-<%= @subscription_details[:payment_method][:brand].downcase %> me-2 text-muted icon-size-1-5"></i>
                         <div>
                           <strong><%= @subscription_details[:payment_method][:brand] %> •••• <%= @subscription_details[:payment_method][:last4] %></strong>
                           <small class="text-muted d-block">
@@ -175,7 +175,7 @@
                   <% end %>
                 <% else %>
                   <div class="text-center py-4">
-                    <i class="fas fa-exclamation-circle text-muted mb-3" style="font-size: 3rem;"></i>
+                    <i class="fas fa-exclamation-circle text-muted mb-3 icon-size-3"></i>
                     <h5>No Active Subscription</h5>
                     <p class="text-muted mb-3">You don't have an active subscription yet.</p>
                     <%= link_to "Choose a Plan", pricing_path, class: "btn btn-primary" %>
@@ -249,7 +249,7 @@
                   </div>
                 <% else %>
                   <div class="text-center py-4">
-                    <i class="fas fa-receipt text-muted mb-3" style="font-size: 3rem;"></i>
+                    <i class="fas fa-receipt text-muted mb-3 icon-size-3"></i>
                     <h6>No Billing History</h6>
                     <p class="text-muted mb-0">Your billing history will appear here once you have transactions.</p>
                   </div>
@@ -318,7 +318,7 @@
                   </small>
                 <% else %>
                   <div class="text-center py-4">
-                    <i class="fas fa-chart-bar text-muted mb-3" style="font-size: 2rem;"></i>
+                    <i class="fas fa-chart-bar text-muted mb-3 icon-size-2"></i>
                     <p class="text-muted mb-0">Usage statistics will appear here when you have an active subscription.</p>
                   </div>
                 <% end %>

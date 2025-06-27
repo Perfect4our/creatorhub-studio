@@ -134,7 +134,7 @@ export default class extends Controller {
 
   showCustomModal() {
     if (this.hasCustomModalTarget) {
-      this.customModalTarget.style.display = 'block'
+      this.customModalTarget.classList.remove('custom-modal-hidden')
       
       // Set default dates (28 days)
       const endDate = new Date().toISOString().split('T')[0]
@@ -148,10 +148,9 @@ export default class extends Controller {
     }
   }
 
-  closeCustomModal(event) {
-    event.preventDefault()
+  closeCustomModal() {
     if (this.hasCustomModalTarget) {
-      this.customModalTarget.style.display = 'none'
+      this.customModalTarget.classList.add('custom-modal-hidden')
     }
   }
 
@@ -175,7 +174,7 @@ export default class extends Controller {
     this.currentValueValue = 'custom'
     const dateRange = `${this.formatDate(startDate)} - ${this.formatDate(endDate)}`
     this.selectedTarget.textContent = dateRange
-    this.closeCustomModal(event)
+    this.closeCustomModal()
 
     // Show custom loading bar for AJAX (safely)
     try {
@@ -622,8 +621,8 @@ export default class extends Controller {
   handleEscapeKey(event) {
     if (event.key === 'Escape') {
       this.closeDropdown()
-      if (this.hasCustomModalTarget && this.customModalTarget.style.display === 'block') {
-        this.closeCustomModal(event)
+      if (this.hasCustomModalTarget && this.customModalTarget.classList.contains('custom-modal-hidden') === false) {
+        this.closeCustomModal()
       }
     }
   }

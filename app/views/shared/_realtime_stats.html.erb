@@ -30,13 +30,13 @@
       <% has_advanced = defined?(@subscriptions) && @subscriptions&.any? { |s| has_advanced_analytics?(s) } %>
       <% if has_advanced %>
         <div class="text-center py-3">
-          <i class="fas fa-chart-line text-muted mb-2" style="font-size: 2rem;"></i>
+          <i class="fas fa-chart-line text-muted mb-2 icon-size-2"></i>
           <p class="text-muted mb-0 small">48-Hour View Tracking</p>
           <p class="text-muted mb-0 small">Coming Soon</p>
         </div>
       <% else %>
         <div class="text-center py-3">
-          <i class="fas fa-chart-line text-muted mb-2" style="font-size: 2rem;"></i>
+          <i class="fas fa-chart-line text-muted mb-2 icon-size-2"></i>
           <p class="text-muted mb-0 small">Analytics Coming Soon</p>
           <p class="text-muted mb-0 small">Connect accounts to start tracking</p>
         </div>
@@ -218,14 +218,14 @@
             <div class="d-flex">
               <div class="video-thumbnail-small me-3 position-relative">
                 <% if video[:thumbnail_url].present? %>
-                  <img src="<%= video[:thumbnail_url] %>" alt="Video thumbnail" class="img-fluid rounded" style="width: 60px; height: 45px; object-fit: cover;">
+                  <img src="<%= video[:thumbnail_url] %>" alt="Video thumbnail" class="img-fluid rounded thumbnail-small">
                 <% else %>
-                  <div class="d-flex align-items-center justify-content-center bg-light rounded" style="width: 60px; height: 45px;">
+                  <div class="d-flex align-items-center justify-content-center bg-light rounded thumbnail-placeholder">
                     <i class="fab fa-<%= video[:platform] %> text-<%= video[:platform] == 'youtube' ? 'danger' : 'dark' %>"></i>
                   </div>
                 <% end %>
                 <!-- Ranking badge -->
-                <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-primary" style="font-size: 0.7rem;">
+                <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-primary badge-extra-small">
                   <%= index + 1 %>
                 </span>
               </div>
@@ -251,7 +251,7 @@
                     <i class="fab fa-<%= video[:platform] %>"></i> 
                     <%= video[:platform].capitalize %>
                     <% if video[:source] == 'analytics_api' %>
-                      <span class="badge bg-success ms-1" style="font-size: 0.6rem;">Enhanced</span>
+                      <span class="badge bg-success ms-1 badge-small">Enhanced</span>
                     <% end %>
                   </small>
                 </div>
@@ -281,7 +281,7 @@
         </div>
       <% else %>
         <div class="text-center py-3">
-          <i class="fas fa-video text-muted mb-2" style="font-size: 2rem;"></i>
+          <i class="fas fa-video text-muted mb-2 icon-size-2"></i>
           <p class="text-muted mb-1">No videos found</p>
           <small class="text-muted">Videos will appear here once your accounts are synced</small>
         </div>

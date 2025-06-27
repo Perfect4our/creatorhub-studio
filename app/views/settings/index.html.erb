@@ -186,7 +186,7 @@
 <%= render "shared/footer" %>
 
 <% content_for :page_scripts do %>
-  <script>
+  <script nonce="<%= content_security_policy_nonce %>">
     document.addEventListener('DOMContentLoaded', function() {
       // Get notification controller if available
       const notificationController = document.querySelector('[data-controller="notification"]')?.__stimulusController;

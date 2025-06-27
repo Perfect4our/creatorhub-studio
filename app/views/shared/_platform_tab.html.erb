@@ -119,7 +119,7 @@
                       <td><%= number_with_delimiter(video.comment_count) %></td>
                       <td>
                         <div class="d-flex align-items-center">
-                          <div class="progress flex-grow-1" style="height: 6px; width: 60px;">
+                          <div class="progress flex-grow-1 progress-small">
                             <div class="progress-bar bg-success" role="progressbar" style="width: <%= [video.engagement_rate, 100].min %>%"></div>
                           </div>
                           <span class="ms-2"><%= video.engagement_rate %>%</span>

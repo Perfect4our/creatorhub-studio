@@ -25,7 +25,7 @@
     
     <!-- Development Bypass Section -->
     <% if Rails.env.development? %>
-      <div class="card mb-4" style="border: 2px dashed #17a2b8; background: #f1f9ff;">
+      <div class="card mb-4 card-dashed-info">
         <div class="card-body text-center">
           <h6 class="text-info mb-3">
             <i class="fas fa-code me-2"></i>
@@ -37,14 +37,12 @@
             <div class="col-md-6">
               <div class="input-group">
                 <input type="text" 
-                       class="form-control" 
+                       class="form-control card-rounded-left" 
                        id="bypassCode" 
-                       placeholder="Enter bypass code..."
-                       style="border-radius: 8px 0 0 8px;">
-                <button class="btn btn-info" 
+                       placeholder="Enter bypass code...">
+                <button class="btn btn-info card-rounded-right" 
                         type="button" 
-                        id="applyBypass"
-                        style="border-radius: 0 8px 8px 0;">
+                        id="applyBypass">
                   <i class="fas fa-unlock me-1"></i>
                   Apply
                 </button>
@@ -490,145 +488,145 @@
   .price .amount {
     font-size: 3rem;
   }
-  }
-      </style>
+}
+</style>
+
+<script nonce="<%= content_security_policy_nonce %>">
+  document.addEventListener('DOMContentLoaded', function() {
+    const bypassInput = document.getElementById('bypassCode');
+    const applyBtn = document.getElementById('applyBypass');
     
-    <script nonce="<%= content_security_policy_nonce %>">
-      document.addEventListener('DOMContentLoaded', function() {
-        const bypassInput = document.getElementById('bypassCode');
-      const applyBtn = document.getElementById('applyBypass');
+    if (bypassInput && applyBtn) {
+      // Handle Enter key in input
+      bypassInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          applyBypass();
+        }
+      });
       
-      if (bypassInput && applyBtn) {
-        // Handle Enter key in input
-        bypassInput.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') {
-            applyBypass();
-          }
-        });
+      // Handle button click
+      applyBtn.addEventListener('click', applyBypass);
+      
+      function applyBypass() {
+        const code = bypassInput.value.trim();
         
-        // Handle button click
-        applyBtn.addEventListener('click', applyBypass);
-        
-        function applyBypass() {
-          const code = bypassInput.value.trim();
+        if (code === 'dev2025') {
+          // Show loading state
+          applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Applying...';
+          applyBtn.disabled = true;
           
-          if (code === 'dev2025') {
-            // Show loading state
-            applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Applying...';
-            applyBtn.disabled = true;
-            
-            // Send request to bypass endpoint
-            fetch('/billing/dev_bypass', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-              },
-              body: JSON.stringify({ code: code })
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                // Show success and redirect
-                applyBtn.innerHTML = '<i class="fas fa-check me-1"></i>Success!';
-                applyBtn.className = 'btn btn-success';
-                
-                setTimeout(() => {
-                  window.location.href = '/dashboard';
-                }, 1500);
-              } else {
-                throw new Error(data.message || 'Invalid code');
-              }
-            })
-            .catch(error => {
-              // Show error
-              applyBtn.innerHTML = '<i class="fas fa-times me-1"></i>Error';
-              applyBtn.className = 'btn btn-danger';
+          // Send request to bypass endpoint
+          fetch('/billing/dev_bypass', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ code: code })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Show success and redirect
+              applyBtn.innerHTML = '<i class="fas fa-check me-1"></i>Success!';
+              applyBtn.className = 'btn btn-success';
               
               setTimeout(() => {
-                applyBtn.innerHTML = '<i class="fas fa-unlock me-1"></i>Apply';
-                applyBtn.className = 'btn btn-info';
-                applyBtn.disabled = false;
-              }, 2000);
-            });
-          } else {
-            // Invalid code
-            bypassInput.style.borderColor = '#dc3545';
-            bypassInput.focus();
+                window.location.href = '/dashboard';
+              }, 1500);
+            } else {
+              throw new Error(data.message || 'Invalid code');
+            }
+          })
+          .catch(error => {
+            // Show error
+            applyBtn.innerHTML = '<i class="fas fa-times me-1"></i>Error';
+            applyBtn.className = 'btn btn-danger';
             
             setTimeout(() => {
-              bypassInput.style.borderColor = '';
+              applyBtn.innerHTML = '<i class="fas fa-unlock me-1"></i>Apply';
+              applyBtn.className = 'btn btn-info';
+              applyBtn.disabled = false;
             }, 2000);
-          }
+          });
+        } else {
+          // Invalid code
+          bypassInput.style.borderColor = '#dc3545';
+          bypassInput.focus();
+          
+          setTimeout(() => {
+            bypassInput.style.borderColor = '';
+          }, 2000);
         }
       }
+    }
+  });
+  
+  // PostHog Analytics - Track pricing page interaction
+  if (window.posthog) {
+    // Track pricing page view
+    posthog.capture('pricing_page_viewed', {
+      <% if user_signed_in? %>
+      user_authenticated: true,
+      user_id: "<%= current_user.id %>",
+      has_existing_subscription: <%= current_user.stripe_subscribed? %>,
+      <% else %>
+      user_authenticated: false,
+      <% end %>
+      page_location: 'pricing',
+      stripe_configured: <%= !@stripe_publishable_key&.include?('placeholder') %>
     });
     
-    // PostHog Analytics - Track pricing page interaction
-    if (window.posthog) {
-      // Track pricing page view
-      posthog.capture('pricing_page_viewed', {
-        <% if user_signed_in? %>
-        user_authenticated: true,
-        user_id: "<%= current_user.id %>",
-        has_existing_subscription: <%= current_user.stripe_subscribed? %>,
-        <% else %>
-        user_authenticated: false,
-        <% end %>
-        page_location: 'pricing',
-        stripe_configured: <%= !@stripe_publishable_key&.include?('placeholder') %>
-      });
-      
-      // Track plan button clicks
-      document.querySelectorAll('form[action*="create_checkout_session"]').forEach(form => {
-        form.addEventListener('submit', function(e) {
-          const planInput = this.querySelector('input[name="plan"]');
-          const planType = planInput ? planInput.value : 'unknown';
-          
-          posthog.capture('subscription_plan_selected', {
-            plan_type: planType,
-            <% if user_signed_in? %>
-            user_id: "<%= current_user.id %>",
-            user_email: "<%= current_user.email %>",
-            <% end %>
-            page_location: 'pricing',
-            conversion_step: 'checkout_initiated'
-          });
+    // Track plan button clicks
+    document.querySelectorAll('form[action*="create_checkout_session"]').forEach(form => {
+      form.addEventListener('submit', function(e) {
+        const planInput = this.querySelector('input[name="plan"]');
+        const planType = planInput ? planInput.value : 'unknown';
+        
+        posthog.capture('subscription_plan_selected', {
+          plan_type: planType,
+          <% if user_signed_in? %>
+          user_id: "<%= current_user.id %>",
+          user_email: "<%= current_user.email %>",
+          <% end %>
+          page_location: 'pricing',
+          conversion_step: 'checkout_initiated'
         });
       });
-      
-      // Track sign-in link clicks for unauthenticated users
-      document.querySelectorAll('a[href*="sign_in"]').forEach(link => {
-        link.addEventListener('click', function() {
-          posthog.capture('pricing_signin_clicked', {
-            page_location: 'pricing',
-            conversion_step: 'authentication_required'
-          });
+    });
+    
+    // Track sign-in link clicks for unauthenticated users
+    document.querySelectorAll('a[href*="sign_in"]').forEach(link => {
+      link.addEventListener('click', function() {
+        posthog.capture('pricing_signin_clicked', {
+          page_location: 'pricing',
+          conversion_step: 'authentication_required'
         });
       });
-      
-      // Track FAQ interactions
-      document.querySelectorAll('.accordion-button').forEach(button => {
-        button.addEventListener('click', function() {
-          const faqTitle = this.textContent.trim();
-          posthog.capture('pricing_faq_opened', {
-            faq_question: faqTitle,
-            page_location: 'pricing'
-          });
+    });
+    
+    // Track FAQ interactions
+    document.querySelectorAll('.accordion-button').forEach(button => {
+      button.addEventListener('click', function() {
+        const faqTitle = this.textContent.trim();
+        posthog.capture('pricing_faq_opened', {
+          faq_question: faqTitle,
+          page_location: 'pricing'
         });
       });
-      
-      <% if Rails.env.development? %>
-      // Track development bypass usage
-      const bypassBtn = document.getElementById('applyBypass');
-      if (bypassBtn) {
-        bypassBtn.addEventListener('click', function() {
-          posthog.capture('dev_bypass_attempted', {
-            page_location: 'pricing',
-            environment: 'development'
-          });
+    });
+    
+    <% if Rails.env.development? %>
+    // Track development bypass usage
+    const bypassBtn = document.getElementById('applyBypass');
+    if (bypassBtn) {
+      bypassBtn.addEventListener('click', function() {
+        posthog.capture('dev_bypass_attempted', {
+          page_location: 'pricing',
+          environment: 'development'
         });
-      }
-      <% end %>
+      });
     }
-  </script> 
+    <% end %>
+  }
+</script> 
