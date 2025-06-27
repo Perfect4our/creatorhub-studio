@@ -518,7 +518,7 @@ Uncomment when we have real users and testimonials
 
 <%= content_for :page_scripts do %>
 <script src="https://cdn.jsdelivr.net/npm/countup.js@2.3.2/dist/countUp.umd.js"></script>
-<script>
+<script nonce="<%= content_security_policy_nonce %>">
 document.addEventListener('DOMContentLoaded', function() {
   // Scroll-based animations with Intersection Observer
   const animatedElements = document.querySelectorAll('[data-animate]');

@@ -107,7 +107,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="<%= content_security_policy_nonce %>">
 document.addEventListener('DOMContentLoaded', function() {
   const eventLog = document.getElementById('event-log');
   const jsStatus = document.getElementById('js-status');

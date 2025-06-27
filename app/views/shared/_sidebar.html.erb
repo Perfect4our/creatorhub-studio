@@ -1,6 +1,6 @@
-<!-- Shared Sidebar Component -->
-<div class="col-md-2 d-md-block bg-light sidebar" id="sidebar">
-  <div class="sidebar-sticky">
+  <!-- Shared Sidebar Component -->
+  <div class="col-md-2 d-md-block bg-light sidebar" id="sidebar" data-controller="sidebar">
+    <div class="sidebar-sticky">
     <ul class="nav flex-column">
       <li class="nav-item">
         <a class="nav-link <%= 'active' if current_page?(dashboard_path) || request.path == "/dashboard" || request.path == "/" %>" href="<%= dashboard_path %>">
@@ -26,10 +26,10 @@
           Analytics
         </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#" onclick="showComingSoon('Revenue'); return false;">
-          <i class="fas fa-dollar-sign"></i>
-          Revenue
+              <li class="nav-item">
+          <a class="nav-link" href="#" data-feature="Revenue" data-action="click->sidebar#showComingSoon">
+            <i class="fas fa-dollar-sign"></i>
+            Revenue
         </a>
       </li>
       <li class="nav-item">
@@ -130,39 +130,39 @@
           </li>
         <% end %>
       <% else %>
-        <!-- Show placeholder platforms if no subscriptions -->
-        <li class="nav-item">
-          <a class="nav-link disabled text-muted" href="#" onclick="showConnectPrompt('TikTok'); return false;">
-            <i class="fab fa-tiktok"></i>
-            TikTok
+                  <!-- Show placeholder platforms if no subscriptions -->
+          <li class="nav-item">
+            <a class="nav-link disabled text-muted" href="#" data-platform="TikTok" data-action="click->sidebar#showConnectPrompt">
+              <i class="fab fa-tiktok"></i>
+              TikTok
             <small class="d-block">Not connected</small>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link disabled text-muted" href="#" onclick="showConnectPrompt('YouTube'); return false;">
-            <i class="fab fa-youtube"></i>
-            YouTube
+                  <li class="nav-item">
+            <a class="nav-link disabled text-muted" href="#" data-platform="YouTube" data-action="click->sidebar#showConnectPrompt">
+              <i class="fab fa-youtube"></i>
+              YouTube
             <small class="d-block">Not connected</small>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link disabled text-muted" href="#" onclick="showConnectPrompt('Instagram'); return false;">
-            <i class="fab fa-instagram"></i>
-            Instagram
+                  <li class="nav-item">
+            <a class="nav-link disabled text-muted" href="#" data-platform="Instagram" data-action="click->sidebar#showConnectPrompt">
+              <i class="fab fa-instagram"></i>
+              Instagram
             <small class="d-block">Not connected</small>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link disabled text-muted" href="#" onclick="showConnectPrompt('Facebook'); return false;">
-            <i class="fab fa-facebook"></i>
-            Facebook
+                  <li class="nav-item">
+            <a class="nav-link disabled text-muted" href="#" data-platform="Facebook" data-action="click->sidebar#showConnectPrompt">
+              <i class="fab fa-facebook"></i>
+              Facebook
             <small class="d-block">Not connected</small>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link disabled text-muted" href="#" onclick="showConnectPrompt('Twitter'); return false;">
-            <i class="fab fa-twitter"></i>
-            Twitter
+                  <li class="nav-item">
+            <a class="nav-link disabled text-muted" href="#" data-platform="Twitter" data-action="click->sidebar#showConnectPrompt">
+              <i class="fab fa-twitter"></i>
+              Twitter
             <small class="d-block">Not connected</small>
           </a>
         </li>
@@ -254,11 +254,11 @@
       <% end %>
     </div>
   </div>
-</div>
-
-<script>
-  // Helper functions for sidebar interactions
-  function showComingSoon(feature) {
+  </div>
+  
+  <script nonce="<%= content_security_policy_nonce %>">
+    // Helper functions for sidebar interactions
+    function showComingSoon(feature) {
     if (window.notificationController) {
       window.notificationController.showNotification(`${feature} feature coming soon!`, 'info');
     } else {

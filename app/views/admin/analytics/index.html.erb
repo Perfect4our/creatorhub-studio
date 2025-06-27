@@ -927,7 +927,7 @@
 }
 </style>
 
-<script>
+<script nonce="<%= content_security_policy_nonce %>">
 document.addEventListener('DOMContentLoaded', function() {
   // Real-time user count updates
   function updateRealtimeCount() {

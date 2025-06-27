@@ -491,11 +491,11 @@
     font-size: 3rem;
   }
   }
-  </style>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const bypassInput = document.getElementById('bypassCode');
+      </style>
+    
+    <script nonce="<%= content_security_policy_nonce %>">
+      document.addEventListener('DOMContentLoaded', function() {
+        const bypassInput = document.getElementById('bypassCode');
       const applyBtn = document.getElementById('applyBypass');
       
       if (bypassInput && applyBtn) {

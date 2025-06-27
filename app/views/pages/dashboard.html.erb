@@ -432,7 +432,7 @@
 <%= render "shared/footer" %>
 
 <% content_for :page_scripts do %>
-  <script>
+  <script nonce="<%= content_security_policy_nonce %>">
     // Use a unique namespace to avoid conflicts
     window.TikTokStudio = window.TikTokStudio || {};
     

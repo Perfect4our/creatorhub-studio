@@ -406,11 +406,11 @@
 </div>
 
 <%= render "shared/footer" %>
-
-<% if @first_time_viewing %>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Scroll to welcome message after page loads
+  
+  <% if @first_time_viewing %>
+  <script nonce="<%= content_security_policy_nonce %>">
+  document.addEventListener('DOMContentLoaded', function() {
+    // Scroll to welcome message after page loads
   setTimeout(function() {
     const welcomeAlert = document.getElementById('firstTimeWelcome');
     if (welcomeAlert) {

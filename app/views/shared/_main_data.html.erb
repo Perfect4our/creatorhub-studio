@@ -132,11 +132,11 @@
     </div>
   </div>
 <% end %>
-
-<% content_for :page_scripts do %>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Performance chart
+  
+  <% content_for :page_scripts do %>
+    <script nonce="<%= content_security_policy_nonce %>">
+      document.addEventListener('DOMContentLoaded', function() {
+        // Performance chart
       try {
         const ctx = document.getElementById('performanceChart')?.getContext('2d');
         if (!ctx) {

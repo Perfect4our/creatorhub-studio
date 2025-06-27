@@ -219,7 +219,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="<%= content_security_policy_nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
     // Toggle collapsible sections
     const insightsHeader = document.getElementById('<%= platform %>-insights-header');
